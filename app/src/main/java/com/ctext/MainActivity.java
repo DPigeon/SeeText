@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
-import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
@@ -14,22 +13,14 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.util.Size;
+import android.view.animation.AnimationUtils;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.firebase.ml.vision.FirebaseVision;
-import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
-import com.google.firebase.ml.vision.common.FirebaseVisionPoint;
-import com.google.firebase.ml.vision.face.FirebaseVisionFace;
-import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
-import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
-import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -45,19 +36,13 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener {
+public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback {
     private String TAG = "MainActivity:";
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private PreviewView previewView;
     private Switch cameraSwitch;
-    // High-accuracy landmark detection
-    FirebaseVisionFaceDetectorOptions highAccuracyOpts =
-            new FirebaseVisionFaceDetectorOptions.Builder()
-                    .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
-                    .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
-                    .build();
 
     /* Audio Variables */
     private SpeechRecognizer mRecognizer;
@@ -80,6 +65,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         initializeRecognition();
 
         listenForSpeech();
+    }
+
+    @Override
+    public void updateSpeechTextView(float x, float y)  {
+        speechTextView.setX(x);
+        speechTextView.setY(y);
     }
 
     @Override
@@ -139,6 +130,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         String sentence = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).get(0);
         try {
             this.runOnUiThread(() -> speechTextView.setText(sentence));
+            speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
+
         } catch (Exception exception) {
 
         }
@@ -195,7 +188,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void bindPreview(@NonNull ProcessCameraProvider cameraProvider, int lensFacing) {
         Preview preview = new Preview.Builder().build();
         CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
-        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder().setTargetResolution(new Size(480, 360)).setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
+        Size size = new Size(480, 360); // For better latency
+        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder().setTargetResolution(size).setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
 
         /* Image Processing Face Detection */
         Executor executor = Executors.newSingleThreadExecutor();
@@ -203,33 +197,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             if (image == null || image.getImage() == null) {
                 return;
             }
-            Image mediaImage = image.getImage();
-            int rotation = degreesToFirebaseRotation(image.getImageInfo().getRotationDegrees());
-            FirebaseVisionImage imageVision = FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
-            FirebaseVisionFaceDetector detector = FirebaseVision.getInstance().getVisionFaceDetector(highAccuracyOpts);
-            image.close(); // Closes the images to have multi-frames analysis
-            Task<List<FirebaseVisionFace>> result = detector.detectInImage(imageVision).addOnSuccessListener(faces -> {
-                // Task completed successfully --> Should start speech recognition HERE
-                for (FirebaseVisionFace face : faces) {
-                    // Check if face has mouth, ears, eyes, etc
-                    FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
-                    FirebaseVisionFaceLandmark rightEar = face.getLandmark(FirebaseVisionFaceLandmark.RIGHT_EAR);
-                    FirebaseVisionFaceLandmark leftEye = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EYE);
-                    FirebaseVisionFaceLandmark rightEye = face.getLandmark(FirebaseVisionFaceLandmark.RIGHT_EAR);
-                    FirebaseVisionFaceLandmark mouthBottom = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_BOTTOM);
-                    FirebaseVisionFaceLandmark mouthLeft = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_LEFT);
-                    FirebaseVisionFaceLandmark mouthRight = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_RIGHT);
-                    FirebaseVisionFaceLandmark nose = face.getLandmark(FirebaseVisionFaceLandmark.NOSE_BASE);
-                    if (leftEar != null && rightEar != null && leftEye != null && rightEye != null && mouthBottom != null && mouthLeft != null && mouthRight != null && nose != null) {
-                        // Start Speech and show words near mouth
-                        FirebaseVisionPoint mouthBottomPos = mouthBottom.getPosition();
-                        speechTextView.setX(mouthBottomPos.getX());
-                        speechTextView.setY(mouthBottomPos.getY());
-                    }
-                }
-            }).addOnFailureListener(e -> {
-                // Task failed with an exception --> No speech
-            });
+            FaceDetection faceDetection = new FaceDetection(this::updateSpeechTextView);
+            faceDetection.detect(image);
         });
         Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
         preview.setSurfaceProvider(previewView.createSurfaceProvider(camera.getCameraInfo()));
@@ -262,8 +231,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     /* Makes the app always listen to inputs */
     protected void persistentSpeech() {
-        mRecognizer.stopListening();
         mRecognizer.destroy();
+        mRecognizer = null;
         initializeRecognition();
         listenForSpeech();
     }
