@@ -18,6 +18,11 @@ import java.util.List;
 
 import androidx.camera.core.ImageProxy;
 
+/* FaceDetection.java
+ * The FaceDetection uses Firebase to recognize facial contours, landmarks and can be fast or accurate.
+ * It starts the speech recognition once a face has been detected.
+ */
+
 public class FaceDetection {
     private String TAG = "FaceDetectionActivity";
     FirebaseVisionFaceDetector detector;
@@ -29,6 +34,10 @@ public class FaceDetection {
             .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
             .build();
 
+    // Factors from Rect to Screen coordinates for speech textView
+    float xFactor = 0.5F;
+    float yFactor = 1.5F;
+
     public FaceDetection(Callback cb) {
         this.callback = cb;
         detector = FirebaseVision.getInstance().getVisionFaceDetector(highAccuracyOpts);
@@ -36,7 +45,12 @@ public class FaceDetection {
 
     /* An interface to update the position of the speech textView from Main Activity */
     public interface Callback {
-        void updateSpeechTextView(float x, float y);
+        void update(float x, float y, boolean hasFace);
+    }
+
+    /* An interface to update the flag for detection to Main Activity */
+    public interface DetectedCallback {
+        void updateDetectionFlag();
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -47,27 +61,31 @@ public class FaceDetection {
 
         Task<List<FirebaseVisionFace>> result = detector.detectInImage(imageVision).addOnSuccessListener(faces -> {
             // Task completed successfully --> Should start speech recognition HERE
-            for (FirebaseVisionFace face : faces) {
-                // Check if face has mouth, ears, eyes, etc
-                FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
-                FirebaseVisionFaceLandmark rightEar = face.getLandmark(FirebaseVisionFaceLandmark.RIGHT_EAR);
-                FirebaseVisionFaceLandmark leftEye = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EYE);
-                FirebaseVisionFaceLandmark rightEye = face.getLandmark(FirebaseVisionFaceLandmark.RIGHT_EAR);
-                FirebaseVisionFaceLandmark mouthBottom = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_BOTTOM);
-                FirebaseVisionFaceLandmark mouthLeft = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_LEFT);
-                FirebaseVisionFaceLandmark mouthRight = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_RIGHT);
-                FirebaseVisionFaceLandmark nose = face.getLandmark(FirebaseVisionFaceLandmark.NOSE_BASE);
-                if (leftEar != null && rightEar != null && leftEye != null && rightEye != null && mouthBottom != null && mouthLeft != null && mouthRight != null && nose != null) {
-                    // Start Speech and show words near mouth
-                    FirebaseVisionPoint mouthBottomPos = mouthBottom.getPosition();
-                    // Has to match the screens preview for words to be near mouth
-                    float x = mouthBottomPos.getX();
-                    float y = mouthBottomPos.getX();
-                    callback.updateSpeechTextView(x, y);
+            if (faces.isEmpty())  // If no face detected
+                callback.update(0, 0, false);
+            else { // Face(s) detected
+                for (FirebaseVisionFace face : faces) {
+                    // Check if face has mouth, ears, eyes, etc
+                    FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
+                    FirebaseVisionFaceLandmark rightEar = face.getLandmark(FirebaseVisionFaceLandmark.RIGHT_EAR);
+                    FirebaseVisionFaceLandmark leftEye = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EYE);
+                    FirebaseVisionFaceLandmark rightEye = face.getLandmark(FirebaseVisionFaceLandmark.RIGHT_EAR);
+                    FirebaseVisionFaceLandmark mouthBottom = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_BOTTOM);
+                    FirebaseVisionFaceLandmark mouthLeft = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_LEFT);
+                    FirebaseVisionFaceLandmark mouthRight = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_RIGHT);
+                    FirebaseVisionFaceLandmark nose = face.getLandmark(FirebaseVisionFaceLandmark.NOSE_BASE);
+                    if (leftEar != null && rightEar != null && leftEye != null && rightEye != null && mouthBottom != null && mouthLeft != null && mouthRight != null && nose != null) {
+                        // Show words near mouth
+                        FirebaseVisionPoint mouthBottomPos = mouthBottom.getPosition();
+                        // Has to match the screens preview for words to be near mouth
+                        float x = mouthBottomPos.getX();
+                        float y = mouthBottomPos.getY();
+                        callback.update(x * xFactor, y * yFactor, true); // Rect to Screen Space from the picture
+                    }
                 }
             }
         }).addOnFailureListener(e -> {
-            Log.d(TAG, "error");
+            Log.d(TAG, "Error");
             // Task failed with an exception --> No speech
         });
         //image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)

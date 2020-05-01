@@ -13,13 +13,13 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.util.Size;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -36,8 +36,14 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+/* MainActivity.java
+* The MainActivity with CameraX library, Speech Recognition & a Face Detection callback to update the speech text.
+* The speech text should move every time the app recognizes a face near the mouth of the speaker.
+ */
+
 public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback {
     private String TAG = "MainActivity:";
+    private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -54,23 +60,51 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /* Running UI Thread to get audio permission */
+        /* Running UI Thread to get audio & video permission */
         this.runOnUiThread(() -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 showPermissions();
             }
         });
 
-        setupUI();
-        initializeRecognition();
-
-        listenForSpeech();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+            setupUI();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
+            initializeRecognition();
     }
 
     @Override
-    public void updateSpeechTextView(float x, float y)  {
-        speechTextView.setX(x);
-        speechTextView.setY(y);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults.length > 0) {
+            if (requestCode == MY_PERMISSIONS) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setupUI();
+                    initializeRecognition();
+                } else {
+                    Toast.makeText(this, "You cannot run the app without allowing camera or microphone!", Toast.LENGTH_LONG).show();
+                    this.finish();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void update(float x, float y, boolean hasFace)  {
+        // This function knows that it has detected a face
+        if (!hasFace) { // Closing speech recognition
+            stopListeningSpeech();
+            speechTextView.setText(""); // Reset text
+        } else { // Opening speech recognition with speech text
+            if (mRecognizer != null) {
+                initializeRecognition();
+            } else {
+                initializeRecognition();
+                listenForSpeech();
+            }
+            speechTextView.setX(x);
+            speechTextView.setY(y);
+        }
     }
 
     @Override
@@ -80,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     @Override
     public void onBeginningOfSpeech() {
-        //showToastMessage("Say something!");
+
     }
 
     @Override
@@ -121,20 +155,22 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         } else {
             showToastMessage("Unknown error");
         }*/
-
         persistentSpeech();
     }
 
     @Override
     public void onResults(Bundle results) {
         String sentence = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).get(0);
+        /* Sentences may be null sometimes so we avoid that */
         try {
-            this.runOnUiThread(() -> speechTextView.setText(sentence));
-            speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
-
+            speechTextView.setText(sentence);
         } catch (Exception exception) {
 
         }
+        speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
+        Animation fadeOutAnim = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+        fadeOutAnim.setStartTime(5000);
+        speechTextView.startAnimation(fadeOutAnim);
 
         persistentSpeech();
     }
@@ -165,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         cameraSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
             int lensFacing;
             if (compoundButton.isChecked()) {
-                cameraSwitch.setText("Front");
+                cameraSwitch.setText("Front"); // Change those to picture later
                 lensFacing = 0;
             } else {
                 cameraSwitch.setText("Back");
@@ -178,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             } catch (Exception exception) {
 
             }
+            speechTextView.setText(""); // Reset text
         });
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -197,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             if (image == null || image.getImage() == null) {
                 return;
             }
-            FaceDetection faceDetection = new FaceDetection(this::updateSpeechTextView);
+            FaceDetection faceDetection = new FaceDetection(this::update);
             faceDetection.detect(image);
         });
         Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
@@ -206,13 +243,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     /* Used to grant permission from the UI thread */
     protected void showPermissions() {
-        int MY_PERMISSIONS = 1;
         MainActivity thisActivity = this;
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) // Videos
-            ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) // Audio
-            ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS);
+            ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS);
     }
 
     protected void initializeRecognition() {
@@ -229,31 +263,19 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mRecognizer.startListening(intent);
     }
 
+    protected void stopListeningSpeech() {
+        if (mRecognizer != null) {
+            mRecognizer.destroy();
+            mRecognizer = null;
+        }
+    }
+
     /* Makes the app always listen to inputs */
     protected void persistentSpeech() {
         mRecognizer.destroy();
         mRecognizer = null;
         initializeRecognition();
         listenForSpeech();
-    }
-
-    void showToastMessage(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    private int degreesToFirebaseRotation(int degrees) {
-        switch (degrees) {
-            case 0:
-                return FirebaseVisionImageMetadata.ROTATION_0;
-            case 90:
-                return FirebaseVisionImageMetadata.ROTATION_90;
-            case 180:
-                return FirebaseVisionImageMetadata.ROTATION_180;
-            case 270:
-                return FirebaseVisionImageMetadata.ROTATION_270;
-            default:
-                throw new IllegalArgumentException("Rotation must be 0, 90, 180, or 270.");
-        }
     }
 
 }
