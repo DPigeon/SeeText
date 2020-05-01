@@ -27,6 +27,7 @@ public class FaceDetection {
     private String TAG = "FaceDetectionActivity";
     FirebaseVisionFaceDetector detector;
     Callback callback = null;
+    DetectingCallback detectingCallback = null;
 
     // High-accuracy landmark detection
     FirebaseVisionFaceDetectorOptions highAccuracyOpts = new FirebaseVisionFaceDetectorOptions.Builder()
@@ -38,8 +39,9 @@ public class FaceDetection {
     float xFactor = 0.5F;
     float yFactor = 1.5F;
 
-    public FaceDetection(Callback cb) {
+    public FaceDetection(Callback cb, DetectingCallback dCb) {
         this.callback = cb;
+        this.detectingCallback = dCb;
         detector = FirebaseVision.getInstance().getVisionFaceDetector(highAccuracyOpts);
     }
 
@@ -48,13 +50,17 @@ public class FaceDetection {
         void update(float x, float y, boolean hasFace);
     }
 
+    public interface DetectingCallback {
+        void detect(boolean bool);
+    }
+
     /* An interface to update the flag for detection to Main Activity */
     public interface DetectedCallback {
         void updateDetectionFlag();
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
-    public void detect(ImageProxy image) {
+    public void analyzeImage(ImageProxy image) {
         Image mediaImage = image.getImage();
         int rotation = degreesToFirebaseRotation(image.getImageInfo().getRotationDegrees());
         FirebaseVisionImage imageVision = FirebaseVisionImage.fromMediaImage(mediaImage, rotation);

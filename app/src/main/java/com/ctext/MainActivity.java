@@ -41,9 +41,10 @@ import androidx.core.content.ContextCompat;
 * The speech text should move every time the app recognizes a face near the mouth of the speaker.
  */
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback {
+public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, FaceDetection.DetectingCallback {
     private String TAG = "MainActivity:";
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
+    volatile boolean detecting = false;
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -105,6 +106,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             speechTextView.setX(x);
             speechTextView.setY(y);
         }
+    }
+
+    @Override
+    public void detect(boolean bool) {
+        detecting = bool;
     }
 
     @Override
@@ -234,9 +240,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             if (image == null || image.getImage() == null) {
                 return;
             }
-            FaceDetection faceDetection = new FaceDetection(this::update);
-            faceDetection.detect(image);
+            FaceDetection faceDetection = new FaceDetection(this::update, this::detect);
+            faceDetection.analyzeImage(image);
         });
+
         Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
         preview.setSurfaceProvider(previewView.createSurfaceProvider(camera.getCameraInfo()));
     }
