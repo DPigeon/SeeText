@@ -49,4 +49,9 @@ dependencies {
 
     // Firebase ML Face Detection
     implementation 'com.google.firebase:firebase-ml-vision:24.0.3'
+
+    // Firebase ML Translation
+    implementation 'com.google.firebase:firebase-ml-natural-language:22.0.0'
+    implementation 'com.google.firebase:firebase-ml-natural-language-translate-model:20.0.8'
+    implementation 'com.google.firebase:firebase-ml-natural-language-language-id-model:20.0.7'
 }

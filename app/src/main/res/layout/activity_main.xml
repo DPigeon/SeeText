@@ -22,11 +22,21 @@
 		android:textColor="#FFFFFF"
 		android:textStyle="bold" />
 
+	<Spinner
+		android:id="@+id/languageSpinner"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom|right"
+		android:textColor="#FFFFFF" 
+		android:background="@color/colorPrimary"
+		android:spinnerMode="dialog" />
+
 	<Switch
 		android:id="@+id/cameraSwitch"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="right"
+		android:backgroundTint="#FFFFFF"
 		android:text="Back"
 		android:textColor="#F6F4F4"
 		android:textOff="Front"

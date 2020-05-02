@@ -13,13 +13,18 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.util.Size;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -41,10 +46,13 @@ import androidx.core.content.ContextCompat;
 * The speech text should move every time the app recognizes a face near the mouth of the speaker.
  */
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, FaceDetection.DetectingCallback {
+public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, FaceDetection.DetectingCallback, Translator.Callback {
     private String TAG = "MainActivity:";
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
+    private int inputLanguage = FirebaseTranslateLanguage.EN; // For now SpeechRecognizer library only initialized with english
+    private int outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
     volatile boolean detecting = false;
+    Spinner languageSpinner;
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -52,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private Switch cameraSwitch;
 
     /* Audio Variables */
+    LanguageIdentification languageIdentification;
+    Translator translator;
     private SpeechRecognizer mRecognizer;
     private TextView speechTextView;
     private AudioManager mAudioManager;
@@ -72,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             setupUI();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
             initializeRecognition();
+
+        languageIdentification = new LanguageIdentification();
     }
 
     @Override
@@ -111,6 +123,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     public void detect(boolean bool) {
         detecting = bool;
+    }
+
+    @Override
+    public void translateTheText(String text) {
+        speechTextView.setText(text);
     }
 
     @Override
@@ -169,7 +186,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         String sentence = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).get(0);
         /* Sentences may be null sometimes so we avoid that */
         try {
-            speechTextView.setText(sentence);
+            if (inputLanguage != outputLanguage) { // Checks if input and output are the same
+                translator = new Translator(inputLanguage, getOutputLanguage(), this::translateTheText);
+                translator.translate(sentence);
+            } else
+                speechTextView.setText(sentence); // We show the text like it is
+            //languageIdentification.identification(sentence);
         } catch (Exception exception) {
 
         }
@@ -193,6 +215,32 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     protected void setupUI() {
         previewView = findViewById(R.id.previewView);
+        languageSpinner = findViewById(R.id.languageSpinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.languages_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        languageSpinner.setAdapter(adapter);
+        languageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // An item was selected. You can retrieve the selected item using
+                String item = adapterView.getItemAtPosition(i).toString();
+                if (item.equals("English")) {
+                    setOutputLanguage(FirebaseTranslateLanguage.EN);
+                }
+                else if (item.equals("French")) {
+                    setOutputLanguage(FirebaseTranslateLanguage.FR);
+                }
+                else if (item.equals("Spanish")) {
+                    setOutputLanguage(FirebaseTranslateLanguage.ES);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
             try {
@@ -263,9 +311,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     /* Starts the speech */
     public void listenForSpeech() {
+        // To be able to use any languages, we must set it first on preferences.
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
         mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
         mRecognizer.startListening(intent);
     }
@@ -283,6 +333,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mRecognizer = null;
         initializeRecognition();
         listenForSpeech();
+    }
+
+    protected void setOutputLanguage(int number) {
+        outputLanguage = number;
+    }
+
+    protected int getOutputLanguage() {
+        return outputLanguage;
     }
 
 }

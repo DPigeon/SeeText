@@ -24,16 +24,16 @@ import androidx.camera.core.ImageProxy;
  */
 
 public class FaceDetection {
-    private String TAG = "FaceDetectionActivity";
+    private String TAG = "FaceDetection";
     FirebaseVisionFaceDetector detector;
     Callback callback = null;
     DetectingCallback detectingCallback = null;
 
     // High-accuracy landmark detection
     FirebaseVisionFaceDetectorOptions highAccuracyOpts = new FirebaseVisionFaceDetectorOptions.Builder()
-            .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
-            .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
-            .build();
+        .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
+        .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
+        .build();
 
     // Factors from Rect to Screen coordinates for speech textView
     float xFactor = 0.5F;
