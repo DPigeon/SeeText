@@ -37,7 +37,7 @@ public class FaceDetection {
 
     // Factors from Rect to Screen coordinates for speech textView
     float xFactor = 0.5F;
-    float yFactor = 1.5F;
+    float yFactor = 1.75F;
 
     public FaceDetection(Callback cb, DetectingCallback dCb) {
         this.callback = cb;

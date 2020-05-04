@@ -133,7 +133,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     @Override
     public void translateTheText(String text) {
-        speechTextView.setText(text);
+        String sentenceToFitUI = " " + text + " ";
+        speechTextView.setText(sentenceToFitUI);
     }
 
     @Override
@@ -191,12 +192,15 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void onResults(Bundle results) {
         String sentence = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).get(0);
         /* Sentences may be null sometimes so we avoid that */
+        String sentenceToFitUI = " " + sentence + " ";
+        if (speechTextView.getVisibility() == View.INVISIBLE)
+            speechTextView.setVisibility(View.VISIBLE);
         try {
             if (inputLanguage != outputLanguage) { // Checks if input and output are the same
-                translator = new Translator(inputLanguage, getOutputLanguage(), this::translateTheText);
-                translator.translate(sentence);
+                translator = new Translator(getApplicationContext(), inputLanguage, getOutputLanguage(), this::translateTheText);
+                translator.downloadModelAndTranslate(outputLanguage, sentence);
             } else
-                speechTextView.setText(sentence); // We show the text like it is
+                speechTextView.setText(sentenceToFitUI); // We show the text like it is
             //languageIdentification.identification(sentence);
         } catch (Exception exception) {
 
