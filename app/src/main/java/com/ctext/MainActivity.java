@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,13 +14,14 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.util.Size;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,11 +55,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private int outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
     volatile boolean detecting = false;
     Spinner languageSpinner;
+    TextView languageTextView;
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private PreviewView previewView;
-    private Switch cameraSwitch;
+    private ImageView cameraModeImageView;
+    private ImageView languagesImageView;
+    private int lensFacing = CameraSelector.LENS_FACING_BACK;
 
     /* Audio Variables */
     LanguageIdentification languageIdentification;
@@ -70,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().hide(); // Hide the main app bar on top
 
         /* Running UI Thread to get audio & video permission */
         this.runOnUiThread(() -> {
@@ -213,8 +219,37 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     protected void setupUI() {
         previewView = findViewById(R.id.previewView);
+        cameraModeImageView = findViewById(R.id.cameraModeImageView);
+        cameraModeImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                view.getContext().getDrawable(R.drawable.camera_mode).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                view.invalidate();
+            }
+            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                view.getContext().getDrawable(R.drawable.camera_mode).clearColorFilter();
+                view.invalidate();
+                if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+                    lensFacing = CameraSelector.LENS_FACING_FRONT;
+                } else {
+                    lensFacing = CameraSelector.LENS_FACING_BACK;
+                }
+                try {
+                    cameraProviderFuture.get().unbindAll(); // Unbind all other cameras
+                    cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+                    bindPreview(cameraProviderFuture.get(), lensFacing); // Change lens facing
+                } catch (Exception exception) {
+
+                }
+                speechTextView.setText(""); // Reset text
+            }
+
+            return true;
+        });
+
         languageSpinner = findViewById(R.id.languageSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.languages_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -233,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 else if (item.equals("Spanish")) {
                     setOutputLanguage(FirebaseTranslateLanguage.ES);
                 }
+                languageTextView.setText(item);
             }
 
             @Override
@@ -240,36 +276,33 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
             }
         });
+        languageTextView = findViewById(R.id.languageTextView);
+        languagesImageView = findViewById(R.id.languagesImageView);
+        languagesImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                view.getContext().getDrawable(R.drawable.camera_mode).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                view.invalidate();
+            }
+            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                view.getContext().getDrawable(R.drawable.camera_mode).clearColorFilter();
+                view.invalidate();
+                languageSpinner.performClick();
+            }
+
+            return true;
+        });
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                bindPreview(cameraProvider, CameraSelector.LENS_FACING_BACK); // Default facing back
+                bindPreview(cameraProvider, lensFacing); // Default facing back
             } catch (ExecutionException | InterruptedException e) {
                 // No errors need to be handled for this Future.
                 // This should never be reached.
             }
         }, ContextCompat.getMainExecutor(this));
-        cameraSwitch = findViewById(R.id.cameraSwitch);
-        cameraSwitch.setOnCheckedChangeListener((compoundButton, b) -> {
-            int lensFacing;
-            if (compoundButton.isChecked()) {
-                cameraSwitch.setText("Front"); // Change those to picture later
-                lensFacing = 0;
-            } else {
-                cameraSwitch.setText("Back");
-                lensFacing = 1;
-            }
-            try {
-                cameraProviderFuture.get().unbindAll(); // Unbind all other cameras
-                cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-                bindPreview(cameraProviderFuture.get(), lensFacing); // Change lens facing
-            } catch (Exception exception) {
-
-            }
-            speechTextView.setText(""); // Reset text
-        });
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         speechTextView = findViewById(R.id.speechTextView);

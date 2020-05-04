@@ -25,21 +25,41 @@
 	<Spinner
 		android:id="@+id/languageSpinner"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
+		android:layout_height="56dp"
 		android:layout_gravity="bottom|right"
-		android:textColor="#FFFFFF" 
 		android:background="@color/colorPrimary"
-		android:spinnerMode="dialog" />
+		android:spinnerMode="dialog"
+		android:textColor="#FFFFFF"
+		android:visibility="invisible" />
 
-	<Switch
-		android:id="@+id/cameraSwitch"
+	<ImageView
+		android:id="@+id/cameraModeImageView"
+		android:layout_width="62dp"
+		android:layout_height="45dp"
+		android:layout_gravity="right"
+		app:srcCompat="@drawable/camera_mode" />
+
+	<ImageView
+		android:id="@+id/languagesImageView"
+		android:layout_width="56dp"
+		android:layout_height="51dp"
+		android:layout_gravity="bottom|right"
+		app:srcCompat="@drawable/languages" />
+
+	<TextView
+		android:id="@+id/languageTextView"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_gravity="right"
-		android:backgroundTint="#FFFFFF"
-		android:text="Back"
-		android:textColor="#F6F4F4"
-		android:textOff="Front"
-		android:textOn="Back" />
+		android:layout_gravity="bottom|center"
+		android:text="English"
+		android:textAlignment="center"
+		android:textSize="24sp" />
+
+	<ImageView
+		android:id="@+id/objectDetectionImageView"
+		android:layout_width="66dp"
+		android:layout_height="55dp"
+		android:layout_gravity="bottom"
+		app:srcCompat="@drawable/objects_detection" />
 
 </FrameLayout>
