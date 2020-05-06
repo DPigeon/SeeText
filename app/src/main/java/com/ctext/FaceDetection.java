@@ -7,7 +7,6 @@ import android.util.Log;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
-import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 import com.google.firebase.ml.vision.common.FirebaseVisionPoint;
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
@@ -62,7 +61,7 @@ public class FaceDetection {
     @SuppressLint("UnsafeExperimentalUsageError")
     public void analyzeImage(ImageProxy image) {
         Image mediaImage = image.getImage();
-        int rotation = degreesToFirebaseRotation(image.getImageInfo().getRotationDegrees());
+        int rotation = Utils.degreesToFirebaseRotation(image.getImageInfo().getRotationDegrees());
         FirebaseVisionImage imageVision = FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
 
         Task<List<FirebaseVisionFace>> result = detector.detectInImage(imageVision).addOnSuccessListener(faces -> {
@@ -94,22 +93,5 @@ public class FaceDetection {
             Log.d(TAG, "Error");
             // Task failed with an exception --> No speech
         });
-        //image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)
     }
-
-    private int degreesToFirebaseRotation(int degrees) {
-        switch (degrees) {
-            case 0:
-                return FirebaseVisionImageMetadata.ROTATION_0;
-            case 90:
-                return FirebaseVisionImageMetadata.ROTATION_90;
-            case 180:
-                return FirebaseVisionImageMetadata.ROTATION_180;
-            case 270:
-                return FirebaseVisionImageMetadata.ROTATION_270;
-            default:
-                throw new IllegalArgumentException("Rotation must be 0, 90, 180, or 270.");
-        }
-    }
-
 }

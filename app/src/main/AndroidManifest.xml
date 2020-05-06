@@ -13,6 +13,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="fritz_api_key"
+            android:value="9c3c870199e54991aae646cab229854b" />
+        <service
+            android:name="ai.fritz.core.FritzCustomModelService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <activity android:name=".MainActivity"
                   android:screenOrientation="portrait">
             <intent-filter>

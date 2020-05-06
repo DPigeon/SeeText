@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.os.Build;
@@ -15,6 +17,7 @@ import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -32,6 +35,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import ai.fritz.core.Fritz;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
@@ -48,7 +52,7 @@ import androidx.core.content.ContextCompat;
 * The speech text should move every time the app recognizes a face near the mouth of the speaker.
  */
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, FaceDetection.DetectingCallback, Translator.Callback {
+public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, FaceDetection.DetectingCallback, Translator.Callback, ObjectDetection.Callback {
     private String TAG = "MainActivity:";
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
     private int inputLanguage = FirebaseTranslateLanguage.EN; // For now SpeechRecognizer library only initialized with english
@@ -60,9 +64,15 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private PreviewView previewView;
+    private Camera camera;
+    private Preview preview;
     private ImageView cameraModeImageView;
     private ImageView languagesImageView;
+    private ImageView speechDetectionImageView;
+    private ImageView objectDetectionImageView;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
+    private ImageView previewImageView; // Used for object detection
+    private OrientationEventListener mOrientationListener;
 
     /* Audio Variables */
     LanguageIdentification languageIdentification;
@@ -71,9 +81,17 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private TextView speechTextView;
     private AudioManager mAudioManager;
 
+    /* Modes of the app */
+    enum Mode {
+        SPEECHDETECTION,
+        OBJECTDETECTION
+    }
+    Mode currentMode = Mode.SPEECHDETECTION;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fritz.configure(this); // Initialize Fritz
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide(); // Hide the main app bar on top
 
@@ -124,6 +142,13 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             speechTextView.setX(x);
             speechTextView.setY(y);
         }
+    }
+
+    @Override
+    public void draw(Bitmap image) {
+        this.runOnUiThread(() -> {
+            previewImageView.setImageBitmap(image); // Update the imageView that's gonna replace the previewView
+        });
     }
 
     @Override
@@ -193,24 +218,26 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         String sentence = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).get(0);
         /* Sentences may be null sometimes so we avoid that */
         String sentenceToFitUI = " " + sentence + " ";
-        if (speechTextView.getVisibility() == View.INVISIBLE)
-            speechTextView.setVisibility(View.VISIBLE);
-        try {
-            if (inputLanguage != outputLanguage) { // Checks if input and output are the same
-                translator = new Translator(getApplicationContext(), inputLanguage, getOutputLanguage(), this::translateTheText);
-                translator.downloadModelAndTranslate(outputLanguage, sentence);
-            } else
-                speechTextView.setText(sentenceToFitUI); // We show the text like it is
-            //languageIdentification.identification(sentence);
-        } catch (Exception exception) {
+        if (currentMode != Mode.OBJECTDETECTION) { // Current mode must be speech detection
+            if (speechTextView.getVisibility() == View.INVISIBLE)
+                speechTextView.setVisibility(View.VISIBLE);
+            try {
+                if (inputLanguage != outputLanguage) { // Checks if input and output are the same
+                    translator = new Translator(getApplicationContext(), inputLanguage, getOutputLanguage(), this::translateTheText);
+                    translator.downloadModelAndTranslate(outputLanguage, sentence);
+                } else
+                    speechTextView.setText(sentenceToFitUI); // We show the text like it is
+                //languageIdentification.identification(sentence);
+            } catch (Exception exception) {
 
+            }
+            speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
+            Animation fadeOutAnim = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+            fadeOutAnim.setStartTime(5000);
+            speechTextView.startAnimation(fadeOutAnim);
+
+            persistentSpeech();
         }
-        speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
-        Animation fadeOutAnim = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-        fadeOutAnim.setStartTime(5000);
-        speechTextView.startAnimation(fadeOutAnim);
-
-        persistentSpeech();
     }
 
     @Override
@@ -248,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 } catch (Exception exception) {
 
                 }
-                speechTextView.setText(""); // Reset text
+                speechTextView.setVisibility(View.INVISIBLE); // Reset textView
             }
 
             return true;
@@ -285,13 +312,55 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         languagesImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
-                view.getContext().getDrawable(R.drawable.camera_mode).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                view.getContext().getDrawable(R.drawable.languages).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
                 view.invalidate();
             }
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                view.getContext().getDrawable(R.drawable.camera_mode).clearColorFilter();
+                view.getContext().getDrawable(R.drawable.languages).clearColorFilter();
                 view.invalidate();
                 languageSpinner.performClick();
+            }
+
+            return true;
+        });
+
+        objectDetectionImageView = findViewById(R.id.objectDetectionImageView);
+        objectDetectionImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                view.getContext().getDrawable(R.drawable.objects_detection).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                view.invalidate();
+            }
+            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                view.getContext().getDrawable(R.drawable.objects_detection).clearColorFilter();
+                view.invalidate();
+                if (currentMode != Mode.OBJECTDETECTION) {
+                    currentMode = Mode.OBJECTDETECTION;
+                    speechTextView.setVisibility(View.INVISIBLE);
+                    Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
+                } else
+                    Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
+            }
+
+            return true;
+        });
+
+        speechDetectionImageView = findViewById(R.id.speechDetectionImageView);
+        speechDetectionImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                view.getContext().getDrawable(R.drawable.speech_detection).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                view.invalidate();
+            }
+            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                view.getContext().getDrawable(R.drawable.speech_detection).clearColorFilter();
+                view.invalidate();
+                if (currentMode != Mode.SPEECHDETECTION) {
+                    currentMode = Mode.SPEECHDETECTION;
+                    speechTextView.setVisibility(View.VISIBLE);
+                    Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
+                } else
+                    Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
             }
 
             return true;
@@ -310,26 +379,39 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         speechTextView = findViewById(R.id.speechTextView);
+        previewImageView = findViewById(R.id.previewImageView);
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
     protected void bindPreview(@NonNull ProcessCameraProvider cameraProvider, int lensFacing) {
-        Preview preview = new Preview.Builder().build();
+        preview = new Preview.Builder().build();
         CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
         Size size = new Size(480, 360); // For better latency
-        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder().setTargetResolution(size).setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
+        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
+                .setTargetResolution(size)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build();
 
         /* Image Processing Face Detection */
         Executor executor = Executors.newSingleThreadExecutor();
-        imageAnalysis.setAnalyzer(executor, image -> {
+        imageAnalysis.setAnalyzer(executor, image -> { // https://developer.android.com/training/camerax/analyze
             if (image == null || image.getImage() == null) {
                 return;
             }
-            FaceDetection faceDetection = new FaceDetection(this::update, this::detect);
-            faceDetection.analyzeImage(image);
-        });
+            Log.d(TAG, image.getImage().getWidth() + " " + image.getImage().getHeight());
+            if (currentMode == Mode.SPEECHDETECTION) {
+                FaceDetection faceDetection = new FaceDetection(this::update, this::detect);
+                faceDetection.analyzeImage(image);
 
-        Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
+                //image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)
+            } else if (currentMode == Mode.OBJECTDETECTION) {
+                ObjectDetection objectDetection = new ObjectDetection(this::draw);
+                objectDetection.detectObjects(image, lensFacing);
+
+                image.close();
+            }
+        });
+        camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
         preview.setSurfaceProvider(previewView.createSurfaceProvider(camera.getCameraInfo()));
     }
 
@@ -378,6 +460,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     protected int getOutputLanguage() {
         return outputLanguage;
+    }
+
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
 }

@@ -11,8 +11,16 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+        // To improve image processing performance
+        renderscriptTargetApi 21
+        renderscriptSupportModeEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Don't compress included TensorFlow Lite models on build.
+    aaptOptions {
+        noCompress "tflite"
     }
 
     buildTypes {
@@ -54,4 +62,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-natural-language:22.0.0'
     implementation 'com.google.firebase:firebase-ml-natural-language-translate-model:20.0.8'
     implementation 'com.google.firebase:firebase-ml-natural-language-language-id-model:20.0.7'
+
+    // Fritz AI Image Labeler
+    implementation 'ai.fritz:core:+'
+    implementation 'ai.fritz:vision:+'
+    implementation 'ai.fritz:vision-object-detection-model-fast:3.0.0' // Adds the TensorFlow Lite model uncompressed in the app (increases size)
 }

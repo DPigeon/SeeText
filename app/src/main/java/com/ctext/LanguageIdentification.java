@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
 import com.google.firebase.ml.naturallanguage.languageid.FirebaseLanguageIdentification;
-import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
 public class LanguageIdentification {
     private String TAG = "LanguageIdentifier";
