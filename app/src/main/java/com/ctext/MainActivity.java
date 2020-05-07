@@ -14,10 +14,10 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
-import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
+import android.view.TextureView;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -83,10 +83,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     /* Modes of the app */
     enum Mode {
-        SPEECHDETECTION,
-        OBJECTDETECTION
+        SpeechRecognition,
+        ObjectDetection
     }
-    Mode currentMode = Mode.SPEECHDETECTION;
+    Mode currentMode = Mode.SpeechRecognition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     public void draw(Bitmap image) {
         this.runOnUiThread(() -> {
-            previewImageView.setImageBitmap(image); // Update the imageView that's gonna replace the previewView
+            previewImageView.setImageBitmap(image);
         });
     }
 
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         String sentence = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).get(0);
         /* Sentences may be null sometimes so we avoid that */
         String sentenceToFitUI = " " + sentence + " ";
-        if (currentMode != Mode.OBJECTDETECTION) { // Current mode must be speech detection
+        if (currentMode != Mode.ObjectDetection) { // Current mode must be speech detection
             if (speechTextView.getVisibility() == View.INVISIBLE)
                 speechTextView.setVisibility(View.VISIBLE);
             try {
@@ -253,6 +253,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @SuppressLint("ClickableViewAccessibility")
     protected void setupUI() {
         previewView = findViewById(R.id.previewView);
+        previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW); // TextureView
         cameraModeImageView = findViewById(R.id.cameraModeImageView);
         cameraModeImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
@@ -268,13 +269,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 } else {
                     lensFacing = CameraSelector.LENS_FACING_BACK;
                 }
-                try {
-                    cameraProviderFuture.get().unbindAll(); // Unbind all other cameras
-                    cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-                    bindPreview(cameraProviderFuture.get(), lensFacing); // Change lens facing
-                } catch (Exception exception) {
-
-                }
+                rebindPreview();
                 speechTextView.setVisibility(View.INVISIBLE); // Reset textView
             }
 
@@ -334,8 +329,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 view.getContext().getDrawable(R.drawable.objects_detection).clearColorFilter();
                 view.invalidate();
-                if (currentMode != Mode.OBJECTDETECTION) {
-                    currentMode = Mode.OBJECTDETECTION;
+                if (currentMode != Mode.ObjectDetection) {
+                    currentMode = Mode.ObjectDetection;
+                    previewImageView.setImageDrawable(null);
+                    rebindPreview();
+                    previewImageView.setVisibility(View.VISIBLE);
                     speechTextView.setVisibility(View.INVISIBLE);
                     Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
                 } else
@@ -355,8 +353,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 view.getContext().getDrawable(R.drawable.speech_detection).clearColorFilter();
                 view.invalidate();
-                if (currentMode != Mode.SPEECHDETECTION) {
-                    currentMode = Mode.SPEECHDETECTION;
+                if (currentMode != Mode.SpeechRecognition) {
+                    currentMode = Mode.SpeechRecognition;
+                    previewImageView.setVisibility(View.INVISIBLE);
+                    rebindPreview();
                     speechTextView.setVisibility(View.VISIBLE);
                     Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
                 } else
@@ -386,9 +386,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void bindPreview(@NonNull ProcessCameraProvider cameraProvider, int lensFacing) {
         preview = new Preview.Builder().build();
         CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
+
         Size size = new Size(480, 360); // For better latency
         ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
-                .setTargetResolution(size)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
 
@@ -398,21 +398,33 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             if (image == null || image.getImage() == null) {
                 return;
             }
-            Log.d(TAG, image.getImage().getWidth() + " " + image.getImage().getHeight());
-            if (currentMode == Mode.SPEECHDETECTION) {
+            if (currentMode == Mode.SpeechRecognition) {
                 FaceDetection faceDetection = new FaceDetection(this::update, this::detect);
                 faceDetection.analyzeImage(image);
 
                 //image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)
-            } else if (currentMode == Mode.OBJECTDETECTION) {
+            } else if (currentMode == Mode.ObjectDetection) {
                 ObjectDetection objectDetection = new ObjectDetection(this::draw);
-                objectDetection.detectObjects(image, lensFacing);
-
+                // We get the textureView to get the bitmap image every time for better orientation
+                View surfaceOrTexture = previewView.getChildAt(0);
+                if (surfaceOrTexture instanceof TextureView) {
+                    Bitmap bitmap = ((TextureView) surfaceOrTexture).getBitmap();
+                    objectDetection.detectObjects(Bitmap.createScaledBitmap(bitmap, getScreenWidth(), getScreenHeight(), false), lensFacing);
+                }
                 image.close();
             }
         });
         camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
         preview.setSurfaceProvider(previewView.createSurfaceProvider(camera.getCameraInfo()));
+    }
+
+    /* Rebinds the preview to keep the lenses working in real time */
+    protected void rebindPreview() {
+        try {
+            cameraProviderFuture.get().unbindAll(); // Unbind all other cameras
+            cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+            bindPreview(cameraProviderFuture.get(), lensFacing); // Change lens facing
+        } catch (Exception exception) {}
     }
 
     /* Used to grant permission from the UI thread */
