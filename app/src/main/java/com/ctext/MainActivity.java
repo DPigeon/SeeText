@@ -409,7 +409,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 View surfaceOrTexture = previewView.getChildAt(0);
                 if (surfaceOrTexture instanceof TextureView) {
                     Bitmap bitmap = ((TextureView) surfaceOrTexture).getBitmap();
-                    objectDetection.detectObjects(Bitmap.createScaledBitmap(bitmap, getScreenWidth(), getScreenHeight(), false), lensFacing);
+                    Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, getScreenWidth(), getScreenHeight(), false);
+                    objectDetection.detectObjects(getApplicationContext(), newBitmap, lensFacing, getOutputLanguage());
                 }
                 image.close();
             }

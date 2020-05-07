@@ -4,14 +4,16 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelManager;
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateRemoteModel;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
+
+import java.util.concurrent.ExecutionException;
 
 import androidx.annotation.NonNull;
 
@@ -22,8 +24,8 @@ public class Translator {
     Context context;
     Callback callback = null;
 
+    /* Used for translating in speech recognition using a callback */
     public Translator(Context context, int input, int output, Callback callback) {
-        // Create an English-German translator:
         FirebaseTranslatorOptions options = new FirebaseTranslatorOptions.Builder()
             .setSourceLanguage(input)
             .setTargetLanguage(output)
@@ -32,6 +34,17 @@ public class Translator {
         translator = FirebaseNaturalLanguage.getInstance().getTranslator(options);
         this.context = context;
         this.callback = callback;
+    }
+
+    /* Used for translating in object detection without callbacks of translator */
+    public Translator(Context context, int input, int output) {
+        FirebaseTranslatorOptions options = new FirebaseTranslatorOptions.Builder()
+                .setSourceLanguage(input)
+                .setTargetLanguage(output)
+                .build();
+        modelManager = FirebaseModelManager.getInstance();
+        translator = FirebaseNaturalLanguage.getInstance().getTranslator(options);
+        this.context = context;
     }
 
     /* An interface to give the translated text as a response to Main Activity */
@@ -47,6 +60,39 @@ public class Translator {
             Log.d(TAG, "Could not translate the text. Error: " + error.toString());
             Toast.makeText(context,"There is an error with the translator...", Toast.LENGTH_LONG).show();
         });
+    }
+
+    public String translateObject(String text, int languageId) {
+        FirebaseTranslateRemoteModel model = new FirebaseTranslateRemoteModel.Builder(languageId).build();
+        boolean isDownloaded = false;
+        String tText = "";
+
+        Task downloadTask = modelManager.isModelDownloaded(model);
+        try {
+            Tasks.await(downloadTask);
+            isDownloaded = (boolean)downloadTask.getResult();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (isDownloaded) {
+            Task textTask = translator.translate(text);
+            // Asynchronous call awaiting for the promise
+            try {
+                Tasks.await(textTask);
+                tText = textTask.getResult().toString();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        } else {
+            //Toast.makeText(context,"Downloading the language model...", Toast.LENGTH_LONG).show();
+            downloadModel(model);
+            return "Loading...";
+        }
+        return tText;
     }
 
     /* Downloads a model requested if not downloaded & / or translates */
