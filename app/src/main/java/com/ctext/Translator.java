@@ -88,7 +88,6 @@ public class Translator {
                 e.printStackTrace();
             }
         } else {
-            //Toast.makeText(context,"Downloading the language model...", Toast.LENGTH_LONG).show();
             downloadModel(model);
             return "Loading...";
         }

@@ -4,7 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
+import android.util.Size;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
@@ -53,18 +56,31 @@ public class ObjectDetection {
         List<FritzVisionObject> objects = objectResult.getObjects();
         if (!sameAsOutput) { // Translator activated
             for (FritzVisionObject object : objects) {
-                // Translate the appropriate text
                 String text = object.getVisionLabel().getText();
                 String translatedText = translator.translateObject(text, outputLanguage);
-                BorderedText borderedText = BorderedText.createDefault(context);
-                float x = object.getBoundingBox().centerX();
-                float y = object.getBoundingBox().centerY();
-                borderedText.drawText(canvas, x, y, translatedText);
-                callback.draw(image);
+                drawBoxesAndLabels(context, object, image, canvas, translatedText);
             }
         } else { // No translator needed because same input and output languages (english)
-            Bitmap boundingBoxesOnImage = visionImage.overlayBoundingBoxes(objects); // Draw all boxes on image
-            callback.draw(boundingBoxesOnImage);
+            for (FritzVisionObject object : objects) {
+                String text = object.getVisionLabel().getText();
+                drawBoxesAndLabels(context, object, image, canvas, text);
+            }
         }
     }
+
+    /* Custom bounding boxes & labels with no score value */
+    public void drawBoxesAndLabels(Context context, FritzVisionObject object, Bitmap image, Canvas canvas, String translatedText) {
+        // Translate the appropriate text
+        BorderedText borderedText = BorderedText.createDefault(context);
+        FritzVisionObject scaledObject = object.scaledTo(new Size(image.getWidth(), image.getHeight()));
+        float x = scaledObject.getBoundingBox().left;
+        float y = scaledObject.getBoundingBox().top;
+        borderedText.drawText(canvas, x, y, translatedText);
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE); // Set unfilled rectangle
+        paint.setColor(Color.RED); // Set red
+        canvas.drawRect(scaledObject.getBoundingBox(), paint);
+        callback.draw(image);
+    }
+
 }
