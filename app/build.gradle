@@ -66,5 +66,7 @@ dependencies {
     // Fritz AI Image Labeler
     implementation 'ai.fritz:core:+'
     implementation 'ai.fritz:vision:+'
-    implementation 'ai.fritz:vision-object-detection-model-fast:3.0.0' // Adds the TensorFlow Lite model uncompressed in the app (increases size)
+    implementation 'ai.fritz:vision-object-detection-model-fast:3.0.0'
+    implementation 'com.google.android.material:material:1.1.0'
+    // Adds the TensorFlow Lite model uncompressed in the app (increases size)
 }

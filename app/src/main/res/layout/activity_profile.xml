@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProfileActivity" >
+
+    <ImageView
+        android:id="@+id/profileImageView"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_gravity="center|top"
+        android:layout_marginTop="45dp"
+        app:srcCompat="@drawable/user_profile_dark" />
+
+    <TextView
+        android:id="@+id/ownLanguageTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|top|left"
+        android:paddingLeft="10dp"
+        android:paddingTop="160dp"
+        android:text="Your Language"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="128dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:text="Save" />
+
+    <RadioGroup
+        android:id="@+id/languagesRadioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="top"
+        android:layout_marginTop="190dp"
+        android:layout_marginBottom="50dp" />
+
+</FrameLayout>

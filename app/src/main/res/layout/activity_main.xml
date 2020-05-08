@@ -42,7 +42,13 @@
 		android:textColor="#FFFFFF"
 		android:visibility="invisible" />
 
-    <ImageView
+	<ImageView
+		android:id="@+id/userProfileImageView"
+		android:layout_width="66dp"
+		android:layout_height="51dp"
+		app:srcCompat="@drawable/user_profile" />
+
+	<ImageView
         android:id="@+id/cameraModeImageView"
         android:layout_width="66dp"
         android:layout_height="51dp"
@@ -67,17 +73,19 @@
 		android:textColor="#000000"
 		android:textSize="24sp" />
 
-    <ImageView
-        android:id="@+id/speechDetectionImageView"
-        android:layout_width="66dp"
-        android:layout_height="51dp"
-        app:srcCompat="@drawable/speech_detection" />
+	<ImageView
+		android:id="@+id/speechDetectionImageView"
+		android:layout_width="66dp"
+		android:layout_height="51dp"
+		android:layout_gravity="bottom"
+		app:srcCompat="@drawable/speech_detection" />
 
-    <ImageView
+	<ImageView
 		android:id="@+id/objectDetectionImageView"
 		android:layout_width="66dp"
-		android:layout_height="55dp"
+		android:layout_height="51dp"
 		android:layout_gravity="bottom"
+		android:layout_marginLeft="65dp"
 		app:srcCompat="@drawable/objects_detection" />
 
 </FrameLayout>

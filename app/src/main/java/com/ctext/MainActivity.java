@@ -54,8 +54,7 @@ import androidx.core.content.ContextCompat;
 public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback, ObjectDetection.Callback {
     private String TAG = "MainActivity:";
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
-    private int inputLanguage = FirebaseTranslateLanguage.EN; // For now SpeechRecognizer library only initialized with english
-    private int outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
+    private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
     Spinner languageSpinner;
     TextView languageTextView;
 
@@ -64,10 +63,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private PreviewView previewView;
     private Camera camera;
     private Preview preview;
-    private ImageView cameraModeImageView;
-    private ImageView languagesImageView;
-    private ImageView speechDetectionImageView;
-    private ImageView objectDetectionImageView;
+    private ImageView userProfileImageView, cameraModeImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
     private ImageView previewImageView; // Used for object detection
 
@@ -211,6 +207,24 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void setupUI() {
         previewView = findViewById(R.id.previewView);
         previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW); // TextureView
+
+        userProfileImageView = findViewById(R.id.userProfileImageView);
+        userProfileImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                view.getContext().getDrawable(R.drawable.user_profile).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                view.invalidate();
+            }
+            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                view.getContext().getDrawable(R.drawable.user_profile).clearColorFilter();
+                view.invalidate();
+                // Go to the profile activity with a nice slide animation
+                goToActivity(ProfileActivity.class);
+            }
+
+            return true;
+        });
+
         cameraModeImageView = findViewById(R.id.cameraModeImageView);
         cameraModeImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
@@ -441,6 +455,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     public static int getScreenHeight() {
         return Resources.getSystem().getDisplayMetrics().heightPixels;
+    }
+
+    void goToActivity(Class activity) { // Function that goes from the main activity to another one
+        Intent intent = new Intent(MainActivity.this, activity);
+        startActivity(intent);
     }
 
 }
