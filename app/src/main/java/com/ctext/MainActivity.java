@@ -16,7 +16,6 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Size;
 import android.view.MotionEvent;
-import android.view.OrientationEventListener;
 import android.view.TextureView;
 import android.view.View;
 import android.view.animation.Animation;
@@ -52,12 +51,11 @@ import androidx.core.content.ContextCompat;
 * The speech text should move every time the app recognizes a face near the mouth of the speaker.
  */
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, FaceDetection.DetectingCallback, Translator.Callback, ObjectDetection.Callback {
+public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback, ObjectDetection.Callback {
     private String TAG = "MainActivity:";
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
     private int inputLanguage = FirebaseTranslateLanguage.EN; // For now SpeechRecognizer library only initialized with english
     private int outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
-    volatile boolean detecting = false;
     Spinner languageSpinner;
     TextView languageTextView;
 
@@ -72,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private ImageView objectDetectionImageView;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
     private ImageView previewImageView; // Used for object detection
-    private OrientationEventListener mOrientationListener;
 
     /* Audio Variables */
     LanguageIdentification languageIdentification;
@@ -119,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     setupUI();
                     initializeRecognition();
                 } else {
-                    Toast.makeText(this, "You cannot run the app without allowing camera or microphone!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "You cannot run the app without allowing the camera or microphone!", Toast.LENGTH_LONG).show();
                     this.finish();
                 }
             }
@@ -152,64 +149,28 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     @Override
-    public void detect(boolean bool) {
-        detecting = bool;
-    }
-
-    @Override
     public void translateTheText(String text) {
         String sentenceToFitUI = " " + text + " ";
         speechTextView.setText(sentenceToFitUI);
     }
 
     @Override
-    public void onReadyForSpeech(Bundle params) {
-
-    }
+    public void onReadyForSpeech(Bundle params) {}
 
     @Override
-    public void onBeginningOfSpeech() {
-
-    }
+    public void onBeginningOfSpeech() {}
 
     @Override
-    public void onRmsChanged(float rmsDb) {
-
-    }
+    public void onRmsChanged(float rmsDb) {}
 
     @Override
-    public void onBufferReceived(byte[] buffer) {
-
-    }
+    public void onBufferReceived(byte[] buffer) {}
 
     @Override
-    public void onEndOfSpeech() {
-
-    }
+    public void onEndOfSpeech() {}
 
     @Override
     public void onError(int error) {
-        /*if (error == SpeechRecognizer.ERROR_AUDIO) {
-            showToastMessage("Audio recording error");
-        } else if (error == SpeechRecognizer.ERROR_CLIENT) {
-            showToastMessage("Client side error");
-        } else if (error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
-            showToastMessage("Insufficient permissions");
-        } else if (error == SpeechRecognizer.ERROR_NETWORK) {
-            showToastMessage("Network error");
-        } else if (error == SpeechRecognizer.ERROR_NETWORK_TIMEOUT) {
-            showToastMessage("Network timeout");
-        } else if (error == SpeechRecognizer.ERROR_NO_MATCH) {
-            showToastMessage("No speech match");
-        } else if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) {
-            showToastMessage("Recognizer busy");
-        } else if (error == SpeechRecognizer.ERROR_SERVER) {
-            showToastMessage("Server error");
-        } else if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
-            showToastMessage("No speech input");
-        } else {
-            showToastMessage("Unknown error");
-        }*/
         persistentSpeech();
     }
 
@@ -223,14 +184,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 speechTextView.setVisibility(View.VISIBLE);
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
-                    translator = new Translator(getApplicationContext(), inputLanguage, getOutputLanguage(), this::translateTheText);
+                    translator = new Translator(getApplicationContext(), inputLanguage, getOutputLanguage(), this);
                     translator.downloadModelAndTranslate(outputLanguage, sentence);
                 } else
                     speechTextView.setText(sentenceToFitUI); // We show the text like it is
                 //languageIdentification.identification(sentence);
-            } catch (Exception exception) {
+            } catch (Exception exception) {}
 
-            }
+            /* Text Animation */
             speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
             Animation fadeOutAnim = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
             fadeOutAnim.setStartTime(5000);
@@ -241,14 +202,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     @Override
-    public void onPartialResults(Bundle partialResults) {
-
-    }
+    public void onPartialResults(Bundle partialResults) {}
 
     @Override
-    public void onEvent(int eventType, Bundle params) {
-
-    }
+    public void onEvent(int eventType, Bundle params) {}
 
     @SuppressLint("ClickableViewAccessibility")
     protected void setupUI() {
@@ -285,14 +242,16 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 // An item was selected. You can retrieve the selected item using
                 String item = adapterView.getItemAtPosition(i).toString();
-                if (item.equals("English")) {
-                    setOutputLanguage(FirebaseTranslateLanguage.EN);
-                }
-                else if (item.equals("French")) {
-                    setOutputLanguage(FirebaseTranslateLanguage.FR);
-                }
-                else if (item.equals("Spanish")) {
-                    setOutputLanguage(FirebaseTranslateLanguage.ES);
+                switch (item) {
+                    case "English":
+                        setOutputLanguage(FirebaseTranslateLanguage.EN);
+                        break;
+                    case "French":
+                        setOutputLanguage(FirebaseTranslateLanguage.FR);
+                        break;
+                    case "Spanish":
+                        setOutputLanguage(FirebaseTranslateLanguage.ES);
+                        break;
                 }
                 languageTextView.setText(item);
             }
@@ -395,16 +354,17 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         /* Image Processing Face Detection */
         Executor executor = Executors.newSingleThreadExecutor();
         imageAnalysis.setAnalyzer(executor, image -> { // https://developer.android.com/training/camerax/analyze
-            if (image == null || image.getImage() == null) {
+            if (image.getImage() == null) {
                 return;
             }
             if (currentMode == Mode.SpeechRecognition) {
-                FaceDetection faceDetection = new FaceDetection(this::update, this::detect);
+                // Currently only looks at the first image
+                FaceDetection faceDetection = new FaceDetection(this);
                 faceDetection.analyzeImage(image);
 
                 //image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)
             } else if (currentMode == Mode.ObjectDetection) {
-                ObjectDetection objectDetection = new ObjectDetection(this::draw);
+                ObjectDetection objectDetection = new ObjectDetection(this);
                 // We get the textureView to get the bitmap image every time for better orientation
                 View surfaceOrTexture = previewView.getChildAt(0);
                 if (surfaceOrTexture instanceof TextureView) {

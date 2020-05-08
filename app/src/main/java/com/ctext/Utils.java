@@ -2,6 +2,10 @@ package com.ctext;
 
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 
+/*
+ * The utility class containing some useful reusable functions
+ */
+
 public class Utils {
     public static int degreesToFirebaseRotation(int degrees) {
         switch (degrees) {

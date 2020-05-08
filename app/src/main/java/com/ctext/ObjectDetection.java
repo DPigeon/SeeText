@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
 import android.util.Size;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
@@ -21,6 +20,11 @@ import ai.fritz.vision.objectdetection.BorderedText;
 import ai.fritz.vision.objectdetection.FritzVisionObjectPredictor;
 import ai.fritz.vision.objectdetection.FritzVisionObjectResult;
 import ai.fritz.vision.objectdetection.ObjectDetectionOnDeviceModel;
+
+/*
+ * The Object Detection class using the Fritz API. It gets the device model and detects objects.
+ * It then draws the imageViews with unfilled rectangle & bordered text.
+ */
 
 public class ObjectDetection {
     private String TAG = "ObjectDetection";
@@ -72,7 +76,8 @@ public class ObjectDetection {
     public void drawBoxesAndLabels(Context context, FritzVisionObject object, Bitmap image, Canvas canvas, String translatedText) {
         // Translate the appropriate text
         BorderedText borderedText = BorderedText.createDefault(context);
-        FritzVisionObject scaledObject = object.scaledTo(new Size(image.getWidth(), image.getHeight()));
+        Size size = new Size(image.getWidth(), image.getHeight());
+        FritzVisionObject scaledObject = object.scaledTo(size);
         float x = scaledObject.getBoundingBox().left;
         float y = scaledObject.getBoundingBox().top;
         borderedText.drawText(canvas, x, y, translatedText);

@@ -15,7 +15,10 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOption
 
 import java.util.concurrent.ExecutionException;
 
-import androidx.annotation.NonNull;
+/*
+ * Translator using the Firebase API. It checks if the language model is downloaded. If it is, translate.
+ * It it isn't downloaded, download it and translate afterwards
+ */
 
 public class Translator {
     private String TAG = "Translator";
