@@ -63,6 +63,15 @@
         app:srcCompat="@drawable/languages" />
 
 	<TextView
+		android:id="@+id/translateToTextView"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom|center"
+		android:layout_marginBottom="40dp"
+		android:background="@android:drawable/editbox_dropdown_light_frame"
+		android:text="Translate" />
+
+	<TextView
 		android:id="@+id/languageTextView"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"

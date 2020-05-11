@@ -20,8 +20,8 @@ public class SharedPreferenceHelper {
         editor.apply(); // Using apply instead of commit now
     }
 
-    public Profile getProfile() { // Getter for profile with different keys
-        int language = sharedPreferences.getInt("ProfileLanguage", 0);
+    public Profile getProfile() {
+        int language = sharedPreferences.getInt("ProfileLanguage", -1);
         return new Profile(language);
     }
 }

@@ -1,6 +1,11 @@
 package com.ctext;
 
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
+
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.Set;
 
 /*
  * The utility class containing some useful reusable functions
@@ -21,4 +26,16 @@ public class Utils {
                 throw new IllegalArgumentException("Rotation must be 0, 90, 180, or 270.");
         }
     }
+
+    protected static ArrayList<String> getLanguageList() {
+        ArrayList<String> list = new ArrayList<>();
+        Set<Integer> tagSet = FirebaseTranslateLanguage.getAllLanguages();
+        for (Integer tag : tagSet) {
+            String language = FirebaseTranslateLanguage.languageCodeForLanguage(tag);
+            String stringLang = Locale.forLanguageTag(language).getDisplayName();
+            list.add(stringLang);
+        }
+        return list;
+    }
+
 }

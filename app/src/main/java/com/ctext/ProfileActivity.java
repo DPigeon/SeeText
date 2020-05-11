@@ -2,7 +2,7 @@ package com.ctext;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -11,7 +11,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /*
  * The User Profile to change his language (input language)
@@ -20,9 +23,10 @@ import android.widget.Toast;
 public class ProfileActivity extends AppCompatActivity {
     private String TAG = "ProfileActivity";
     SharedPreferenceHelper sharedPreferenceHelper;
+    ScrollView languagesScrollView;
     RadioGroup languagesRadioGroup;
     Button saveButton;
-    int languageChosen = 0; // Language checked on radioButton
+    int languageChosen = -1; // Language checked on radioButton
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +36,7 @@ public class ProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Profile");
 
-        sharedPreferenceHelper = new SharedPreferenceHelper(getApplicationContext());
+        sharedPreferenceHelper = new SharedPreferenceHelper(this);
         setupUI();
         instantiateRadioGroup();
     }
@@ -59,35 +63,40 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     protected void setupUI() {
+        languagesScrollView = findViewById(R.id.languagesScrollView);
+        languagesRadioGroup = findViewById(R.id.languagesRadioGroup);
         saveButton = findViewById(R.id.saveButton);
         saveButton.setOnClickListener(view -> saveProfile());
     }
 
-    protected void instantiateRadioGroup() {
-        languagesRadioGroup = findViewById(R.id.languagesRadioGroup);
-
-        String[] languages = getResources().getStringArray(R.array.languages_array);
-
-        /* Setup the radioGroup list of languages */
-        for (int i = 0; i < languages.length; i++)
-            addRadioButtons(languages, i);
-        languagesRadioGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                languageChosen = languagesRadioGroup.indexOfChild(view);
-            }
-        });
+    private final void scrollToCheckedButton() {
+        RadioButton checkedButton = findViewById(languagesRadioGroup.getCheckedRadioButtonId());
+        if (checkedButton != null)
+            languagesScrollView.post(() -> languagesScrollView.smoothScrollTo(0, checkedButton.getTop()));
     }
 
-    protected void addRadioButtons(String[] languages, int i) {
+    protected void instantiateRadioGroup() {
+        ArrayList<String> languages = Utils.getLanguageList();
+
+        /* Setup the radioGroup list of languages */
+        for (int i = 0; i < languages.size(); i++)
+            addRadioButtons(languages.get(i), i);
+    }
+
+    protected void addRadioButtons(String languages, int i) {
         RadioButton rButton = new RadioButton(this);
-        rButton.setId(i + 1);
-        rButton.setText(languages[i]);
+        rButton.setId(i);
+        rButton.setText(languages);
+        rButton.setTextSize(20F);
+        rButton.setOnCheckedChangeListener((compoundButton, b) -> {
+            if (compoundButton.isChecked())
+                languageChosen = compoundButton.getId(); // Set the current language chosen when touched
+        });
         languagesRadioGroup.addView(rButton);
     }
 
     protected void setActivityFields() {
-        if (sharedPreferenceHelper.getProfile() == null) { // Info does not exist
+        if (sharedPreferenceHelper.getProfile().getLanguage() == -1) { // Info does not exist
             switchMode(true, View.VISIBLE); // Switch to the edit mode
         }
         else {
@@ -96,14 +105,9 @@ public class ProfileActivity extends AppCompatActivity {
             // Getting the profile and displaying it
             Profile profile = sharedPreferenceHelper.getProfile();
             int currentLanguage = profile.getLanguage();
-            languagesRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                    if (currentLanguage == i)
-                        radioGroup.check(currentLanguage);
-                }
-            });
+            languagesRadioGroup.check(currentLanguage);
         }
+        scrollToCheckedButton();
     }
 
     protected void switchMode(boolean enabled, int view) { // Toggle between display mode and edit mode
@@ -115,17 +119,23 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     protected void saveProfile() {
-        if (languageChosen != 0) {
+        if (languageChosen != -1) {
             Profile profile = new Profile(languageChosen);
             sharedPreferenceHelper.saveProfile(profile);
-            toastMessage("not 0");
-        }
-        toastMessage(languageChosen+"");
+            toastMessage("Your profile has been saved!");
+            goToActivity(MainActivity.class);
+        } else
+            toastMessage("An error occured while saving your profile!");
     }
 
     protected void toastMessage(String message) { // Shows a toast message
         Toast toast = Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG); // Current pointer to the add, the string and the length if stays on
         toast.show(); // We display it
+    }
+
+    void goToActivity(Class activity) { // Function that goes from the main activity to another one
+        Intent intent = new Intent(ProfileActivity.this, activity);
+        startActivity(intent);
     }
 
 }

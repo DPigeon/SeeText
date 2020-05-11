@@ -8,12 +8,14 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
 import android.view.TextureView;
@@ -53,6 +55,7 @@ import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback, ObjectDetection.Callback {
     private String TAG = "MainActivity:";
+    SharedPreferenceHelper sharedPreferenceHelper;
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
     private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
     Spinner languageSpinner;
@@ -94,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 showPermissions();
             }
         });
+
+        checkProfile();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
             setupUI();
@@ -180,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 speechTextView.setVisibility(View.VISIBLE);
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
-                    translator = new Translator(getApplicationContext(), inputLanguage, getOutputLanguage(), this);
+                    translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), this);
                     translator.downloadModelAndTranslate(outputLanguage, sentence);
                 } else
                     speechTextView.setText(sentenceToFitUI); // We show the text like it is
@@ -255,18 +260,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 // An item was selected. You can retrieve the selected item using
+                int langId = adapterView.getPositionForView(view);
                 String item = adapterView.getItemAtPosition(i).toString();
-                switch (item) {
-                    case "English":
-                        setOutputLanguage(FirebaseTranslateLanguage.EN);
-                        break;
-                    case "French":
-                        setOutputLanguage(FirebaseTranslateLanguage.FR);
-                        break;
-                    case "Spanish":
-                        setOutputLanguage(FirebaseTranslateLanguage.ES);
-                        break;
-                }
+                setOutputLanguage(langId);
                 languageTextView.setText(item);
             }
 
@@ -417,10 +413,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     /* Starts the speech */
     public void listenForSpeech() {
-        // To be able to use any languages, we must set it first on preferences.
+        // Uses our SharedPreferences to perform recognition in different languages
+        String lang = FirebaseTranslateLanguage.languageCodeForLanguage(getInputLanguage());
+        Log.d(TAG, lang);
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
+        intent.putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", new String[]{lang});
 
         mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
         mRecognizer.startListening(intent);
@@ -439,6 +439,27 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mRecognizer = null;
         initializeRecognition();
         listenForSpeech();
+    }
+
+    /* Checks if profile is filled in before using the app */
+    protected void checkProfile() {
+        sharedPreferenceHelper = new SharedPreferenceHelper(this);
+        Profile profile = sharedPreferenceHelper.getProfile();
+        int lang = profile.getLanguage();
+        if (lang != -1) {
+            setInputLanguage(lang);
+        } else {
+            goToActivity(ProfileActivity.class);
+            Toast.makeText(getApplicationContext(), "Create your profile!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    protected void setInputLanguage(int number) {
+        inputLanguage = number;
+    }
+
+    protected int getInputLanguage() {
+        return inputLanguage;
     }
 
     protected void setOutputLanguage(int number) {

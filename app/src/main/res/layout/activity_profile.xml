@@ -20,9 +20,20 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center|top|left"
         android:paddingLeft="10dp"
-        android:paddingTop="160dp"
-        android:text="Your Language"
+        android:paddingTop="140dp"
+        android:text="Choose Your Language"
         android:textSize="20sp" />
+
+	<TextView
+		android:id="@+id/subOwnLanguageTextView"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center|top|left"
+		android:paddingLeft="11dp"
+		android:paddingTop="165dp"
+		android:text="Used for your microphone speech!"
+		android:textSize="14dp"
+		android:textStyle="bold" />
 
     <Button
         android:id="@+id/saveButton"
@@ -31,12 +42,21 @@
         android:layout_gravity="bottom|center"
         android:text="Save" />
 
-    <RadioGroup
-        android:id="@+id/languagesRadioGroup"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="top"
-        android:layout_marginTop="190dp"
-        android:layout_marginBottom="50dp" />
+	<ScrollView
+    android:id="@+id/languagesScrollView"
+    android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:layout_gravity="top"
+	android:layout_marginTop="190dp"
+	android:layout_marginBottom="50dp" >
+
+        <RadioGroup
+            android:id="@+id/languagesRadioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            android:layout_marginBottom="50dp"></RadioGroup>
+
+	</ScrollView>
 
 </FrameLayout>

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
@@ -15,6 +17,8 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOption
 
 import java.util.concurrent.ExecutionException;
 
+import androidx.annotation.NonNull;
+
 /*
  * Translator using the Firebase API. It checks if the language model is downloaded. If it is, translate.
  * It it isn't downloaded, download it and translate afterwards
@@ -24,6 +28,7 @@ public class Translator {
     private String TAG = "Translator";
     final FirebaseModelManager modelManager;
     final FirebaseTranslator translator;
+    FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder().requireWifi().build();
     Context context;
     Callback callback = null;
 
@@ -57,11 +62,15 @@ public class Translator {
 
     /* Translate text from input to output */
     public void translate(String text) {
-        translator.translate(text).addOnSuccessListener(translatedText -> {
+        translator.downloadModelIfNeeded(conditions).addOnSuccessListener(v -> {
+            translator.translate(text).addOnSuccessListener(translatedText -> {
                 callback.translateTheText(translatedText);
+            }).addOnFailureListener(error -> {
+                Log.d(TAG, "Could not translate the text. Error: " + error.toString());
+                Toast.makeText(context,"There is an error with the translator...", Toast.LENGTH_LONG).show();
+            });
         }).addOnFailureListener(error -> {
-            Log.d(TAG, "Could not translate the text. Error: " + error.toString());
-            Toast.makeText(context,"There is an error with the translator...", Toast.LENGTH_LONG).show();
+            Log.d(TAG, "Downloading model if needed has an error: " + error.toString());
         });
     }
 
@@ -112,9 +121,6 @@ public class Translator {
     }
 
     protected void downloadModel(FirebaseTranslateRemoteModel model) {
-        FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder()
-                .requireWifi()
-                .build();
         modelManager.download(model, conditions).addOnSuccessListener(v -> {
             // Model downloaded
             Toast.makeText(context,"Language model has been downloaded!", Toast.LENGTH_LONG).show();
