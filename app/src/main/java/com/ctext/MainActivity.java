@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -106,6 +107,17 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             initializeRecognition();
 
         languageIdentification = new LanguageIdentification();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        int outputLang = sharedPreferenceHelper.getLanguageOutput();
+        if (outputLang != -1) { // First time using the app
+            String language = FirebaseTranslateLanguage.languageCodeForLanguage(outputLang);
+            String stringLang = Locale.forLanguageTag(language).getDisplayName();
+            languageTextView.setText(stringLang);
+        }
     }
 
     @Override
@@ -256,8 +268,13 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 // An item was selected. You can retrieve the selected item using
                 int langId = adapterView.getPositionForView(view);
                 String item = adapterView.getItemAtPosition(i).toString();
-                setOutputLanguage(langId);
-                languageTextView.setText(item);
+                if (langId != 0) { // Will have to increase all ids by 1 since 0 is default called at beginning
+                    setOutputLanguage(langId);
+                    // Save the output language in profile
+                    Profile profile = new Profile(getInputLanguage(), getOutputLanguage());
+                    sharedPreferenceHelper.saveProfile(profile);
+                    languageTextView.setText(item);
+                }
             }
 
             @Override
@@ -440,8 +457,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         sharedPreferenceHelper = new SharedPreferenceHelper(this);
         Profile profile = sharedPreferenceHelper.getProfile();
         int lang = profile.getLanguage();
+        int outputLang = profile.getLanguageOutputId();
         if (lang != -1) {
             setInputLanguage(lang);
+            if (outputLang != -1)
+                setOutputLanguage(outputLang);
         } else {
             goToActivity(ProfileActivity.class);
             Toast.makeText(getApplicationContext(), "Create your profile!", Toast.LENGTH_LONG).show();

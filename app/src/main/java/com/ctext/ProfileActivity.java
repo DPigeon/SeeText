@@ -120,7 +120,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     protected void saveProfile() {
         if (languageChosen != -1) {
-            Profile profile = new Profile(languageChosen);
+            Profile profile = new Profile(languageChosen, sharedPreferenceHelper.getLanguageOutput());
             sharedPreferenceHelper.saveProfile(profile);
             toastMessage("Your profile has been saved!");
             goToActivity(MainActivity.class);

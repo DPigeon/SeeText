@@ -17,11 +17,18 @@ public class SharedPreferenceHelper {
     public void saveProfile(Profile profile)  {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("ProfileLanguage", profile.getLanguage());
+        editor.putInt("ProfileLanguageOutput", profile.getLanguageOutputId());
         editor.apply(); // Using apply instead of commit now
+    }
+
+    public int getLanguageOutput() {
+        int output = sharedPreferences.getInt("ProfileLanguageOutput", -1);
+        return output;
     }
 
     public Profile getProfile() {
         int language = sharedPreferences.getInt("ProfileLanguage", -1);
-        return new Profile(language);
+        int output = sharedPreferences.getInt("ProfileLanguageOutput", -1);
+        return new Profile(language, output);
     }
 }

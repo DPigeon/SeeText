@@ -17,6 +17,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.google.android.gms.vision.CameraSource;
@@ -78,6 +79,11 @@ public class GraphicOverlay extends View {
          * @param canvas drawing canvas
          */
         public abstract void draw(Canvas canvas);
+
+         /*
+         * @param event firing touch events
+         */
+        public abstract void touchEvent(MotionEvent event);
 
         /**
          * Adjusts a horizontal value of the supplied value from the preview scale to the view scale.
@@ -175,4 +181,16 @@ public class GraphicOverlay extends View {
             }
         }
     }
+
+    /* Performs actions when touching an overlayed object */
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+        for (Graphic graphic : graphics) {
+            graphic.touchEvent(event);
+        }
+        invalidate();
+        return true;
+    }
+
 }
