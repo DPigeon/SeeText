@@ -3,10 +3,6 @@ package com.ctext;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.util.Size;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
@@ -16,7 +12,6 @@ import ai.fritz.vision.FritzVision;
 import ai.fritz.vision.FritzVisionImage;
 import ai.fritz.vision.FritzVisionModels;
 import ai.fritz.vision.FritzVisionObject;
-import ai.fritz.vision.objectdetection.BorderedText;
 import ai.fritz.vision.objectdetection.FritzVisionObjectPredictor;
 import ai.fritz.vision.objectdetection.FritzVisionObjectResult;
 import ai.fritz.vision.objectdetection.ObjectDetectionOnDeviceModel;
@@ -31,17 +26,12 @@ public class ObjectDetection {
     Translator translator;
     ObjectDetectionOnDeviceModel onDeviceModel;
     FritzVisionObjectPredictor predictor;
-    Callback callback = null;
+    GraphicOverlay graphicOverlay;
 
-    public ObjectDetection(Callback cb) {
-        this.callback = cb;
+    public ObjectDetection(GraphicOverlay graphicOverlay) {
+        this.graphicOverlay = graphicOverlay;
         onDeviceModel = FritzVisionModels.getObjectDetectionOnDeviceModel();
         predictor = FritzVision.ObjectDetection.getPredictor(onDeviceModel);
-    }
-
-    /* An interface to update the image after detecting in Main Activity */
-    public interface Callback {
-        void draw(Bitmap bitmap);
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -55,37 +45,22 @@ public class ObjectDetection {
             translator = new Translator(context, FirebaseTranslateLanguage.EN, outputLanguage); // Input always english for Fritz AI
         }
 
-        Canvas canvas = new Canvas(image);
-
         List<FritzVisionObject> objects = objectResult.getObjects();
+        graphicOverlay.clear();
+
         if (!sameAsOutput) { // Translator activated
             for (FritzVisionObject object : objects) {
                 String text = object.getVisionLabel().getText();
                 String translatedText = translator.translateObject(text, outputLanguage);
-                drawBoxesAndLabels(context, object, image, canvas, translatedText);
+                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, translatedText);
+                graphicOverlay.add(objectOverlay);
             }
         } else { // No translator needed because same input and output languages (english)
             for (FritzVisionObject object : objects) {
                 String text = object.getVisionLabel().getText();
-                drawBoxesAndLabels(context, object, image, canvas, text);
+                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, text);
+                graphicOverlay.add(objectOverlay);
             }
         }
     }
-
-    /* Custom bounding boxes & labels with no score value */
-    public void drawBoxesAndLabels(Context context, FritzVisionObject object, Bitmap image, Canvas canvas, String translatedText) {
-        // Translate the appropriate text
-        BorderedText borderedText = BorderedText.createDefault(context);
-        Size size = new Size(image.getWidth(), image.getHeight());
-        FritzVisionObject scaledObject = object.scaledTo(size);
-        float x = scaledObject.getBoundingBox().left;
-        float y = scaledObject.getBoundingBox().top;
-        borderedText.drawText(canvas, x, y, translatedText);
-        Paint paint = new Paint();
-        paint.setStyle(Paint.Style.STROKE); // Set unfilled rectangle
-        paint.setColor(Color.RED); // Set red
-        canvas.drawRect(scaledObject.getBoundingBox(), paint);
-        callback.draw(image);
-    }
-
 }

@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -53,7 +52,7 @@ import androidx.core.content.ContextCompat;
 * The speech text should move every time the app recognizes a face near the mouth of the speaker.
  */
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback, ObjectDetection.Callback {
+public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback {
     private String TAG = "MainActivity:";
     SharedPreferenceHelper sharedPreferenceHelper;
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
@@ -69,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private ImageView userProfileImageView, cameraModeImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
     private ImageView previewImageView; // Used for object detection
+    private GraphicOverlay graphicOverlay;
 
     /* Audio Variables */
     LanguageIdentification languageIdentification;
@@ -143,13 +143,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     @Override
-    public void draw(Bitmap image) {
-        this.runOnUiThread(() -> {
-            previewImageView.setImageBitmap(image);
-        });
-    }
-
-    @Override
     public void translateTheText(String text) {
         String sentenceToFitUI = " " + text + " ";
         speechTextView.setText(sentenceToFitUI);
@@ -212,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void setupUI() {
         previewView = findViewById(R.id.previewView);
         previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW); // TextureView
+        graphicOverlay = findViewById(R.id.graphicOverlay);
 
         userProfileImageView = findViewById(R.id.userProfileImageView);
         userProfileImageView.setOnTouchListener((view, motionEvent) -> {
@@ -374,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
                 //image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)
             } else if (currentMode == Mode.ObjectDetection) {
-                ObjectDetection objectDetection = new ObjectDetection(this);
+                ObjectDetection objectDetection = new ObjectDetection(graphicOverlay);
                 // We get the textureView to get the bitmap image every time for better orientation
                 View surfaceOrTexture = previewView.getChildAt(0);
                 if (surfaceOrTexture instanceof TextureView) {
