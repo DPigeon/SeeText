@@ -42,6 +42,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import ai.fritz.core.Fritz;
 import androidx.annotation.NonNull;
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
     private Spinner languageSpinner;
     private TextView languageTextView;
+    private AtomicBoolean faceProcessing = new AtomicBoolean(false); // For throttling the calls
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -154,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             speechTextView.setX(x);
             speechTextView.setY(y);
         }
+        faceProcessing.set(false);
     }
 
     @Override
@@ -384,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
 
-        /* Image Processing Face Detection */
+        /* Image Processing */
         Executor executor = Executors.newSingleThreadExecutor();
         imageAnalysis.setAnalyzer(executor, image -> { // https://developer.android.com/training/camerax/analyze
             if (image.getImage() == null) {
@@ -394,9 +397,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 // Currently only looks at the first image
                 graphicOverlay.clear(); // Always destroy the object graphic overlays
                 FaceDetection faceDetection = new FaceDetection(graphicOverlay,this);
-                faceDetection.analyzeImage(image);
+                if (!faceProcessing.get()) { // Throttle the calls
+                    faceProcessing.set(true);
+                    faceDetection.analyzeImage(image);
+                }
 
-                //image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)
+                image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)
             } else if (currentMode == Mode.ObjectDetection) {
                 ObjectDetection objectDetection = new ObjectDetection(graphicOverlay);
                 // We get the textureView to get the bitmap image every time for better orientation
