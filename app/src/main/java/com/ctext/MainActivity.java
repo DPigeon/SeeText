@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
@@ -28,6 +29,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ctext.facedetection.FaceDetection;
+import com.ctext.objectdetection.ObjectDetection;
+import com.ctext.profile.Profile;
+import com.ctext.profile.SharedPreferenceHelper;
+import com.ctext.translator.Translator;
+import com.ctext.utils.GraphicOverlay;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
@@ -55,11 +62,11 @@ import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback {
     private String TAG = "MainActivity:";
-    SharedPreferenceHelper sharedPreferenceHelper;
+    private SharedPreferenceHelper sharedPreferenceHelper;
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
     private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
-    Spinner languageSpinner;
-    TextView languageTextView;
+    private Spinner languageSpinner;
+    private TextView languageTextView;
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -72,18 +79,18 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private GraphicOverlay graphicOverlay;
 
     /* Audio Variables */
-    LanguageIdentification languageIdentification;
-    Translator translator;
+    private Translator translator;
     private SpeechRecognizer mRecognizer;
     private TextView speechTextView;
     private AudioManager mAudioManager;
+    private TextToSpeech mTTS;
 
     /* Modes of the app */
-    enum Mode {
+    private enum Mode {
         SpeechRecognition,
         ObjectDetection
     }
-    Mode currentMode = Mode.SpeechRecognition;
+    private Mode currentMode = Mode.SpeechRecognition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,19 +112,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             setupUI();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
             initializeRecognition();
-
-        languageIdentification = new LanguageIdentification();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        int outputLang = sharedPreferenceHelper.getLanguageOutput();
-        if (outputLang != -1) { // First time using the app
-            String language = FirebaseTranslateLanguage.languageCodeForLanguage(outputLang);
-            String stringLang = Locale.forLanguageTag(language).getDisplayName();
-            languageTextView.setText(stringLang);
-        }
+        loadLanguageFirstTime(); // Check when first time opening the app
     }
 
     @Override
@@ -145,8 +145,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         } else { // Opening speech recognition with speech text
             if (mRecognizer != null) {
                 initializeRecognition();
+                //initializeTTS();
             } else {
                 initializeRecognition();
+                //initializeTTS();
                 listenForSpeech();
             }
             speechTextView.setX(x);
@@ -158,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void translateTheText(String text) {
         String sentenceToFitUI = " " + text + " ";
         speechTextView.setText(sentenceToFitUI);
+        //startTTS(text);
     }
 
     @Override
@@ -362,6 +365,15 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         previewImageView = findViewById(R.id.previewImageView);
     }
 
+    protected void loadLanguageFirstTime() {
+        int outputLang = sharedPreferenceHelper.getLanguageOutput();
+        if (outputLang != -1) { // First time using the app
+            String language = FirebaseTranslateLanguage.languageCodeForLanguage(outputLang);
+            String stringLang = Locale.forLanguageTag(language).getDisplayName();
+            languageTextView.setText(stringLang);
+        }
+    }
+
     @SuppressLint("UnsafeExperimentalUsageError")
     protected void bindPreview(@NonNull ProcessCameraProvider cameraProvider, int lensFacing) {
         preview = new Preview.Builder().build();
@@ -380,7 +392,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             }
             if (currentMode == Mode.SpeechRecognition) {
                 // Currently only looks at the first image
-                FaceDetection faceDetection = new FaceDetection(this);
+                graphicOverlay.clear(); // Always destroy the object graphic overlays
+                FaceDetection faceDetection = new FaceDetection(graphicOverlay,this);
                 faceDetection.analyzeImage(image);
 
                 //image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)
@@ -423,10 +436,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     /* Starts the speech */
-    public void listenForSpeech() {
+    protected void listenForSpeech() {
         // Uses our SharedPreferences to perform recognition in different languages
         String lang = FirebaseTranslateLanguage.languageCodeForLanguage(getInputLanguage());
-        Log.d(TAG, lang);
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
@@ -450,6 +462,27 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mRecognizer = null;
         initializeRecognition();
         listenForSpeech();
+    }
+
+    protected void initializeTTS() {
+        mTTS = new TextToSpeech(getApplicationContext(), status -> {
+            if (status != TextToSpeech.ERROR) {
+                // We get the output language translated
+                String language = FirebaseTranslateLanguage.languageCodeForLanguage(getOutputLanguage());
+                Locale locale = new Locale(language);
+                mTTS.setLanguage(locale);
+            }
+        });
+    }
+
+    protected void startTTS(String sentence) {
+        mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false); // Mutes any sound of beep for listening
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        mTTS.speak(sentence, TextToSpeech.QUEUE_FLUSH, null, TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
+    }
+
+    protected  void stopTTS() {
+        mTTS.stop();
     }
 
     /* Checks if profile is filled in before using the app */

@@ -1,9 +1,11 @@
-package com.ctext;
+package com.ctext.objectdetection;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.ctext.utils.GraphicOverlay;
+import com.ctext.translator.Translator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
 import java.util.List;
@@ -23,10 +25,10 @@ import ai.fritz.vision.objectdetection.ObjectDetectionOnDeviceModel;
 
 public class ObjectDetection {
     private String TAG = "ObjectDetection";
-    Translator translator;
-    ObjectDetectionOnDeviceModel onDeviceModel;
-    FritzVisionObjectPredictor predictor;
-    GraphicOverlay graphicOverlay;
+    private Translator translator;
+    private ObjectDetectionOnDeviceModel onDeviceModel;
+    private FritzVisionObjectPredictor predictor;
+    private GraphicOverlay graphicOverlay;
 
     public ObjectDetection(GraphicOverlay graphicOverlay) {
         this.graphicOverlay = graphicOverlay;

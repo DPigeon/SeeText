@@ -1,9 +1,13 @@
-package com.ctext;
+package com.ctext.facedetection;
 
 import android.annotation.SuppressLint;
+import android.graphics.Rect;
 import android.media.Image;
 import android.util.Log;
 
+import com.ctext.facedetection.FaceOverlay;
+import com.ctext.utils.GraphicOverlay;
+import com.ctext.utils.Utils;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
@@ -24,20 +28,22 @@ import androidx.camera.core.ImageProxy;
 
 public class FaceDetection {
     private String TAG = "FaceDetection";
-    FirebaseVisionFaceDetector detector;
-    Callback callback = null;
+    private FirebaseVisionFaceDetector detector;
+    private Callback callback = null;
+    private GraphicOverlay graphicOverlay;
+
+    // Factors from Rect to Screen coordinates for speech textView
+    private float xFactor = 0.5F;
+    private float yFactor = 1.75F;
 
     // High-accuracy landmark detection
-    FirebaseVisionFaceDetectorOptions highAccuracyOpts = new FirebaseVisionFaceDetectorOptions.Builder()
+    private FirebaseVisionFaceDetectorOptions highAccuracyOpts = new FirebaseVisionFaceDetectorOptions.Builder()
         .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
         .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
         .build();
 
-    // Factors from Rect to Screen coordinates for speech textView
-    float xFactor = 0.5F;
-    float yFactor = 1.75F;
-
-    public FaceDetection(Callback cb) {
+    public FaceDetection(GraphicOverlay graphicOverlay, Callback cb) {
+        this.graphicOverlay = graphicOverlay;
         this.callback = cb;
         detector = FirebaseVision.getInstance().getVisionFaceDetector(highAccuracyOpts);
     }
@@ -69,6 +75,7 @@ public class FaceDetection {
                     FirebaseVisionFaceLandmark mouthLeft = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_LEFT);
                     FirebaseVisionFaceLandmark mouthRight = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_RIGHT);
                     FirebaseVisionFaceLandmark nose = face.getLandmark(FirebaseVisionFaceLandmark.NOSE_BASE);
+
                     if (leftEar != null && rightEar != null && leftEye != null && rightEye != null && mouthBottom != null && mouthLeft != null && mouthRight != null && nose != null) {
                         // Show words near mouth
                         FirebaseVisionPoint mouthBottomPos = mouthBottom.getPosition();

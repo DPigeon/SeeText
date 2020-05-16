@@ -11,12 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.ctext;
+package com.ctext.utils;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -122,6 +121,10 @@ public class GraphicOverlay extends View {
 
         public void postInvalidate() {
             overlay.postInvalidate();
+        }
+
+        public void postInvalidateDelayed(long delay) {
+            overlay.postInvalidateDelayed(delay);
         }
     }
 

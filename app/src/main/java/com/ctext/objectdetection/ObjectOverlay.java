@@ -1,15 +1,14 @@
-package com.ctext;
+package com.ctext.objectdetection;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.net.Uri;
-import android.util.Log;
 import android.util.Size;
 import android.view.MotionEvent;
+
+import com.ctext.utils.GraphicOverlay;
 
 import ai.fritz.vision.FritzVisionObject;
 import ai.fritz.vision.objectdetection.BorderedText;
@@ -22,7 +21,7 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
     private String translatedText;
     private FritzVisionObject scaledObject;
     private Paint paint;
-    BorderedText borderedText;
+    private BorderedText borderedText;
 
     public ObjectOverlay(GraphicOverlay graphicOverlay, Context context, FritzVisionObject object, Bitmap image, String translatedText) {
         super(graphicOverlay);

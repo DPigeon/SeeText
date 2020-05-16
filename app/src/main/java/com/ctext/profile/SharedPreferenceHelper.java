@@ -1,7 +1,9 @@
-package com.ctext;
+package com.ctext.profile;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import com.ctext.profile.Profile;
 
 /*
  * The SharedPreferenceHelper helps storing value in the app as a profile

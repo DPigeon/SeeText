@@ -1,4 +1,4 @@
-package com.ctext;
+package com.ctext.utils;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
@@ -27,7 +27,7 @@ public class Utils {
         }
     }
 
-    protected static ArrayList<String> getLanguageList() {
+    public static ArrayList<String> getLanguageList() {
         ArrayList<String> list = new ArrayList<>();
         Set<Integer> tagSet = FirebaseTranslateLanguage.getAllLanguages();
         for (Integer tag : tagSet) {

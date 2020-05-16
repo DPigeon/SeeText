@@ -1,4 +1,4 @@
-package com.ctext;
+package com.ctext.profile;
 
 /*
  * Profile of the user used through SharedPreferences

@@ -1,4 +1,4 @@
-package com.ctext;
+package com.ctext.translator;
 
 import android.content.Context;
 import android.util.Log;
