@@ -1,6 +1,8 @@
 package com.ctext;
 
 import android.Manifest;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -42,7 +44,6 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import ai.fritz.core.Fritz;
 import androidx.annotation.NonNull;
@@ -68,14 +69,16 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
     private Spinner languageSpinner;
     private TextView languageTextView;
-    private AtomicBoolean faceProcessing = new AtomicBoolean(false); // For throttling the calls
+    private boolean faceProcessing = false; // For throttling the calls
+    private long animationDuration = 1000; // milliseconds
+    private boolean faceDetected = false; // For face check imageView anim to run once
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private PreviewView previewView;
     private Camera camera;
     private Preview preview;
-    private ImageView userProfileImageView, cameraModeImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView;
+    private ImageView userProfileImageView, cameraModeImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
     private ImageView previewImageView; // Used for object detection
     private GraphicOverlay graphicOverlay;
@@ -139,12 +142,13 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     @Override
-    public void update(float x, float y, boolean hasFace)  {
+    public void updateSpeechTextViewPosition(float x, float y, boolean hasFace)  {
         // This function knows that it has detected a face
         if (!hasFace) { // Closing speech recognition
             stopListeningSpeech();
             speechTextView.setText(""); // Reset text
         } else { // Opening speech recognition with speech text
+            faceCheckAnimation();
             if (mRecognizer != null) {
                 initializeRecognition();
                 //initializeTTS();
@@ -156,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             speechTextView.setX(x);
             speechTextView.setY(y);
         }
-        faceProcessing.set(false);
+        faceProcessing = false;
     }
 
     @Override
@@ -366,6 +370,24 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         speechTextView = findViewById(R.id.speechTextView);
         previewImageView = findViewById(R.id.previewImageView);
+        faceCheckImageView = findViewById(R.id.faceCheckImageView);
+    }
+
+    protected void faceCheckAnimation() {
+        if (!faceDetected && currentMode != Mode.ObjectDetection) {
+            faceDetected = true; // Run once when mode chosen
+            faceCheckImageView.setVisibility(View.VISIBLE);
+            ObjectAnimator animatorY = ObjectAnimator.ofFloat(faceCheckImageView, "y", getScreenHeight() - 150, getScreenHeight() - 250);
+            ObjectAnimator fadeInAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 0.0F, 1.0F);
+            ObjectAnimator fadeOutAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 1.0F, 0.0F);
+            animatorY.setDuration(animationDuration);
+            fadeInAnimation.setDuration(animationDuration);
+            fadeOutAnimation.setStartDelay(animationDuration * 4);
+            fadeOutAnimation.setDuration(animationDuration);
+            AnimatorSet animatorSet = new AnimatorSet();
+            animatorSet.playTogether(animatorY, fadeInAnimation, fadeOutAnimation);
+            animatorSet.start();
+        }
     }
 
     protected void loadLanguageFirstTime() {
@@ -397,23 +419,22 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 // Currently only looks at the first image
                 graphicOverlay.clear(); // Always destroy the object graphic overlays
                 FaceDetection faceDetection = new FaceDetection(graphicOverlay,this);
-                if (!faceProcessing.get()) { // Throttle the calls
-                    faceProcessing.set(true);
+                if (!faceProcessing) { // Throttle the calls
+                    faceProcessing = true;
                     faceDetection.analyzeImage(image);
                 }
-
-                image.close(); // Closes the images to have multi-frames analysis for real time preview (CAUSES MEMORY LEAK WILL HAVE TO FIX)
             } else if (currentMode == Mode.ObjectDetection) {
                 ObjectDetection objectDetection = new ObjectDetection(graphicOverlay);
                 // We get the textureView to get the bitmap image every time for better orientation
                 View surfaceOrTexture = previewView.getChildAt(0);
                 if (surfaceOrTexture instanceof TextureView) {
                     Bitmap bitmap = ((TextureView) surfaceOrTexture).getBitmap();
+                    assert bitmap != null;
                     Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, getScreenWidth(), getScreenHeight(), false);
                     objectDetection.detectObjects(getApplicationContext(), newBitmap, lensFacing, getOutputLanguage());
                 }
-                image.close();
             }
+            image.close();
         });
         camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
         preview.setSurfaceProvider(previewView.createSurfaceProvider(camera.getCameraInfo()));
@@ -424,6 +445,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         try {
             cameraProviderFuture.get().unbindAll(); // Unbind all other cameras
             cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+            faceDetected = false; // Reseted and ready to fire the face check anim
             bindPreview(cameraProviderFuture.get(), lensFacing); // Change lens facing
         } catch (Exception exception) {}
     }
@@ -464,10 +486,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     /* Makes the app always listen to inputs */
     protected void persistentSpeech() {
-        mRecognizer.destroy();
-        mRecognizer = null;
-        initializeRecognition();
-        listenForSpeech();
+        if (mRecognizer != null) {
+            mRecognizer.destroy();
+            mRecognizer = null;
+            initializeRecognition();
+            listenForSpeech();
+        }
     }
 
     protected void initializeTTS() {

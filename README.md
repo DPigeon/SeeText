@@ -14,3 +14,5 @@ A mobile application that shows you what you say & detects different objects in 
 <a href="https://www.freepik.com/flaticon">Freepik: Logo Text Icon</a>
 
 <a href="https://www.freepik.com/flaticon">Freepik: User Profile Icon</a>
+
+<a href="https://www.freepik.com/flaticon">Freepik: Head With Check Icon</a>

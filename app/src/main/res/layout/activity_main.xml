@@ -88,6 +88,15 @@
 		android:textSize="24sp" />
 
 	<ImageView
+		android:id="@+id/faceCheckImageView"
+		android:layout_width="56dp"
+		android:layout_height="51dp"
+		android:layout_gravity="bottom"
+		android:layout_marginLeft="5dp"
+		android:visibility="invisible"
+		app:srcCompat="@drawable/face_check" />
+
+	<ImageView
 		android:id="@+id/speechDetectionImageView"
 		android:layout_width="66dp"
 		android:layout_height="51dp"

@@ -34,7 +34,7 @@ public class FaceDetection {
 
     // Factors from Rect to Screen coordinates for speech textView
     private float xFactor = 0.5F;
-    private float yFactor = 1.75F;
+    private float yFactor = 2.25F;
 
     // High-accuracy landmark detection
     private FirebaseVisionFaceDetectorOptions highAccuracyOpts = new FirebaseVisionFaceDetectorOptions.Builder()
@@ -50,7 +50,7 @@ public class FaceDetection {
 
     /* An interface to update the position of the speech textView from Main Activity */
     public interface Callback {
-        void update(float x, float y, boolean hasFace);
+        void updateSpeechTextViewPosition(float x, float y, boolean hasFace);
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -63,7 +63,7 @@ public class FaceDetection {
         Task<List<FirebaseVisionFace>> result = detector.detectInImage(imageVision).addOnSuccessListener(faces -> {
             // Task completed successfully --> Should start speech recognition HERE
             if (faces.isEmpty())  // If no face detected
-                callback.update(0, 0, false);
+                callback.updateSpeechTextViewPosition(0, 0, false);
             else { // Face(s) detected
                 for (FirebaseVisionFace face : faces) {
                     // Check if face has mouth, ears, eyes, etc
@@ -75,6 +75,7 @@ public class FaceDetection {
                     FirebaseVisionFaceLandmark mouthLeft = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_LEFT);
                     FirebaseVisionFaceLandmark mouthRight = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_RIGHT);
                     FirebaseVisionFaceLandmark nose = face.getLandmark(FirebaseVisionFaceLandmark.NOSE_BASE);
+                    Rect rect = face.getBoundingBox();
 
                     if (leftEar != null && rightEar != null && leftEye != null && rightEye != null && mouthBottom != null && mouthLeft != null && mouthRight != null && nose != null) {
                         // Show words near mouth
@@ -82,7 +83,7 @@ public class FaceDetection {
                         // Has to match the screens preview for words to be near mouth
                         float x = mouthBottomPos.getX();
                         float y = mouthBottomPos.getY();
-                        callback.update(x * xFactor, y * yFactor, true); // Rect to Screen Space from the picture
+                        callback.updateSpeechTextViewPosition(x * xFactor, y * yFactor, true);// Rect to Screen Space from the picture
                     }
                 }
             }
