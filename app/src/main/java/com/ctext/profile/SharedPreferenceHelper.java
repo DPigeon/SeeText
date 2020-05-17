@@ -23,6 +23,11 @@ public class SharedPreferenceHelper {
         editor.apply(); // Using apply instead of commit now
     }
 
+    public int getLanguageInput() {
+        int input = sharedPreferences.getInt("ProfileLanguage", -1);
+        return input;
+    }
+
     public int getLanguageOutput() {
         int output = sharedPreferences.getInt("ProfileLanguageOutput", -1);
         return output;

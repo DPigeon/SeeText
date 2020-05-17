@@ -56,6 +56,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Lifecycle;
 
 /* MainActivity.java
 * The MainActivity with CameraX library, Speech Recognition & a Face Detection callback to update the speech text.
@@ -66,7 +67,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private String TAG = "MainActivity:";
     private SharedPreferenceHelper sharedPreferenceHelper;
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
-    private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
+    private int inputLanguage, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
+    private ImageView userProfileImageView, cameraModeImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView;
     private Spinner languageSpinner;
     private TextView languageTextView;
     private boolean faceProcessing = false; // For throttling the calls
@@ -78,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private PreviewView previewView;
     private Camera camera;
     private Preview preview;
-    private ImageView userProfileImageView, cameraModeImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
     private ImageView previewImageView; // Used for object detection
     private GraphicOverlay graphicOverlay;
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private TextView speechTextView;
     private AudioManager mAudioManager;
     private TextToSpeech mTTS;
+    private String ttsSentence; // The last translated sentence to send to TTS
 
     /* Modes of the app */
     private enum Mode {
@@ -111,8 +113,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             }
         });
 
-        checkProfile();
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
             setupUI();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
@@ -122,7 +122,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     protected void onStart() {
         super.onStart();
+        checkProfile();
         loadLanguageFirstTime(); // Check when first time opening the app
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopListeningSpeech(); // Stopping the recognizer when changing activity
     }
 
     @Override
@@ -151,11 +158,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             faceCheckAnimation();
             if (mRecognizer != null) {
                 initializeRecognition();
-                //initializeTTS();
             } else {
                 initializeRecognition();
-                //initializeTTS();
-                listenForSpeech();
+                if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.CREATED))
+                    listenForSpeech();
             }
             speechTextView.setX(x);
             speechTextView.setY(y);
@@ -167,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void translateTheText(String text) {
         String sentenceToFitUI = " " + text + " ";
         speechTextView.setText(sentenceToFitUI);
-        //startTTS(text);
+        ttsSentence = text;
     }
 
     @Override
@@ -187,7 +193,29 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     @Override
     public void onError(int error) {
-        persistentSpeech();
+        if (error == SpeechRecognizer.ERROR_AUDIO) {
+            Log.d(TAG, "Audio recording error");
+        } else if (error == SpeechRecognizer.ERROR_CLIENT) {
+            Log.d(TAG, "Client side error");
+        } else if (error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
+            Log.d(TAG, "Insufficient permissions");
+        } else if (error == SpeechRecognizer.ERROR_NETWORK) {
+            Log.d(TAG, "Network error");
+        } else if (error == SpeechRecognizer.ERROR_NETWORK_TIMEOUT) {
+            Log.d(TAG, "Network timeout");
+        } else if (error == SpeechRecognizer.ERROR_NO_MATCH) {
+            Log.d(TAG, "No speech match");
+        } else if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) {
+            Log.d(TAG, "Recognizer busy");
+        } else if (error == SpeechRecognizer.ERROR_SERVER) {
+            Log.d(TAG, "Server error");
+        } else if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
+            Log.d(TAG, "No speech input");
+        } else {
+            Log.d(TAG, "Unknown error");
+        }
+        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+            persistentSpeech();
     }
 
     @Override
@@ -198,13 +226,13 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         if (currentMode != Mode.ObjectDetection) { // Current mode must be speech detection
             if (speechTextView.getVisibility() == View.INVISIBLE)
                 speechTextView.setVisibility(View.VISIBLE);
+                audioImageView.setVisibility(View.VISIBLE);
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
                     translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), this);
                     translator.downloadModelAndTranslate(outputLanguage, sentence);
                 } else
                     speechTextView.setText(sentenceToFitUI); // We show the text like it is
-                //languageIdentification.identification(sentence);
             } catch (Exception exception) {}
 
             /* Text Animation */
@@ -213,7 +241,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             fadeOutAnim.setStartTime(5000);
             speechTextView.startAnimation(fadeOutAnim);
 
-            persistentSpeech();
+            if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+                persistentSpeech();
         }
     }
 
@@ -263,6 +292,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 }
                 rebindPreview();
                 speechTextView.setVisibility(View.INVISIBLE); // Reset textView
+                audioImageView.setVisibility(View.INVISIBLE);
             }
 
             return true;
@@ -321,10 +351,13 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 view.invalidate();
                 if (currentMode != Mode.ObjectDetection) {
                     currentMode = Mode.ObjectDetection;
+                    speechDetectionImageView.setImageResource(R.drawable.speech_detection);
+                    objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
                     previewImageView.setImageDrawable(null);
                     rebindPreview();
                     previewImageView.setVisibility(View.VISIBLE);
                     speechTextView.setVisibility(View.INVISIBLE);
+                    audioImageView.setVisibility(View.INVISIBLE);
                     Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
@@ -345,12 +378,32 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 view.invalidate();
                 if (currentMode != Mode.SpeechRecognition) {
                     currentMode = Mode.SpeechRecognition;
+                    speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
+                    objectDetectionImageView.setImageResource(R.drawable.objects_detection);
                     previewImageView.setVisibility(View.INVISIBLE);
                     rebindPreview();
-                    speechTextView.setVisibility(View.VISIBLE);
+                    //speechTextView.setVisibility(View.VISIBLE);
                     Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
+            }
+
+            return true;
+        });
+
+        audioImageView = findViewById(R.id.audioImageView);
+        audioImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                view.getContext().getDrawable(R.drawable.tts_audio).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                view.invalidate();
+            }
+            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                view.getContext().getDrawable(R.drawable.tts_audio).clearColorFilter();
+                view.invalidate();
+                // Start TTS
+                if (!mTTS.isSpeaking())
+                    startTTS(ttsSentence);
             }
 
             return true;
@@ -371,6 +424,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         speechTextView = findViewById(R.id.speechTextView);
         previewImageView = findViewById(R.id.previewImageView);
         faceCheckImageView = findViewById(R.id.faceCheckImageView);
+        speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
     }
 
     protected void faceCheckAnimation() {
@@ -461,15 +515,17 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void initializeRecognition() {
         mRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
         mRecognizer.setRecognitionListener(this);
+        initializeTTS();
     }
 
     /* Starts the speech */
     protected void listenForSpeech() {
         // Uses our SharedPreferences to perform recognition in different languages
         String lang = FirebaseTranslateLanguage.languageCodeForLanguage(getInputLanguage());
+        Log.d(TAG, lang);
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getApplicationContext().getPackageName());
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
         intent.putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", new String[]{lang});
 
@@ -479,8 +535,13 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     protected void stopListeningSpeech() {
         if (mRecognizer != null) {
+            mRecognizer.stopListening();
+            mRecognizer.cancel();
             mRecognizer.destroy();
             mRecognizer = null;
+        }
+        if (mTTS != null) {
+            stopTTS();
         }
     }
 
@@ -496,23 +557,25 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     protected void initializeTTS() {
         mTTS = new TextToSpeech(getApplicationContext(), status -> {
-            if (status != TextToSpeech.ERROR) {
+            if (status == TextToSpeech.SUCCESS) {
                 // We get the output language translated
                 String language = FirebaseTranslateLanguage.languageCodeForLanguage(getOutputLanguage());
                 Locale locale = new Locale(language);
-                mTTS.setLanguage(locale);
+                mTTS.setLanguage(Locale.UK);
             }
         });
     }
 
     protected void startTTS(String sentence) {
-        mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false); // Mutes any sound of beep for listening
+        mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false); // Unmute sound
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         mTTS.speak(sentence, TextToSpeech.QUEUE_FLUSH, null, TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
     }
 
-    protected  void stopTTS() {
+    protected void stopTTS() {
         mTTS.stop();
+        mTTS.shutdown();
+        mTTS = null;
     }
 
     /* Checks if profile is filled in before using the app */

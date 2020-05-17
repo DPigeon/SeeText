@@ -71,21 +71,35 @@
 		android:id="@+id/translateToTextView"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_gravity="bottom|center"
-		android:layout_marginBottom="40dp"
+		android:layout_gravity="bottom|right"
+		android:layout_marginRight="5dp"
+		android:layout_marginBottom="80sp"
 		android:background="@android:drawable/editbox_dropdown_light_frame"
-		android:text="Translate" />
+		android:text="Translate"
+		android:textSize="12sp" />
 
 	<TextView
 		android:id="@+id/languageTextView"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_gravity="bottom|center"
+		android:layout_gravity="bottom|right"
+		android:layout_marginRight="10dp"
+		android:layout_marginBottom="52dp"
 		android:background="@android:drawable/editbox_dropdown_light_frame"
 		android:text="English"
 		android:textAlignment="center"
 		android:textColor="#000000"
-		android:textSize="24sp" />
+		android:textSize="12sp" />
+
+	<ImageView
+		android:id="@+id/audioImageView"
+		android:layout_width="45dp"
+		android:layout_height="35dp"
+		android:layout_gravity="bottom|right"
+		android:layout_marginRight="10dp"
+		android:layout_marginBottom="107dp"
+		android:visibility="invisible"
+		app:srcCompat="@drawable/tts_audio" />
 
 	<ImageView
 		android:id="@+id/faceCheckImageView"

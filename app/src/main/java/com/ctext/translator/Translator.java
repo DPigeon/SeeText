@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
@@ -16,8 +14,6 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
 import java.util.concurrent.ExecutionException;
-
-import androidx.annotation.NonNull;
 
 /*
  * Translator using the Firebase API. It checks if the language model is downloaded. If it is, translate.
