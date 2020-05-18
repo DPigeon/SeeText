@@ -29,11 +29,13 @@ public class ObjectDetection {
     private ObjectDetectionOnDeviceModel onDeviceModel;
     private FritzVisionObjectPredictor predictor;
     private GraphicOverlay graphicOverlay;
+    private ObjectOverlay.Callback callback = null;
 
-    public ObjectDetection(GraphicOverlay graphicOverlay) {
+    public ObjectDetection(GraphicOverlay graphicOverlay, ObjectOverlay.Callback cb) {
         this.graphicOverlay = graphicOverlay;
         onDeviceModel = FritzVisionModels.getObjectDetectionOnDeviceModel();
         predictor = FritzVision.ObjectDetection.getPredictor(onDeviceModel);
+        this.callback = cb;
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -54,13 +56,13 @@ public class ObjectDetection {
             for (FritzVisionObject object : objects) {
                 String text = object.getVisionLabel().getText();
                 String translatedText = translator.translateObject(text, outputLanguage);
-                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, translatedText);
+                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, translatedText, callback);
                 graphicOverlay.add(objectOverlay);
             }
         } else { // No translator needed because same input and output languages (english)
             for (FritzVisionObject object : objects) {
                 String text = object.getVisionLabel().getText();
-                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, text);
+                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, text, callback);
                 graphicOverlay.add(objectOverlay);
             }
         }

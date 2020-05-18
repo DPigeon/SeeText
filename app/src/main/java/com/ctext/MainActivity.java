@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.ctext.facedetection.FaceDetection;
 import com.ctext.objectdetection.ObjectDetection;
+import com.ctext.objectdetection.ObjectOverlay;
 import com.ctext.profile.Profile;
 import com.ctext.profile.SharedPreferenceHelper;
 import com.ctext.translator.Translator;
@@ -40,6 +41,7 @@ import com.ctext.utils.GraphicOverlay;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -63,11 +65,12 @@ import androidx.lifecycle.Lifecycle;
 * The speech text should move every time the app recognizes a face near the mouth of the speaker.
  */
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback {
+public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback, ObjectOverlay.Callback {
     private String TAG = "MainActivity:";
     private SharedPreferenceHelper sharedPreferenceHelper;
+    private static final int MY_TTS_DATA_CHECK_CODE = 90;
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
-    private int inputLanguage, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
+    private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
     private ImageView userProfileImageView, cameraModeImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView;
     private Spinner languageSpinner;
     private TextView languageTextView;
@@ -115,8 +118,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
             setupUI();
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
             initializeRecognition();
+            //checkTtsResources();
+        }
     }
 
     @Override
@@ -130,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void onDestroy() {
         super.onDestroy();
         stopListeningSpeech(); // Stopping the recognizer when changing activity
+        stopTTS();
     }
 
     @Override
@@ -140,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     setupUI();
                     initializeRecognition();
+                    //checkTtsResources();
                 } else {
                     Toast.makeText(this, "You cannot run the app without allowing the camera or microphone!", Toast.LENGTH_LONG).show();
                     this.finish();
@@ -174,6 +181,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         String sentenceToFitUI = " " + text + " ";
         speechTextView.setText(sentenceToFitUI);
         ttsSentence = text;
+    }
+
+    /* Callback for object detection touching words */
+    @Override
+    public void goToObjectDefinition(String word) {
+        Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
+        intent.putExtra("word", word);
+        startActivity(intent);
     }
 
     @Override
@@ -226,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         if (currentMode != Mode.ObjectDetection) { // Current mode must be speech detection
             if (speechTextView.getVisibility() == View.INVISIBLE)
                 speechTextView.setVisibility(View.VISIBLE);
-                audioImageView.setVisibility(View.VISIBLE);
+                //audioImageView.setVisibility(View.VISIBLE);
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
                     translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), this);
@@ -292,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 }
                 rebindPreview();
                 speechTextView.setVisibility(View.INVISIBLE); // Reset textView
-                audioImageView.setVisibility(View.INVISIBLE);
+                //audioImageView.setVisibility(View.INVISIBLE);
             }
 
             return true;
@@ -357,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     rebindPreview();
                     previewImageView.setVisibility(View.VISIBLE);
                     speechTextView.setVisibility(View.INVISIBLE);
-                    audioImageView.setVisibility(View.INVISIBLE);
+                    //audioImageView.setVisibility(View.INVISIBLE);
                     Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
@@ -378,6 +393,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 view.invalidate();
                 if (currentMode != Mode.SpeechRecognition) {
                     currentMode = Mode.SpeechRecognition;
+                    faceDetected = false; // Reseted and ready to fire the face check anim
                     speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
                     objectDetectionImageView.setImageResource(R.drawable.objects_detection);
                     previewImageView.setVisibility(View.INVISIBLE);
@@ -402,8 +418,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 view.getContext().getDrawable(R.drawable.tts_audio).clearColorFilter();
                 view.invalidate();
                 // Start TTS
-                if (!mTTS.isSpeaking())
-                    startTTS(ttsSentence);
+                if (mTTS != null) {
+                    if (!mTTS.isSpeaking())
+                        startTTS(ttsSentence);
+                }
             }
 
             return true;
@@ -428,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     protected void faceCheckAnimation() {
-        if (!faceDetected && currentMode != Mode.ObjectDetection) {
+        if (!faceDetected && currentMode != Mode.ObjectDetection ) {
             faceDetected = true; // Run once when mode chosen
             faceCheckImageView.setVisibility(View.VISIBLE);
             ObjectAnimator animatorY = ObjectAnimator.ofFloat(faceCheckImageView, "y", getScreenHeight() - 150, getScreenHeight() - 250);
@@ -449,7 +467,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         if (outputLang != -1) { // First time using the app
             String language = FirebaseTranslateLanguage.languageCodeForLanguage(outputLang);
             String stringLang = Locale.forLanguageTag(language).getDisplayName();
-            languageTextView.setText(stringLang);
+            if (languageTextView != null)
+                languageTextView.setText(stringLang);
         }
     }
 
@@ -478,7 +497,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     faceDetection.analyzeImage(image);
                 }
             } else if (currentMode == Mode.ObjectDetection) {
-                ObjectDetection objectDetection = new ObjectDetection(graphicOverlay);
+                ObjectDetection objectDetection = new ObjectDetection(graphicOverlay, this);
                 // We get the textureView to get the bitmap image every time for better orientation
                 View surfaceOrTexture = previewView.getChildAt(0);
                 if (surfaceOrTexture instanceof TextureView) {
@@ -499,7 +518,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         try {
             cameraProviderFuture.get().unbindAll(); // Unbind all other cameras
             cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-            faceDetected = false; // Reseted and ready to fire the face check anim
             bindPreview(cameraProviderFuture.get(), lensFacing); // Change lens facing
         } catch (Exception exception) {}
     }
@@ -515,7 +533,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void initializeRecognition() {
         mRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
         mRecognizer.setRecognitionListener(this);
-        initializeTTS();
     }
 
     /* Starts the speech */
@@ -555,13 +572,41 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         }
     }
 
+    protected void checkTtsResources() {
+        Intent checkIntent = new Intent();
+        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkIntent, MY_TTS_DATA_CHECK_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MY_TTS_DATA_CHECK_CODE) {
+            ArrayList<String> availableLanguages = data.getStringArrayListExtra(TextToSpeech.Engine.EXTRA_AVAILABLE_VOICES);
+            if (availableLanguages.isEmpty()) {
+                Intent installIntent = new Intent();
+                installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installIntent);
+            } else
+                initializeTTS();
+        }
+    }
+
     protected void initializeTTS() {
         mTTS = new TextToSpeech(getApplicationContext(), status -> {
             if (status == TextToSpeech.SUCCESS) {
                 // We get the output language translated
                 String language = FirebaseTranslateLanguage.languageCodeForLanguage(getOutputLanguage());
                 Locale locale = new Locale(language);
-                mTTS.setLanguage(Locale.UK);
+                int result = mTTS.setLanguage(locale);
+                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.d(TAG, "Language not supported");
+                    audioImageView.setEnabled(false);
+                } else {
+                    audioImageView.setEnabled(true); // Enable the audio imageView
+                }
+            } else {
+                Log.d(TAG, "Initialization failed");
             }
         });
     }
@@ -573,9 +618,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     protected void stopTTS() {
-        mTTS.stop();
-        mTTS.shutdown();
-        mTTS = null;
+        if (mTTS != null) {
+            mTTS.stop();
+            mTTS.shutdown();
+            mTTS = null;
+        }
     }
 
     /* Checks if profile is filled in before using the app */
@@ -584,6 +631,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         Profile profile = sharedPreferenceHelper.getProfile();
         int lang = profile.getLanguage();
         int outputLang = profile.getLanguageOutputId();
+        Log.d(TAG, lang+"");
         if (lang != -1) {
             setInputLanguage(lang);
             if (outputLang != -1)

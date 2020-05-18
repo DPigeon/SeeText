@@ -16,12 +16,14 @@ package com.ctext.utils;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 import com.google.android.gms.vision.CameraSource;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 /**
@@ -44,6 +46,7 @@ import java.util.List;
  * </ol>
  */
 public class GraphicOverlay extends View {
+    private final String TAG = "GraphicOverlay";
     private final Object lock = new Object();
     private int previewWidth;
     private float widthScaleFactor = 1.0f;
@@ -189,8 +192,12 @@ public class GraphicOverlay extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
-        for (Graphic graphic : graphics) {
-            graphic.touchEvent(event);
+        try {
+            for (Graphic graphic : graphics) {
+                graphic.touchEvent(event);
+            }
+        } catch (ConcurrentModificationException error) {
+            Log.d(TAG, error.toString());
         }
         invalidate();
         return true;

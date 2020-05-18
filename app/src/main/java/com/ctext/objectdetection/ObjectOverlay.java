@@ -22,8 +22,9 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
     private FritzVisionObject scaledObject;
     private Paint paint;
     private BorderedText borderedText;
+    private Callback callback = null;
 
-    public ObjectOverlay(GraphicOverlay graphicOverlay, Context context, FritzVisionObject object, Bitmap image, String translatedText) {
+    public ObjectOverlay(GraphicOverlay graphicOverlay, Context context, FritzVisionObject object, Bitmap image, String translatedText, Callback cb) {
         super(graphicOverlay);
         this.graphicOverlay = graphicOverlay;
         borderedText = BorderedText.createDefault(context);
@@ -33,7 +34,13 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
         y = scaledObject.getBoundingBox().top;
         this.translatedText = translatedText;
         this.paint = new Paint();
+        this.callback = cb;
         postInvalidate(); // Redraw
+    }
+
+    /* An interface to go to definition activity */
+    public interface Callback {
+        void goToObjectDefinition(String word);
     }
 
     @Override
@@ -56,7 +63,7 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
                 float bottomBox = scaledObject.getBoundingBox().bottom;
                 float topBox = scaledObject.getBoundingBox().top;
                 if (posX > leftBox && posX < rightBox && posY > topBox && posY < bottomBox) {
-                    // Find some useful actions when touching the detected object
+                    callback.goToObjectDefinition(translatedText);
                 }
                 break;
             }

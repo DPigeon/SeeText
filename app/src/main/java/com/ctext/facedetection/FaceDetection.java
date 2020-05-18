@@ -38,7 +38,7 @@ public class FaceDetection {
 
     // High-accuracy landmark detection
     private FirebaseVisionFaceDetectorOptions highAccuracyOpts = new FirebaseVisionFaceDetectorOptions.Builder()
-        .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE)
+        .setPerformanceMode(FirebaseVisionFaceDetectorOptions.ACCURATE) // Slow calls
         .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
         .build();
 
@@ -83,6 +83,7 @@ public class FaceDetection {
                         // Has to match the screens preview for words to be near mouth
                         float x = mouthBottomPos.getX();
                         float y = mouthBottomPos.getY();
+                        Log.d(TAG, "face");
                         callback.updateSpeechTextViewPosition(x * xFactor, y * yFactor, true);// Rect to Screen Space from the picture
                     }
                 }
