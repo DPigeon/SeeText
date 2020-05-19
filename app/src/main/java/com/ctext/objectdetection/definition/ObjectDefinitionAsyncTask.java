@@ -1,4 +1,4 @@
-package com.ctext.objectdetection;
+package com.ctext.objectdetection.definition;
 
 import android.os.AsyncTask;
 import android.util.Log;

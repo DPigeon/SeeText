@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <ImageView
+        android:id="@+id/iconImageView"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginLeft="18dp"
+        android:contentDescription="@string/default_web_client_id"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+    <TextView
+        android:id="@+id/typeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/iconImageView"
+        android:paddingBottom="10dp"
+        android:textColor="#000000"
+        android:textSize="16dp"
+        android:textStyle="bold|italic" />
+
+    <TextView
+        android:id="@+id/definitionTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/typeTextView"
+        android:layout_marginRight="20dp"
+        android:layout_toRightOf="@+id/iconImageView"
+        android:width="0dp"
+        android:paddingLeft="10dp"
+        android:textColor="#000000"
+        android:textSize="16dp" />
+
+    <TextView
+        android:id="@+id/exampleTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/definitionTextView"
+        android:layout_marginRight="20dp"
+        android:layout_toRightOf="@+id/iconImageView"
+        android:width="0dp"
+        android:paddingLeft="10dp"
+        android:paddingBottom="5dp"
+        android:textColor="#000000"
+        android:textSize="14dp" />
+</RelativeLayout>

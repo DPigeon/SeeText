@@ -188,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void goToObjectDefinition(String word) {
         Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
         intent.putExtra("word", word);
+        intent.putExtra("outputLanguage", getOutputLanguage());
         startActivity(intent);
     }
 
