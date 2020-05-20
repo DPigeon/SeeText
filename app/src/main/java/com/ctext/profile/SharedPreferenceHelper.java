@@ -43,4 +43,15 @@ public class SharedPreferenceHelper {
         int mode = sharedPreferences.getInt("ProfileMode", -1);
         return new Profile(language, output, lensFacing, mode);
     }
+
+    // If first app installed, then it will make it pass this if statement and assign firstRun = true.
+    // Then it will assign firstRun to false and if statement wil never rerun again
+    public boolean checkFirstRun() {
+        if (sharedPreferences.getBoolean("firstRun", true)) {
+            sharedPreferences.edit().putBoolean("firstRun", false).apply();
+            return true;
+        }
+        return false;
+    }
+
 }

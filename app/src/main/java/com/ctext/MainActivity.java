@@ -187,10 +187,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     /* Callback for object detection touching words */
     @Override
     public void goToObjectDefinition(String word) {
-        Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
-        intent.putExtra("word", word);
-        intent.putExtra("outputLanguage", getOutputLanguage());
-        startActivity(intent);
+        if (!word.equals("Loading...")) {
+            Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
+            intent.putExtra("word", word);
+            intent.putExtra("outputLanguage", getOutputLanguage());
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -646,7 +648,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             lensFacing = lens;
         if (profileMode != -1)
             currentMode = Mode.values()[profileMode];
-        if (lang != -1) {
+        if (!sharedPreferenceHelper.checkFirstRun()) { // If first run of the app
             setInputLanguage(lang);
             if (outputLang != -1)
                 setOutputLanguage(outputLang);

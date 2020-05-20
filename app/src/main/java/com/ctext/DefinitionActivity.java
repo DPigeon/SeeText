@@ -12,6 +12,7 @@ import com.ctext.objectdetection.definition.DefinitionListViewAdapter;
 import com.ctext.objectdetection.definition.ObjectDefinitionAsyncTask;
 import com.ctext.objectdetection.definition.DefinitionRowItem;
 import com.ctext.objectdetection.definition.TranslateBackObjectAsyncTask;
+import com.ctext.utils.Utils;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
 import org.json.JSONArray;
@@ -45,7 +46,10 @@ public class DefinitionActivity extends AppCompatActivity {
         Intent intent = getIntent();
         word = intent.getStringExtra("word");
         outputLanguage = intent.getIntExtra("outputLanguage", -1);
-        getSupportActionBar().setTitle(word);
+        String title = word;
+        if (outputLanguage != FirebaseTranslateLanguage.EN)
+            title = word + " [" + Utils.getLanguageList().get(outputLanguage) + "]";
+        getSupportActionBar().setTitle(title);
 
         pronunciationTextView = findViewById(R.id.pronunciationTextView);
         definitionsListView = findViewById(R.id.definitionsListView);
@@ -66,7 +70,7 @@ public class DefinitionActivity extends AppCompatActivity {
             JSONObject json = objectDefinitionAsyncTask.execute(word).get();
             if (json != null) {
                 String pronunciation = json.getString("pronunciation");
-                if (pronunciation == "null")
+                if (pronunciation == "null" || hasToTranslate)
                     pronunciation = "";
                 pronunciationTextView.setText(pronunciation);
                 JSONArray definitions = json.getJSONArray("definitions");

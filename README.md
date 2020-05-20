@@ -16,3 +16,7 @@ A mobile application that shows you what you say & detects different objects in 
 <a href="https://www.freepik.com/flaticon">Freepik: User Profile Icon</a>
 
 <a href="https://www.freepik.com/flaticon">Freepik: Head With Check Icon</a>
+
+<a href="https://www.freepik.com/flaticon">Freepik: Audio Sound Icon</a>
+
+<a href="https://www.flaticon.com/authors/vectors-market">Vectors Market: Document Icon</a>
