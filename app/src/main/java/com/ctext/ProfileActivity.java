@@ -59,7 +59,7 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int menuId = item.getItemId();
-        if(menuId == R.id.profile_settings) { // If we click on the ... button
+        if (menuId == R.id.profile_settings) { // If we click on the ... button
             switchMode(true, View.VISIBLE); // Switch to edit mode
         }
         return super.onOptionsItemSelected(item);
@@ -99,7 +99,9 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     protected void setActivityFields() {
-        if (sharedPreferenceHelper.getProfile().getLanguage() == -1) { // Info does not exist
+        Intent intent = getIntent();
+        String firstTime = intent.getStringExtra("firstTime");
+        if (firstTime.equals("yes")) { // If first time launching app
             switchMode(true, View.VISIBLE); // Switch to the edit mode
         }
         else {
@@ -134,7 +136,7 @@ public class ProfileActivity extends AppCompatActivity {
             toastMessage("Your profile has been saved!");
             goToActivity(MainActivity.class);
         } else
-            toastMessage("An error occured while saving your profile!");
+            toastMessage("You must choose a language!");
     }
 
     protected void toastMessage(String message) { // Shows a toast message

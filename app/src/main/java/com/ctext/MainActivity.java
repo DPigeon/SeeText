@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 view.getContext().getDrawable(R.drawable.user_profile).clearColorFilter();
                 view.invalidate();
                 // Go to the profile activity with a nice slide animation
-                goToActivity(ProfileActivity.class);
+                goToProfileActivity(ProfileActivity.class, "no");
             }
 
             return true;
@@ -653,7 +653,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             if (outputLang != -1)
                 setOutputLanguage(outputLang);
         } else {
-            goToActivity(ProfileActivity.class);
+            goToProfileActivity(ProfileActivity.class, "yes");
             Toast.makeText(getApplicationContext(), "Create your profile!", Toast.LENGTH_LONG).show();
         }
     }
@@ -682,10 +682,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
-    void goToActivity(Class activity) { // Function that goes from the main activity to another one
+    void goToProfileActivity(Class activity, String firstTime) { // Function that goes from the main activity to profile one
         Intent intent = new Intent(MainActivity.this, activity);
         intent.putExtra("lensFacing", lensFacing);
         intent.putExtra("mode", currentMode.ordinal());
+        intent.putExtra("firstTime", firstTime);
         startActivity(intent);
     }
 
