@@ -123,7 +123,13 @@ public class ProfileActivity extends AppCompatActivity {
 
     protected void saveProfile() {
         if (languageChosen != -1) {
-            Profile profile = new Profile(languageChosen, sharedPreferenceHelper.getLanguageOutput());
+            Intent intent = getIntent();
+            int lensFacing = -1, mode = -1;
+            if (intent != null) {
+                lensFacing = intent.getIntExtra("lensFacing", -1);
+                mode = intent.getIntExtra("mode", -1);
+            }
+            Profile profile = new Profile(languageChosen, sharedPreferenceHelper.getLanguageOutput(), lensFacing, mode);
             sharedPreferenceHelper.saveProfile(profile);
             toastMessage("Your profile has been saved!");
             goToActivity(MainActivity.class);

@@ -116,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             }
         });
 
+        loadProfile();
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
             setupUI();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -127,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     protected void onStart() {
         super.onStart();
-        checkProfile();
         loadLanguageFirstTime(); // Check when first time opening the app
     }
 
@@ -308,6 +309,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 }
                 rebindPreview();
                 speechTextView.setVisibility(View.INVISIBLE); // Reset textView
+                sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
                 //audioImageView.setVisibility(View.INVISIBLE);
             }
 
@@ -327,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 if (langId != 0) { // Will have to increase all ids by 1 since 0 is default called at beginning
                     setOutputLanguage(langId);
                     // Save the output language in profile
-                    Profile profile = new Profile(getInputLanguage(), getOutputLanguage());
+                    Profile profile = new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal());
                     sharedPreferenceHelper.saveProfile(profile);
                     languageTextView.setText(item);
                 }
@@ -374,6 +376,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     previewImageView.setVisibility(View.VISIBLE);
                     speechTextView.setVisibility(View.INVISIBLE);
                     //audioImageView.setVisibility(View.INVISIBLE);
+                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
                     Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
@@ -400,6 +403,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     previewImageView.setVisibility(View.INVISIBLE);
                     rebindPreview();
                     //speechTextView.setVisibility(View.VISIBLE);
+                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
                     Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
@@ -443,7 +447,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         speechTextView = findViewById(R.id.speechTextView);
         previewImageView = findViewById(R.id.previewImageView);
         faceCheckImageView = findViewById(R.id.faceCheckImageView);
-        speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
+        if (currentMode == Mode.SpeechRecognition)
+            speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
+        else
+            objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
     }
 
     protected void faceCheckAnimation() {
@@ -626,13 +633,19 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         }
     }
 
-    /* Checks if profile is filled in before using the app */
-    protected void checkProfile() {
+    /* Loads profile if needed */
+    protected void loadProfile() {
         sharedPreferenceHelper = new SharedPreferenceHelper(this);
         Profile profile = sharedPreferenceHelper.getProfile();
         int lang = profile.getLanguage();
         int outputLang = profile.getLanguageOutputId();
-        Log.d(TAG, lang+"");
+        int lens = profile.getLensFacing();
+        int profileMode = profile.getMode();
+
+        if (lens != -1)
+            lensFacing = lens;
+        if (profileMode != -1)
+            currentMode = Mode.values()[profileMode];
         if (lang != -1) {
             setInputLanguage(lang);
             if (outputLang != -1)
@@ -669,6 +682,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     void goToActivity(Class activity) { // Function that goes from the main activity to another one
         Intent intent = new Intent(MainActivity.this, activity);
+        intent.putExtra("lensFacing", lensFacing);
+        intent.putExtra("mode", currentMode.ordinal());
         startActivity(intent);
     }
 

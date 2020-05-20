@@ -21,6 +21,8 @@ public class SharedPreferenceHelper {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("ProfileLanguage", profile.getLanguage());
         editor.putInt("ProfileLanguageOutput", profile.getLanguageOutputId());
+        editor.putInt("ProfileLensFacing", profile.getLensFacing());
+        editor.putInt("ProfileMode", profile.getMode());
         editor.apply(); // Using apply instead of commit now
     }
 
@@ -37,6 +39,8 @@ public class SharedPreferenceHelper {
     public Profile getProfile() {
         int language = sharedPreferences.getInt("ProfileLanguage", -1);
         int output = sharedPreferences.getInt("ProfileLanguageOutput", -1);
-        return new Profile(language, output);
+        int lensFacing = sharedPreferences.getInt("ProfileLensFacing", -1);
+        int mode = sharedPreferences.getInt("ProfileMode", -1);
+        return new Profile(language, output, lensFacing, mode);
     }
 }
