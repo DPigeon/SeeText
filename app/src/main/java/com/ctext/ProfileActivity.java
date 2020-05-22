@@ -15,7 +15,9 @@ import android.widget.Toast;
 
 import com.ctext.profile.Profile;
 import com.ctext.profile.SharedPreferenceHelper;
+import com.ctext.translator.Translator;
 import com.ctext.utils.Utils;
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateRemoteModel;
 
 import java.util.ArrayList;
 
@@ -134,6 +136,10 @@ public class ProfileActivity extends AppCompatActivity {
             Profile profile = new Profile(languageChosen, sharedPreferenceHelper.getLanguageOutput(), lensFacing, mode);
             sharedPreferenceHelper.saveProfile(profile);
             toastMessage("Your profile has been saved!");
+            /* Here we download the input model to be able to view translated sentences in definitions */
+            Translator translator = new Translator(getApplicationContext(), languageChosen, sharedPreferenceHelper.getLanguageOutput());
+            FirebaseTranslateRemoteModel model = new FirebaseTranslateRemoteModel.Builder(languageChosen).build();
+            translator.checkAndDownloadModel(model);
             goToActivity(MainActivity.class);
         } else
             toastMessage("You must choose a language!");

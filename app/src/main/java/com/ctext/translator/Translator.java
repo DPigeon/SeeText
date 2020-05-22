@@ -116,6 +116,21 @@ public class Translator {
         });
     }
 
+    public void checkAndDownloadModel(FirebaseTranslateRemoteModel model) {
+        modelManager.isModelDownloaded(model).addOnSuccessListener(isDownloaded -> {
+           if (isDownloaded) {
+               // Do nothing
+           } else {
+               modelManager.download(model, conditions).addOnSuccessListener(v -> {
+                   // Model downloaded
+                   Toast.makeText(context,"Language model has been downloaded!", Toast.LENGTH_LONG).show();
+               }).addOnFailureListener(error -> {
+                   Log.d(TAG, "Error downloading the model. Error: " + error.toString());
+               });
+           }
+        });
+    }
+
     protected void downloadModel(FirebaseTranslateRemoteModel model) {
         modelManager.download(model, conditions).addOnSuccessListener(v -> {
             // Model downloaded

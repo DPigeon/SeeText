@@ -190,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         if (!word.equals("Loading...")) {
             Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
             intent.putExtra("word", word);
+            intent.putExtra("inputLanguage", getInputLanguage());
             intent.putExtra("outputLanguage", getOutputLanguage());
             startActivity(intent);
         }
