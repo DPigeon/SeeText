@@ -460,7 +460,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         if (!faceDetected && currentMode != Mode.ObjectDetection ) {
             faceDetected = true; // Run once when mode chosen
             faceCheckImageView.setVisibility(View.VISIBLE);
-            ObjectAnimator animatorY = ObjectAnimator.ofFloat(faceCheckImageView, "y", getScreenHeight() - 150, getScreenHeight() - 250);
+            // Movements to fit all screens
+            double movementBefore = getScreenHeight() * 0.1;
+            double movementAfter = getScreenHeight() * 0.2;
+            ObjectAnimator animatorY = ObjectAnimator.ofFloat(faceCheckImageView, "y", getScreenHeight() - (int)movementBefore, getScreenHeight() - (int)movementAfter);
             ObjectAnimator fadeInAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 0.0F, 1.0F);
             ObjectAnimator fadeOutAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 1.0F, 0.0F);
             animatorY.setDuration(animationDuration);
