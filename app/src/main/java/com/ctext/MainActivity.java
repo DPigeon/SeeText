@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private boolean faceProcessing = false; // For throttling the calls
     private long animationDuration = 1000; // milliseconds
     private boolean faceDetected = false; // For face check imageView anim to run once
+    private boolean outOfMainActivity = false; // Flag to stop speech recognition on other activities
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     /* Audio Variables */
     private Translator translator;
-    private SpeechRecognizer mRecognizer;
+    private static SpeechRecognizer mRecognizer = null;
     private TextView speechTextView;
     private AudioManager mAudioManager;
     private TextToSpeech mTTS;
@@ -120,10 +121,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
             setupUI();
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            initializeRecognition();
-            //checkTtsResources();
-        }
+
+        /* Stops any other noise from recognizer when switching activities with microphone */
+        if (mRecognizer != null)
+            stopListeningSpeech();
     }
 
     @Override
@@ -133,21 +134,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        stopListeningSpeech(); // Stopping the recognizer when changing activity
-        stopTTS();
-    }
-
-    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults.length > 0) {
             if (requestCode == MY_PERMISSIONS) {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     setupUI();
-                    initializeRecognition();
-                    //checkTtsResources();
                 } else {
                     Toast.makeText(this, "You cannot run the app without allowing the camera or microphone!", Toast.LENGTH_LONG).show();
                     this.finish();
@@ -164,12 +156,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             speechTextView.setText(""); // Reset text
         } else { // Opening speech recognition with speech text
             faceCheckAnimation();
-            if (mRecognizer != null) {
-                initializeRecognition();
+            if (mRecognizer == null) { // Not initialized
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
+                    initializeRecognition();
+                startRecognition();
             } else {
-                initializeRecognition();
-                if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.CREATED))
-                    listenForSpeech();
+                // Used for debugging speech here
             }
             speechTextView.setX(x);
             speechTextView.setY(y);
@@ -192,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             intent.putExtra("word", word);
             intent.putExtra("inputLanguage", getInputLanguage());
             intent.putExtra("outputLanguage", getOutputLanguage());
+            outOfMainActivity = true;
             startActivity(intent);
         }
     }
@@ -234,7 +227,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         } else {
             Log.d(TAG, "Unknown error");
         }
-        if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        //if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+        if (!outOfMainActivity)
             persistentSpeech();
     }
 
@@ -261,8 +255,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             fadeOutAnim.setStartTime(5000);
             speechTextView.startAnimation(fadeOutAnim);
 
-            if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
-                persistentSpeech();
+            persistentSpeech();
         }
     }
 
@@ -545,12 +538,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     protected void initializeRecognition() {
-        mRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
-        mRecognizer.setRecognitionListener(this);
+            mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            mRecognizer.setRecognitionListener(this);
     }
 
     /* Starts the speech */
-    protected void listenForSpeech() {
+    protected void startRecognition() {
         // Uses our SharedPreferences to perform recognition in different languages
         String lang = FirebaseTranslateLanguage.languageCodeForLanguage(getInputLanguage());
         Log.d(TAG, lang);
@@ -558,7 +551,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getApplicationContext().getPackageName());
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
-        intent.putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", new String[]{lang});
+        //intent.putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", new String[]{lang});
 
         mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
         mRecognizer.startListening(intent);
@@ -567,7 +560,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void stopListeningSpeech() {
         if (mRecognizer != null) {
             mRecognizer.stopListening();
-            mRecognizer.cancel();
             mRecognizer.destroy();
             mRecognizer = null;
         }
@@ -579,10 +571,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     /* Makes the app always listen to inputs */
     protected void persistentSpeech() {
         if (mRecognizer != null) {
-            mRecognizer.destroy();
-            mRecognizer = null;
+            stopListeningSpeech();
             initializeRecognition();
-            listenForSpeech();
+            startRecognition();
         }
     }
 
@@ -691,6 +682,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         intent.putExtra("lensFacing", lensFacing);
         intent.putExtra("mode", currentMode.ordinal());
         intent.putExtra("firstTime", firstTime);
+        outOfMainActivity = true;
+        stopListeningSpeech();
         startActivity(intent);
     }
 
