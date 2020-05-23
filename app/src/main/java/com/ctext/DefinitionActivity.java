@@ -109,14 +109,19 @@ public class DefinitionActivity extends AppCompatActivity {
                     String example = definition.getString("example");
 
                     // If no info on some string's item
-                    if (type == "null")
+                    if (type.equals("null"))
                         type = i + 1 + ". noun";
-                    if (def == "null")
+                    if (def.equals("null"))
                         def = "";
-                    if (example == "null")
+                    if (example.equals("null"))
                         example = "";
                     else
                         example = '"' + example + '"';
+
+                    // Changing this definition for inappropriate words from API... ex: oven
+                    if (def.contains("a cremation chamber in a Nazi concentration camp")) {
+                        def = "a small furnace or kiln.";
+                    }
 
                     String[] transInfoInput = new String[3]; // translating to show the definition in input language to toggle if needed to learn
                     TranslateBackObjectAsyncTask translateInfo1 = new TranslateBackObjectAsyncTask(getApplicationContext(), inputLanguage);
