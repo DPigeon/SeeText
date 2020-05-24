@@ -1,5 +1,7 @@
 package com.ctext.utils;
 
+import android.content.res.Resources;
+
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 
@@ -36,6 +38,15 @@ public class Utils {
             list.add(stringLang);
         }
         return list;
+    }
+
+    /* Used to get dimension of the current screen */
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
 }

@@ -38,6 +38,7 @@ import com.ctext.profile.Profile;
 import com.ctext.profile.SharedPreferenceHelper;
 import com.ctext.translator.Translator;
 import com.ctext.utils.GraphicOverlay;
+import com.ctext.utils.Utils;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
@@ -454,9 +455,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             faceDetected = true; // Run once when mode chosen
             faceCheckImageView.setVisibility(View.VISIBLE);
             // Movements to fit all screens
-            double movementBefore = getScreenHeight() * 0.1;
-            double movementAfter = getScreenHeight() * 0.2;
-            ObjectAnimator animatorY = ObjectAnimator.ofFloat(faceCheckImageView, "y", getScreenHeight() - (int)movementBefore, getScreenHeight() - (int)movementAfter);
+            double movementBefore = Utils.getScreenHeight() * 0.1; // 10% from bottom
+            double movementAfter = Utils.getScreenHeight() * 0.2; // to 20% from bottom
+            ObjectAnimator animatorY = ObjectAnimator.ofFloat(faceCheckImageView, "y", Utils.getScreenHeight() - (int)movementBefore, Utils.getScreenHeight() - (int)movementAfter);
             ObjectAnimator fadeInAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 0.0F, 1.0F);
             ObjectAnimator fadeOutAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 1.0F, 0.0F);
             animatorY.setDuration(animationDuration);
@@ -492,9 +493,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         /* Image Processing */
         Executor executor = Executors.newSingleThreadExecutor();
         imageAnalysis.setAnalyzer(executor, image -> { // https://developer.android.com/training/camerax/analyze
-            if (image.getImage() == null) {
+            if (image.getImage() == null)
                 return;
-            }
+
             if (currentMode == Mode.SpeechRecognition) {
                 // Currently only looks at the first image
                 graphicOverlay.clear(); // Always destroy the object graphic overlays
@@ -510,7 +511,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 if (surfaceOrTexture instanceof TextureView) {
                     Bitmap bitmap = ((TextureView) surfaceOrTexture).getBitmap();
                     assert bitmap != null;
-                    Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, getScreenWidth(), getScreenHeight(), false);
+                    Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, Utils.getScreenWidth(), Utils.getScreenHeight(), false);
                     objectDetection.detectObjects(getApplicationContext(), newBitmap, lensFacing, getOutputLanguage());
                 }
             }
@@ -667,14 +668,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     protected int getOutputLanguage() {
         return outputLanguage;
-    }
-
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
-    }
-
-    public static int getScreenHeight() {
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
     void goToProfileActivity(Class activity, String firstTime) { // Function that goes from the main activity to profile one
