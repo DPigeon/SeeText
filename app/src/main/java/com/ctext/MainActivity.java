@@ -181,12 +181,17 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     public void goToObjectDefinition(String word) {
         if (!word.equals("Loading...")) {
-            Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
-            intent.putExtra("word", word);
-            intent.putExtra("inputLanguage", getInputLanguage());
-            intent.putExtra("outputLanguage", getOutputLanguage());
-            outOfMainActivity = true;
-            startActivity(intent);
+            if (getInputLanguage() >= 0) {
+                Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
+                intent.putExtra("word", word);
+                intent.putExtra("inputLanguage", getInputLanguage());
+                intent.putExtra("outputLanguage", getOutputLanguage());
+                outOfMainActivity = true;
+                startActivity(intent);
+            } else {
+                goToProfileActivity(ProfileActivity.class, "yes");
+                Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -546,16 +551,19 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     /* Starts the speech */
     protected void startRecognition() {
         // Uses our SharedPreferences to perform recognition in different languages
-        String lang = FirebaseTranslateLanguage.languageCodeForLanguage(getInputLanguage());
-        Log.d(TAG, lang);
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getApplicationContext().getPackageName());
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
-        //intent.putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", new String[]{lang});
+        if (getInputLanguage() >= 0) {
+            String lang = FirebaseTranslateLanguage.languageCodeForLanguage(getInputLanguage());
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getApplicationContext().getPackageName());
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
 
-        mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
-        mRecognizer.startListening(intent);
+            mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
+            mRecognizer.startListening(intent);
+        } else { // If language not set then send back to profile activity
+            goToProfileActivity(ProfileActivity.class, "yes");
+            Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG);
+        }
     }
 
     protected void stopListeningSpeech() {
