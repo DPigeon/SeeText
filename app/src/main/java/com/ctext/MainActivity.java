@@ -7,10 +7,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
@@ -180,19 +181,22 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     /* Callback for object detection touching words */
     @Override
     public void goToObjectDefinition(String word) {
-        if (!word.equals("Loading...")) {
-            if (getInputLanguage() >= 0) {
-                Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
-                intent.putExtra("word", word);
-                intent.putExtra("inputLanguage", getInputLanguage());
-                intent.putExtra("outputLanguage", getOutputLanguage());
-                outOfMainActivity = true;
-                startActivity(intent);
-            } else {
-                goToProfileActivity(ProfileActivity.class, "yes");
-                Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
+        if (connectedToInternet()) {
+            if (!word.equals("Loading...")) {
+                if (getInputLanguage() >= 0) {
+                    Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
+                    intent.putExtra("word", word);
+                    intent.putExtra("inputLanguage", getInputLanguage());
+                    intent.putExtra("outputLanguage", getOutputLanguage());
+                    outOfMainActivity = true;
+                    startActivity(intent);
+                } else {
+                    goToProfileActivity(ProfileActivity.class, "yes");
+                    Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
+                }
             }
-        }
+        } else
+            Toast.makeText(getApplicationContext(),"You must be connected to internet to see the definitions!", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -249,8 +253,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 //audioImageView.setVisibility(View.VISIBLE);
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
-                    translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), this);
-                    translator.downloadModelAndTranslate(outputLanguage, sentence);
+                        translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), this);
+                        translator.downloadModelAndTranslate(outputLanguage, sentence);
                 } else
                     speechTextView.setText(sentenceToFitUI); // We show the text like it is
             } catch (Exception exception) {}
@@ -544,8 +548,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     protected void initializeRecognition() {
-            mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-            mRecognizer.setRecognitionListener(this);
+        mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        mRecognizer.setRecognitionListener(this);
     }
 
     /* Starts the speech */
@@ -686,6 +690,24 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         outOfMainActivity = true;
         stopListeningSpeech();
         startActivity(intent);
+    }
+
+    /* Checks if we have a wifi or LTE connection */
+    private boolean connectedToInternet() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
     }
 
 }

@@ -24,7 +24,7 @@ public class Translator {
     private String TAG = "Translator";
     final FirebaseModelManager modelManager;
     final FirebaseTranslator translator;
-    FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder().requireWifi().build();
+    FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder().build();
     Context context;
     Callback callback = null;
 
