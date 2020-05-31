@@ -4,6 +4,8 @@ package com.ctext.objectdetection.definition;
  * Class used to define the items in the listView of object definitions
  */
 
+import org.jetbrains.annotations.NotNull;
+
 public class DefinitionRowItem {
     private int icon;
     private String type;
@@ -17,11 +19,9 @@ public class DefinitionRowItem {
         this.example = example;
     }
 
-    public int getIcon() {
-        return icon;
-    }
+    public int getIcon() { return icon; }
 
-    public void setIcon(int imageId) {
+    public void setIcon(int icon) {
         this.icon = icon;
     }
 
@@ -49,6 +49,7 @@ public class DefinitionRowItem {
         this.example = example;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return type + "\n" + definition + "\n" + '"' + example + '"';
