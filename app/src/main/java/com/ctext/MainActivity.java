@@ -376,16 +376,19 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 view.getContext().getDrawable(R.drawable.objects_detection).clearColorFilter();
                 view.invalidate();
                 if (currentMode != Mode.ObjectDetection) {
-                    currentMode = Mode.ObjectDetection;
-                    speechDetectionImageView.setImageResource(R.drawable.speech_detection);
-                    objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
-                    previewImageView.setImageDrawable(null);
-                    rebindPreview();
-                    previewImageView.setVisibility(View.VISIBLE);
-                    speechTextView.setVisibility(View.INVISIBLE);
-                    //audioImageView.setVisibility(View.INVISIBLE);
-                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                    Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
+                        currentMode = Mode.ObjectDetection;
+                        speechDetectionImageView.setImageResource(R.drawable.speech_detection);
+                        objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
+                        previewImageView.setImageDrawable(null);
+                        rebindPreview();
+                        previewImageView.setVisibility(View.VISIBLE);
+                        speechTextView.setVisibility(View.INVISIBLE);
+                        //audioImageView.setVisibility(View.INVISIBLE);
+                        sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
+                        if (connectedToInternet())
+                            Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(this, "You must be connected to internet to use the Object Detector Mode!", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
             }
@@ -404,15 +407,18 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 view.getContext().getDrawable(R.drawable.speech_detection).clearColorFilter();
                 view.invalidate();
                 if (currentMode != Mode.SpeechRecognition) {
-                    currentMode = Mode.SpeechRecognition;
-                    faceDetected = false; // Reseted and ready to fire the face check anim
-                    speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
-                    objectDetectionImageView.setImageResource(R.drawable.objects_detection);
-                    previewImageView.setVisibility(View.INVISIBLE);
-                    rebindPreview();
-                    //speechTextView.setVisibility(View.VISIBLE);
-                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                    Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
+                        currentMode = Mode.SpeechRecognition;
+                        faceDetected = false; // Reseted and ready to fire the face check anim
+                        speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
+                        objectDetectionImageView.setImageResource(R.drawable.objects_detection);
+                        previewImageView.setVisibility(View.INVISIBLE);
+                        rebindPreview();
+                        //speechTextView.setVisibility(View.VISIBLE);
+                        sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
+                        if (connectedToInternet())
+                            Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(this, "You must be connected to internet to use the Speech Detection Mode!", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
             }
@@ -508,15 +514,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             if (image.getImage() == null)
                 return;
 
-            if (currentMode == Mode.SpeechRecognition) {
-                // Currently only looks at the first image
+            if (currentMode == Mode.SpeechRecognition && connectedToInternet()) {
                 graphicOverlay.clear(); // Always destroy the object graphic overlays
                 FaceDetection faceDetection = new FaceDetection(graphicOverlay,this);
                 if (!faceProcessing) { // Throttle the calls
                     faceProcessing = true;
                     faceDetection.analyzeImage(image);
                 }
-            } else if (currentMode == Mode.ObjectDetection) {
+            } else if (currentMode == Mode.ObjectDetection && connectedToInternet()) {
                 ObjectDetection objectDetection = new ObjectDetection(graphicOverlay, this);
                 // We get the textureView to get the bitmap image every time for better orientation
                 View surfaceOrTexture = previewView.getChildAt(0);

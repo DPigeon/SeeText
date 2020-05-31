@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.media.Image;
 import android.util.Log;
 
-import com.ctext.facedetection.FaceOverlay;
 import com.ctext.utils.GraphicOverlay;
 import com.ctext.utils.Utils;
 import com.google.android.gms.tasks.Task;
@@ -56,10 +55,10 @@ public class FaceDetection {
     @SuppressLint("UnsafeExperimentalUsageError")
     public void analyzeImage(ImageProxy image) {
         Image mediaImage = image.getImage();
+        assert mediaImage != null;
         int width = mediaImage.getWidth();
         int height = mediaImage.getHeight();
         int rotation = Utils.degreesToFirebaseRotation(image.getImageInfo().getRotationDegrees());
-        assert mediaImage != null;
         FirebaseVisionImage imageVision = FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
 
         Task<List<FirebaseVisionFace>> result = detector.detectInImage(imageVision).addOnSuccessListener(faces -> {
