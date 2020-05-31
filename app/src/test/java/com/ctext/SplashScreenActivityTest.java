@@ -24,7 +24,7 @@ public class SplashScreenActivityTest {
     }
 
     @Test
-    public void testCreate() {
+    public void testOnCreate() {
         doNothing().when(mockActivity).onCreate(any(Bundle.class));
 
         Bundle savedInstanceState = new Bundle();

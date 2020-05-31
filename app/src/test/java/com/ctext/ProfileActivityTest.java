@@ -1,13 +1,17 @@
 package com.ctext;
 
+import android.os.Bundle;
+
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -24,17 +28,13 @@ public class ProfileActivityTest {
     }
 
     @Test
-    public void testSetupUI() {
-        doNothing().when(mockActivity).setupUI();
+    public void testLifeCycle() {
+        // TODO: mock some calls
 
-        mockActivity.setupUI();
+        Bundle savedInstanceState = new Bundle();
+        mockActivity.onCreate(savedInstanceState);
+        mockActivity.onStart();
 
-        verify(mockActivity).setupUI();
-    }
-
-    @Test
-    public void testAddRadioButtons() {
-        //when(mockActivity.addRadioButtons(anyString(), )
     }
 
 }
