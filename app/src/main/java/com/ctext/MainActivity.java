@@ -27,6 +27,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -60,7 +61,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.Lifecycle;
 
 /* MainActivity.java
 * The MainActivity with CameraX library, Speech Recognition & a Face Detection callback to update the speech text.
@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private long animationDuration = 1000; // milliseconds
     private boolean faceDetected = false; // For face check imageView anim to run once
     private boolean outOfMainActivity = false; // Flag to stop speech recognition on other activities
+    private FrameLayout progressOverlay; // Loading overlay wheel
 
     /* Video Variables */
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -184,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         if (connectedToInternet()) {
             if (!word.equals("Loading...")) {
                 if (getInputLanguage() >= 0) {
+                    progressOverlay.setVisibility(View.VISIBLE);
                     Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
                     intent.putExtra("word", word);
                     intent.putExtra("inputLanguage", getInputLanguage());
@@ -275,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     public void onEvent(int eventType, Bundle params) {}
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"ClickableViewAccessibility", "WrongViewCast"})
     protected void setupUI() {
         previewView = findViewById(R.id.previewView);
         previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW); // TextureView
@@ -453,6 +455,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         speechTextView = findViewById(R.id.speechTextView);
         previewImageView = findViewById(R.id.previewImageView);
         faceCheckImageView = findViewById(R.id.faceCheckImageView);
+        progressOverlay = findViewById(R.id.progress_overlay);
         if (currentMode == Mode.SpeechRecognition)
             speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
         else
@@ -683,6 +686,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     void goToProfileActivity(Class activity, String firstTime) { // Function that goes from the main activity to profile one
+        progressOverlay.setVisibility(View.VISIBLE);
         Intent intent = new Intent(MainActivity.this, activity);
         intent.putExtra("lensFacing", lensFacing);
         intent.putExtra("mode", currentMode.ordinal());

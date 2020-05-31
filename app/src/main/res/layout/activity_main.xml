@@ -125,4 +125,6 @@
 		android:layout_marginLeft="65dp"
 		app:srcCompat="@drawable/objects_detection" />
 
+	<include layout="@layout/loading_overlay" />
+
 </FrameLayout>
