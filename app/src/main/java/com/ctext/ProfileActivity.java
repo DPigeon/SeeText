@@ -2,6 +2,7 @@ package com.ctext;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -41,7 +42,7 @@ public class ProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Profile");
 
-        sharedPreferenceHelper = new SharedPreferenceHelper(this);
+        sharedPreferenceHelper = new SharedPreferenceHelper(this.getSharedPreferences("ProfilePreference", Context.MODE_PRIVATE));
         setupUI();
         instantiateRadioGroup();
     }

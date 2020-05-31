@@ -645,7 +645,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     /* Loads profile if needed */
     protected void loadProfile() {
-        sharedPreferenceHelper = new SharedPreferenceHelper(this);
+        sharedPreferenceHelper = new SharedPreferenceHelper(this.getSharedPreferences("ProfilePreference", Context.MODE_PRIVATE));
         Profile profile = sharedPreferenceHelper.getProfile();
         int lang = profile.getLanguage();
         int outputLang = profile.getLanguageOutputId();
