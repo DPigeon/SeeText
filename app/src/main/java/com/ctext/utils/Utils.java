@@ -40,6 +40,11 @@ public class Utils {
         return list;
     }
 
+    public static String getLanguageByTag(int tag) {
+        String language = FirebaseTranslateLanguage.languageCodeForLanguage(tag);
+        return Locale.forLanguageTag(language).getDisplayName();
+    }
+
     /* Used to get dimension of the current screen */
     public static int getScreenWidth() {
         return Resources.getSystem().getDisplayMetrics().widthPixels;

@@ -70,7 +70,7 @@ import androidx.core.content.ContextCompat;
 public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback, ObjectOverlay.Callback {
     private String TAG = "MainActivity:";
     private SharedPreferenceHelper sharedPreferenceHelper;
-    private static final int MY_TTS_DATA_CHECK_CODE = 90;
+    private static final int TTS_DATA_CHECK = 90;
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
     private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
     private ImageView userProfileImageView, cameraModeImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView;
@@ -122,8 +122,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         loadProfile();
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             setupUI();
+        }
 
         /* Stops any other noise from recognizer when switching activities with microphone */
         if (mRecognizer != null)
@@ -237,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         } else {
             Log.d(TAG, "Unknown error");
         }
-        //if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+
         if (!outOfMainActivity)
             persistentSpeech();
     }
@@ -250,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         if (currentMode != Mode.ObjectDetection) { // Current mode must be speech detection
             if (speechTextView.getVisibility() == View.INVISIBLE)
                 speechTextView.setVisibility(View.VISIBLE);
-                //audioImageView.setVisibility(View.VISIBLE);
+                audioImageView.setVisibility(View.VISIBLE);
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
                         translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), this);
@@ -316,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 rebindPreview();
                 speechTextView.setVisibility(View.INVISIBLE); // Reset textView
                 sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                //audioImageView.setVisibility(View.INVISIBLE);
+                audioImageView.setVisibility(View.INVISIBLE);
             }
 
             return true;
@@ -381,7 +382,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                         rebindPreview();
                         previewImageView.setVisibility(View.VISIBLE);
                         speechTextView.setVisibility(View.INVISIBLE);
-                        //audioImageView.setVisibility(View.INVISIBLE);
+                        audioImageView.setVisibility(View.INVISIBLE);
                         sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
                         if (connectedToInternet())
                             Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
@@ -438,6 +439,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 if (mTTS != null) {
                     if (!mTTS.isSpeaking())
                         startTTS(ttsSentence);
+                    Log.d(TAG, ttsSentence);
                 }
             }
 
@@ -450,8 +452,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 bindPreview(cameraProvider, lensFacing); // Default facing back
             } catch (ExecutionException | InterruptedException e) {
-                // No errors need to be handled for this Future.
-                // This should never be reached.
+                // No errors need to be handled for this Future
+                // This should never be reached
             }
         }, ContextCompat.getMainExecutor(this));
 
@@ -554,6 +556,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void initializeRecognition() {
         mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mRecognizer.setRecognitionListener(this);
+        initializeTTS();
     }
 
     /* Starts the speech */
@@ -597,21 +600,17 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void checkTtsResources() {
         Intent checkIntent = new Intent();
         checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(checkIntent, MY_TTS_DATA_CHECK_CODE);
+        startActivityForResult(checkIntent, TTS_DATA_CHECK);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == MY_TTS_DATA_CHECK_CODE) {
-            ArrayList<String> availableLanguages = data.getStringArrayListExtra(TextToSpeech.Engine.EXTRA_AVAILABLE_VOICES);
-            assert availableLanguages != null;
-            if (availableLanguages.isEmpty()) {
-                Intent installIntent = new Intent();
-                installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivity(installIntent);
-            } else
-                initializeTTS();
+        if (requestCode == TTS_DATA_CHECK) {
+            if (resultCode != TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                final Intent tnt = new Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(tnt);
+            }
         }
     }
 
@@ -619,8 +618,16 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         mTTS = new TextToSpeech(getApplicationContext(), status -> {
             if (status == TextToSpeech.SUCCESS) {
                 // We get the output language translated
-                String language = FirebaseTranslateLanguage.languageCodeForLanguage(getOutputLanguage());
-                Locale locale = new Locale(language);
+                Locale locale = null;
+                for (Locale availableLocale : mTTS.getAvailableLanguages()) {
+                    String languageAudioWanted = Utils.getLanguageByTag(getOutputLanguage());
+                    if (languageAudioWanted.equals(availableLocale.getDisplayLanguage())) { // If the locale voice is installed on the phone then set it
+                        locale = new Locale(availableLocale.toString());
+                    } else { // If the locale voice not installed then install it
+                        // TODO: find a way to install voices directly
+                    }
+                }
+                //String language = FirebaseTranslateLanguage.languageCodeForLanguage(getOutputLanguage());
                 int result = mTTS.setLanguage(locale);
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.d(TAG, "Language not supported");
