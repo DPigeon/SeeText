@@ -31,19 +31,14 @@ public class FaceDetection {
     private Callback callback = null;
     private GraphicOverlay graphicOverlay;
 
-    // Factors from Rect to Screen coordinates for speech textView
-    private float xFactor = 0.5F;
-    private float yFactor = 2.25F;
-
-    // High-accuracy landmark detection
-    private FirebaseVisionFaceDetectorOptions highAccuracyOpts = new FirebaseVisionFaceDetectorOptions.Builder()
-        .setPerformanceMode(FirebaseVisionFaceDetectorOptions.FAST) // Slow calls
-        .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
-        .build();
-
     public FaceDetection(GraphicOverlay graphicOverlay, Callback cb) {
         this.graphicOverlay = graphicOverlay;
         this.callback = cb;
+        // High-accuracy landmark detection
+        FirebaseVisionFaceDetectorOptions highAccuracyOpts = new FirebaseVisionFaceDetectorOptions.Builder()
+                .setPerformanceMode(FirebaseVisionFaceDetectorOptions.FAST) // Slow calls
+                .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
+                .build();
         detector = FirebaseVision.getInstance().getVisionFaceDetector(highAccuracyOpts);
     }
 
@@ -61,7 +56,7 @@ public class FaceDetection {
         int rotation = Utils.degreesToFirebaseRotation(image.getImageInfo().getRotationDegrees());
         FirebaseVisionImage imageVision = FirebaseVisionImage.fromMediaImage(mediaImage, rotation);
 
-        Task<List<FirebaseVisionFace>> result = detector.detectInImage(imageVision).addOnSuccessListener(faces -> {
+        detector.detectInImage(imageVision).addOnSuccessListener(faces -> {
             // Task completed successfully --> Should start speech recognition HERE
             if (faces.isEmpty())  // If no face detected
                 callback.updateSpeechTextViewPosition(0, 0, false);

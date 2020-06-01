@@ -21,6 +21,7 @@ import com.ctext.utils.Utils;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateRemoteModel;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /*
  * The User Profile to change his language (input language)
@@ -38,7 +39,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Profile");
 
@@ -75,7 +76,7 @@ public class ProfileActivity extends AppCompatActivity {
         saveButton.setOnClickListener(view -> saveProfile());
     }
 
-    private final void scrollToCheckedButton() {
+    private void scrollToCheckedButton() {
         RadioButton checkedButton = findViewById(languagesRadioGroup.getCheckedRadioButtonId());
         if (checkedButton != null)
             languagesScrollView.post(() -> languagesScrollView.smoothScrollTo(0, checkedButton.getTop()));
@@ -104,6 +105,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void setActivityFields() {
         Intent intent = getIntent();
         String firstTime = intent.getStringExtra("firstTime");
+        assert firstTime != null;
         if (firstTime.equals("yes")) { // If first time launching app
             switchMode(true, View.VISIBLE); // Switch to the edit mode
         }
@@ -141,7 +143,7 @@ public class ProfileActivity extends AppCompatActivity {
             Translator translator = new Translator(getApplicationContext(), languageChosen, sharedPreferenceHelper.getLanguageOutput());
             FirebaseTranslateRemoteModel model = new FirebaseTranslateRemoteModel.Builder(languageChosen).build();
             translator.checkAndDownloadModel(model);
-            goToActivity(MainActivity.class);
+            goToActivity();
         } else
             toastMessage("You must choose a language!");
     }
@@ -151,8 +153,8 @@ public class ProfileActivity extends AppCompatActivity {
         toast.show(); // We display it
     }
 
-    void goToActivity(Class activity) { // Function that goes from the main activity to another one
-        Intent intent = new Intent(ProfileActivity.this, activity);
+    void goToActivity() { // Function that goes from the main activity to another one
+        Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
         startActivity(intent);
     }
 

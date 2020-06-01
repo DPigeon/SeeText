@@ -13,6 +13,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateRemoteM
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 /*
@@ -65,9 +66,7 @@ public class Translator {
                 Log.d(TAG, "Could not translate the text. Error: " + error.toString());
                 Toast.makeText(context,"There is an error with the translator...", Toast.LENGTH_LONG).show();
             });
-        }).addOnFailureListener(error -> {
-            Log.d(TAG, "Downloading model if needed has an error: " + error.toString());
-        });
+        }).addOnFailureListener(error -> Log.d(TAG, "Downloading model if needed has an error: " + error.toString()));
     }
 
     public String translateObject(String text, int languageId) {
@@ -79,21 +78,17 @@ public class Translator {
         try {
             Tasks.await(downloadTask);
             isDownloaded = (boolean)downloadTask.getResult();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        } catch (InterruptedException | ExecutionException error) {
+            error.printStackTrace();
         }
         if (isDownloaded) {
             Task textTask = translator.translate(text);
             // Asynchronous call awaiting for the promise
             try {
                 Tasks.await(textTask);
-                tText = textTask.getResult().toString();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+                tText = Objects.requireNonNull(textTask.getResult()).toString();
+            } catch (InterruptedException | ExecutionException error) {
+                error.printStackTrace();
             }
         } else {
             downloadModel(model);
@@ -118,15 +113,11 @@ public class Translator {
 
     public void checkAndDownloadModel(FirebaseTranslateRemoteModel model) {
         modelManager.isModelDownloaded(model).addOnSuccessListener(isDownloaded -> {
-           if (isDownloaded) {
-               // Do nothing
-           } else {
+           if (!isDownloaded) {
                modelManager.download(model, conditions).addOnSuccessListener(v -> {
                    // Model downloaded
                    Toast.makeText(context,"Language model has been downloaded!", Toast.LENGTH_LONG).show();
-               }).addOnFailureListener(error -> {
-                   Log.d(TAG, "Error downloading the model. Error: " + error.toString());
-               });
+               }).addOnFailureListener(error -> Log.d(TAG, "Error downloading the model. Error: " + error.toString()));
            }
         });
     }
@@ -135,9 +126,6 @@ public class Translator {
         modelManager.download(model, conditions).addOnSuccessListener(v -> {
             // Model downloaded
             Toast.makeText(context,"Language model has been downloaded!", Toast.LENGTH_LONG).show();
-        }).addOnFailureListener(error -> {
-            Log.d(TAG, "Error downloading the model. Error: " + error.toString());
-        });
+        }).addOnFailureListener(error -> Log.d(TAG, "Error downloading the model. Error: " + error.toString()));
     }
-
 }

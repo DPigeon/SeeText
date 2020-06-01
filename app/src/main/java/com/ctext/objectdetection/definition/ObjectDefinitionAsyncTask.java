@@ -42,8 +42,7 @@ public class ObjectDefinitionAsyncTask extends AsyncTask<String, Void, JSONObjec
                 String response = convertInputStreamToString(inputStream);
                 Log.d(TAG, response);
                 if (!response.isEmpty()) {
-                    JSONObject jsonObject = new JSONObject(response);
-                    return jsonObject;
+                    return new JSONObject(response);
                 }
             } else {
                 Log.d(TAG, "Status code not success: " + statusCode);

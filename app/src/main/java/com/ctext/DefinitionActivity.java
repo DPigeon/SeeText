@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class DefinitionActivity extends AppCompatActivity {
@@ -61,7 +62,7 @@ public class DefinitionActivity extends AppCompatActivity {
         String outputLanguageString = Utils.getLanguageList().get(outputLanguage);
         if (outputLanguage != FirebaseTranslateLanguage.EN)
             title = word + " [" + outputLanguageString + "]";
-        getSupportActionBar().setTitle(title);
+        Objects.requireNonNull(getSupportActionBar()).setTitle(title);
 
         pronunciationTextView = findViewById(R.id.pronunciationTextView);
         definitionsListView = findViewById(R.id.definitionsListView);
@@ -96,7 +97,7 @@ public class DefinitionActivity extends AppCompatActivity {
             JSONObject json = objectDefinitionAsyncTask.execute(word).get();
             if (json != null) {
                 String pronunciation = json.getString("pronunciation");
-                if (pronunciation == "null" || hasToTranslate)
+                if (pronunciation.equals("null") || hasToTranslate)
                     pronunciation = "";
                 pronunciationTextView.setText(pronunciation);
                 JSONArray definitions = json.getJSONArray("definitions");
@@ -173,7 +174,7 @@ public class DefinitionActivity extends AppCompatActivity {
     protected int wordCount(String string) {
         int count = 0;
 
-        char ch[] = new char[string.length()];
+        char[] ch = new char[string.length()];
         for (int i = 0; i < string.length(); i++) {
             ch[i]= string.charAt(i);
             if (((i > 0 ) && (ch[i] != ' ') && (ch[i - 1] == ' ')) || ((ch[0] != ' ') && (i == 0)))

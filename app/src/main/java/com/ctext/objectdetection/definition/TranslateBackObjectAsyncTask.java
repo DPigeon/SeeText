@@ -1,5 +1,6 @@
 package com.ctext.objectdetection.definition;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 
@@ -12,7 +13,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
 
 public class TranslateBackObjectAsyncTask extends AsyncTask<String, Void, String[]> {
     private String TAG = "TranslateBackObjectAsyncTask";
-    private Translator translator;
+    @SuppressLint("StaticFieldLeak")
     private Context context;
     private int outputLanguage;
 
@@ -29,7 +30,8 @@ public class TranslateBackObjectAsyncTask extends AsyncTask<String, Void, String
     @Override
     protected String[] doInBackground(String... word) {
         String[] translatedWord = new String[3];
-        if (word.length == 1) { // If params only has 1 word to translate (normaly the title)
+        Translator translator;
+        if (word.length == 1) { // If params only has 1 word to translate (normally the title)
             // Translating from output language to english for us to be able to find definition
             translator = new Translator(context, outputLanguage, FirebaseTranslateLanguage.EN); // Output must be english
                 translatedWord[0] = translator.translateObject(word[0], FirebaseTranslateLanguage.EN);

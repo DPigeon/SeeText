@@ -1,6 +1,8 @@
 package com.ctext.objectdetection.definition;
 
 import java.util.List;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
@@ -14,6 +16,8 @@ import android.widget.TextView;
 
 import com.ctext.R;
 
+import org.jetbrains.annotations.NotNull;
+
 /*
  * A custom adapter to show the row item better for the definitions
  */
@@ -26,19 +30,22 @@ public class DefinitionListViewAdapter extends ArrayAdapter<DefinitionRowItem> {
         this.context = context;
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         ImageView iconImageView;
         TextView typeTextView;
         TextView definitionTextView;
         TextView exampleTextView;
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder = null;
+    @SuppressLint("InflateParams")
+    @NotNull
+    public View getView(int position, View convertView, @NotNull ViewGroup parent) {
+        ViewHolder holder;
         DefinitionRowItem definitionRowItem = getItem(position);
 
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
+            assert mInflater != null;
             convertView = mInflater.inflate(R.layout.definition_list_item, null);
             holder = new ViewHolder();
             holder.iconImageView = convertView.findViewById(R.id.iconImageView);
@@ -49,6 +56,7 @@ public class DefinitionListViewAdapter extends ArrayAdapter<DefinitionRowItem> {
         } else
             holder = (ViewHolder) convertView.getTag();
 
+        assert definitionRowItem != null;
         holder.iconImageView.setImageResource(definitionRowItem.getIcon());
 
         // If we have any HTML code, we handle it

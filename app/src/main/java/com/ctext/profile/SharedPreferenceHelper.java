@@ -1,6 +1,5 @@
 package com.ctext.profile;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 
 /*
@@ -29,13 +28,11 @@ public class SharedPreferenceHelper {
     }
 
     public int getLanguageInput() {
-        int input = sharedPreferences.getInt(KEY_LANGUAGE, -1);
-        return input;
+        return sharedPreferences.getInt(KEY_LANGUAGE, -1);
     }
 
     public int getLanguageOutput() {
-        int output = sharedPreferences.getInt(KEY_LANGUAGE_OUTPUT, -1);
-        return output;
+        return sharedPreferences.getInt(KEY_LANGUAGE_OUTPUT, -1);
     }
 
     public Profile getProfile() {

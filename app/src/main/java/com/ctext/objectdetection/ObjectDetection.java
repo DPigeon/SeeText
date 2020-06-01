@@ -26,20 +26,19 @@ import ai.fritz.vision.objectdetection.ObjectDetectionOnDeviceModel;
 public class ObjectDetection {
     private String TAG = "ObjectDetection";
     private Translator translator;
-    private ObjectDetectionOnDeviceModel onDeviceModel;
     private FritzVisionObjectPredictor predictor;
     private GraphicOverlay graphicOverlay;
-    private ObjectOverlay.Callback callback = null;
+    private ObjectOverlay.Callback callback;
 
     public ObjectDetection(GraphicOverlay graphicOverlay, ObjectOverlay.Callback cb) {
         this.graphicOverlay = graphicOverlay;
-        onDeviceModel = FritzVisionModels.getObjectDetectionOnDeviceModel();
+        ObjectDetectionOnDeviceModel onDeviceModel = FritzVisionModels.getObjectDetectionOnDeviceModel();
         predictor = FritzVision.ObjectDetection.getPredictor(onDeviceModel);
         this.callback = cb;
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
-    public void detectObjects(Context context, Bitmap image, int lensFacing, int outputLanguage) {
+    public void detectObjects(Context context, Bitmap image, int outputLanguage) {
         FritzVisionImage visionImage = FritzVisionImage.fromBitmap(image);
 
         FritzVisionObjectResult objectResult = predictor.predict(visionImage);

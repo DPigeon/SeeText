@@ -37,18 +37,15 @@ public class FaceOverlay extends GraphicOverlay.Graphic {
     @Override
     public void touchEvent(MotionEvent event) {
         int action = event.getAction() & MotionEvent.ACTION_MASK;
-        switch (action) {
-            case MotionEvent.ACTION_UP: {
-                float posX = event.getX();
-                float posY = event.getY();
-                float leftBox = bounds.left;
-                float rightBox = bounds.right;
-                float bottomBox = bounds.bottom;
-                float topBox = bounds.top;
-                if (posX > leftBox && posX < rightBox && posY > topBox && posY < bottomBox) {
-                    Log.d(TAG, "Touching a face...");
-                }
-                break;
+        if (action == MotionEvent.ACTION_UP) {
+            float posX = event.getX();
+            float posY = event.getY();
+            float leftBox = bounds.left;
+            float rightBox = bounds.right;
+            float bottomBox = bounds.bottom;
+            float topBox = bounds.top;
+            if (posX > leftBox && posX < rightBox && posY > topBox && posY < bottomBox) {
+                Log.d(TAG, "Touching a face...");
             }
         }
     }

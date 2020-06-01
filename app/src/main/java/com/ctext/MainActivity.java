@@ -19,7 +19,6 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.util.Size;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
@@ -46,6 +45,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         super.onCreate(savedInstanceState);
         Fritz.configure(this); // Initialize Fritz
         setContentView(R.layout.activity_main);
-        getSupportActionBar().hide(); // Hide the main app bar on top
+        Objects.requireNonNull(getSupportActionBar()).hide(); // Hide the main app bar on top
 
         /* Running UI Thread to get audio & video permission */
         this.runOnUiThread(() -> {
@@ -163,8 +163,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
                     initializeRecognition();
                 startRecognition();
-            } else {
-                // Used for debugging speech here
             }
             speechTextView.setX(x);
             speechTextView.setY(y);
@@ -193,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     outOfMainActivity = true;
                     startActivity(intent);
                 } else {
-                    goToProfileActivity(ProfileActivity.class, "yes");
+                    goToProfileActivity("yes");
                     Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
                 }
             }
@@ -246,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     @Override
     public void onResults(Bundle results) {
-        String sentence = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).get(0);
+        String sentence = Objects.requireNonNull(results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)).get(0);
         /* Sentences may be null sometimes so we avoid that */
         String sentenceToFitUI = " " + sentence + " ";
         if (currentMode != Mode.ObjectDetection) { // Current mode must be speech detection
@@ -259,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                         translator.downloadModelAndTranslate(outputLanguage, sentence);
                 } else
                     speechTextView.setText(sentenceToFitUI); // We show the text like it is
-            } catch (Exception exception) {}
+            } catch (Exception ignored) {}
 
             /* Text Animation */
             speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
@@ -287,14 +285,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         userProfileImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
-                view.getContext().getDrawable(R.drawable.user_profile).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.user_profile)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
                 view.invalidate();
             }
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                view.getContext().getDrawable(R.drawable.user_profile).clearColorFilter();
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.user_profile)).clearColorFilter();
                 view.invalidate();
                 // Go to the profile activity with a nice slide animation
-                goToProfileActivity(ProfileActivity.class, "no");
+                goToProfileActivity("no");
             }
 
             return true;
@@ -304,11 +302,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         cameraModeImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
-                view.getContext().getDrawable(R.drawable.camera_mode).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.camera_mode)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
                 view.invalidate();
             }
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                view.getContext().getDrawable(R.drawable.camera_mode).clearColorFilter();
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.camera_mode)).clearColorFilter();
                 view.invalidate();
                 if (lensFacing == CameraSelector.LENS_FACING_BACK) {
                     lensFacing = CameraSelector.LENS_FACING_FRONT;
@@ -353,11 +351,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         languagesImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
-                view.getContext().getDrawable(R.drawable.languages).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.languages)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
                 view.invalidate();
             }
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                view.getContext().getDrawable(R.drawable.languages).clearColorFilter();
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.languages)).clearColorFilter();
                 view.invalidate();
                 languageSpinner.performClick();
             }
@@ -369,11 +367,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         objectDetectionImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
-                view.getContext().getDrawable(R.drawable.objects_detection).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.objects_detection)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
                 view.invalidate();
             }
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                view.getContext().getDrawable(R.drawable.objects_detection).clearColorFilter();
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.objects_detection)).clearColorFilter();
                 view.invalidate();
                 if (currentMode != Mode.ObjectDetection) {
                         currentMode = Mode.ObjectDetection;
@@ -400,11 +398,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         speechDetectionImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
-                view.getContext().getDrawable(R.drawable.speech_detection).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.speech_detection)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
                 view.invalidate();
             }
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                view.getContext().getDrawable(R.drawable.speech_detection).clearColorFilter();
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.speech_detection)).clearColorFilter();
                 view.invalidate();
                 if (currentMode != Mode.SpeechRecognition) {
                         currentMode = Mode.SpeechRecognition;
@@ -430,11 +428,11 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         audioImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
             if (action == MotionEvent.ACTION_DOWN) {
-                view.getContext().getDrawable(R.drawable.tts_audio).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.tts_audio)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
                 view.invalidate();
             }
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                view.getContext().getDrawable(R.drawable.tts_audio).clearColorFilter();
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.tts_audio)).clearColorFilter();
                 view.invalidate();
                 // Start TTS
                 if (mTTS != null) {
@@ -502,8 +500,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     protected void bindPreview(@NonNull ProcessCameraProvider cameraProvider, int lensFacing) {
         preview = new Preview.Builder().build();
         CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
-
-        Size size = new Size(480, 360); // For better latency
         ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();
@@ -529,7 +525,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     Bitmap bitmap = ((TextureView) surfaceOrTexture).getBitmap();
                     assert bitmap != null;
                     Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, Utils.getScreenWidth(), Utils.getScreenHeight(), false);
-                    objectDetection.detectObjects(getApplicationContext(), newBitmap, lensFacing, getOutputLanguage());
+                    objectDetection.detectObjects(getApplicationContext(), newBitmap, getOutputLanguage());
                 }
             }
             image.close();
@@ -544,7 +540,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             cameraProviderFuture.get().unbindAll(); // Unbind all other cameras
             cameraProviderFuture = ProcessCameraProvider.getInstance(this);
             bindPreview(cameraProviderFuture.get(), lensFacing); // Change lens facing
-        } catch (Exception exception) {}
+        } catch (Exception ignored) {}
     }
 
     /* Used to grant permission from the UI thread */
@@ -573,8 +569,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
             mRecognizer.startListening(intent);
         } else { // If language not set then send back to profile activity
-            goToProfileActivity(ProfileActivity.class, "yes");
-            Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG);
+            goToProfileActivity("yes");
+            Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -609,6 +605,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MY_TTS_DATA_CHECK_CODE) {
             ArrayList<String> availableLanguages = data.getStringArrayListExtra(TextToSpeech.Engine.EXTRA_AVAILABLE_VOICES);
+            assert availableLanguages != null;
             if (availableLanguages.isEmpty()) {
                 Intent installIntent = new Intent();
                 installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
@@ -669,7 +666,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             if (outputLang != -1)
                 setOutputLanguage(outputLang);
         } else {
-            goToProfileActivity(ProfileActivity.class, "yes");
+            goToProfileActivity("yes");
             Toast.makeText(getApplicationContext(), "Create your profile!", Toast.LENGTH_LONG).show();
         }
     }
@@ -690,9 +687,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         return outputLanguage;
     }
 
-    void goToProfileActivity(Class activity, String firstTime) { // Function that goes from the main activity to profile one
+    void goToProfileActivity(String firstTime) { // Function that goes from the main activity to profile one
         progressOverlay.setVisibility(View.VISIBLE);
-        Intent intent = new Intent(MainActivity.this, activity);
+        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
         intent.putExtra("lensFacing", lensFacing);
         intent.putExtra("mode", currentMode.ordinal());
         intent.putExtra("firstTime", firstTime);
@@ -707,6 +704,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         boolean haveConnectedMobile = false;
 
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert cm != null;
         NetworkInfo[] netInfo = cm.getAllNetworkInfo();
         for (NetworkInfo ni : netInfo) {
             if (ni.getTypeName().equalsIgnoreCase("WIFI"))

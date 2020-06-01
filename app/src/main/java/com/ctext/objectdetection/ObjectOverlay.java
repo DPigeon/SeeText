@@ -26,7 +26,7 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
     private Paint paint;
     private BorderedText borderedText;
     private Drawable documentImage;
-    private Callback callback = null;
+    private Callback callback;
 
     public ObjectOverlay(GraphicOverlay graphicOverlay, Context context, FritzVisionObject object, Bitmap image, String translatedText, Callback cb) {
         super(graphicOverlay);
@@ -55,9 +55,6 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
         paint.setStyle(Paint.Style.STROKE); // Set unfilled rectangle
         paint.setColor(Color.RED); // Set red
 
-        int right = (int)scaledObject.getBoundingBox().right;
-        int bottom = (int)scaledObject.getBoundingBox().bottom;
-
         // Draw the document icon
         int imageSize = 70;
         int offset = 30;
@@ -71,18 +68,15 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
     @Override
     public void touchEvent(MotionEvent event) {
         int action = event.getAction() & MotionEvent.ACTION_MASK;
-        switch (action) {
-            case MotionEvent.ACTION_UP: {
-                float posX = event.getX();
-                float posY = event.getY();
-                float leftBox = scaledObject.getBoundingBox().left;
-                float rightBox = scaledObject.getBoundingBox().right;
-                float bottomBox = scaledObject.getBoundingBox().bottom;
-                float topBox = scaledObject.getBoundingBox().top;
-                if (posX > leftBox && posX < rightBox && posY > topBox && posY < bottomBox) {
-                    callback.goToObjectDefinition(translatedText);
-                }
-                break;
+        if (action == MotionEvent.ACTION_UP) {
+            float posX = event.getX();
+            float posY = event.getY();
+            float leftBox = scaledObject.getBoundingBox().left;
+            float rightBox = scaledObject.getBoundingBox().right;
+            float bottomBox = scaledObject.getBoundingBox().bottom;
+            float topBox = scaledObject.getBoundingBox().top;
+            if (posX > leftBox && posX < rightBox && posY > topBox && posY < bottomBox) {
+                callback.goToObjectDefinition(translatedText);
             }
         }
     }
