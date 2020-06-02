@@ -79,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private boolean faceProcessing = false; // For throttling the calls
     private long animationDuration = 1000; // milliseconds
     private boolean faceDetected = false; // For face check imageView anim to run once
-    private boolean outOfMainActivity = false; // Flag to stop speech recognition on other activities
     private FrameLayout progressOverlay; // Loading overlay wheel
 
     /* Video Variables */
@@ -189,9 +188,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     intent.putExtra("word", word);
                     intent.putExtra("inputLanguage", getInputLanguage());
                     intent.putExtra("outputLanguage", getOutputLanguage());
-                    outOfMainActivity = true;
                     startActivity(intent);
                 } else {
+                    // Infinity Loop here BUG
                     goToProfileActivity("yes");
                     Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
                 }
@@ -239,8 +238,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             Log.d(TAG, "Unknown error");
         }
 
-        if (!outOfMainActivity)
-            persistentSpeech();
+        persistentSpeech();
     }
 
     @Override
@@ -572,8 +570,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
             mRecognizer.startListening(intent);
         } else { // If language not set then send back to profile activity
-            goToProfileActivity("yes");
-            Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Your language is not set!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -695,12 +692,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     void goToProfileActivity(String firstTime) { // Function that goes from the main activity to profile one
-        progressOverlay.setVisibility(View.VISIBLE);
+        if (progressOverlay != null)
+            progressOverlay.setVisibility(View.VISIBLE);
         Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
         intent.putExtra("lensFacing", lensFacing);
         intent.putExtra("mode", currentMode.ordinal());
         intent.putExtra("firstTime", firstTime);
-        outOfMainActivity = true;
         stopListeningSpeech();
         startActivity(intent);
     }
