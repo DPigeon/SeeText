@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -136,13 +137,16 @@ public class ProfileActivity extends AppCompatActivity {
                 lensFacing = intent.getIntExtra("lensFacing", -1);
                 mode = intent.getIntExtra("mode", -1);
             }
-            Profile profile = new Profile(languageChosen, sharedPreferenceHelper.getLanguageOutput(), lensFacing, mode);
+            int outputLanguage = sharedPreferenceHelper.getLanguageOutput();
+            Profile profile = new Profile(languageChosen, outputLanguage, lensFacing, mode);
             sharedPreferenceHelper.saveProfile(profile);
             toastMessage("Your profile has been saved!");
             /* Here we download the input model to be able to view translated sentences in definitions */
-            Translator translator = new Translator(getApplicationContext(), languageChosen, sharedPreferenceHelper.getLanguageOutput());
-            FirebaseTranslateRemoteModel model = new FirebaseTranslateRemoteModel.Builder(languageChosen).build();
-            translator.checkAndDownloadModel(model);
+            if (outputLanguage >= 0) {
+                Translator translator = new Translator(getApplicationContext(), languageChosen, outputLanguage);
+                FirebaseTranslateRemoteModel model = new FirebaseTranslateRemoteModel.Builder(languageChosen).build();
+                translator.checkAndDownloadModel(model);
+            }
             goToActivity();
         } else
             toastMessage("You must choose a language!");

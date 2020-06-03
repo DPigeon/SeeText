@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -79,6 +80,9 @@ public class DefinitionActivity extends AppCompatActivity {
             definitionsListView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
         });
+        // Don't show switch option if input same as output
+        if (inputLanguage == outputLanguage)
+            languageSwitch.setVisibility(View.INVISIBLE);
 
         definitionRowItems = new ArrayList<>();
         transDefinitionRowItems = new ArrayList<>();

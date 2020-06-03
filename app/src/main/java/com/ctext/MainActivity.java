@@ -373,19 +373,19 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 Objects.requireNonNull(view.getContext().getDrawable(R.drawable.objects_detection)).clearColorFilter();
                 view.invalidate();
                 if (currentMode != Mode.ObjectDetection) {
-                        currentMode = Mode.ObjectDetection;
-                        speechDetectionImageView.setImageResource(R.drawable.speech_detection);
-                        objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
-                        previewImageView.setImageDrawable(null);
-                        rebindPreview();
-                        previewImageView.setVisibility(View.VISIBLE);
-                        speechTextView.setVisibility(View.INVISIBLE);
-                        audioImageView.setVisibility(View.INVISIBLE);
-                        sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                        if (connectedToInternet())
-                            Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
-                        else
-                            Toast.makeText(this, "You must be connected to internet to use the Object Detector Mode!", Toast.LENGTH_LONG).show();
+                    currentMode = Mode.ObjectDetection;
+                    speechDetectionImageView.setImageResource(R.drawable.speech_detection);
+                    objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
+                    previewImageView.setImageDrawable(null);
+                    rebindPreview();
+                    previewImageView.setVisibility(View.VISIBLE);
+                    speechTextView.setVisibility(View.INVISIBLE);
+                    audioImageView.setVisibility(View.INVISIBLE);
+                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
+                    if (connectedToInternet())
+                        Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
+                    else
+                        Toast.makeText(this, "You must be connected to internet to use the Object Detector Mode!", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
             }
@@ -404,18 +404,18 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 Objects.requireNonNull(view.getContext().getDrawable(R.drawable.speech_detection)).clearColorFilter();
                 view.invalidate();
                 if (currentMode != Mode.SpeechRecognition) {
-                        currentMode = Mode.SpeechRecognition;
-                        faceDetected = false; // Reseted and ready to fire the face check anim
-                        speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
-                        objectDetectionImageView.setImageResource(R.drawable.objects_detection);
-                        previewImageView.setVisibility(View.INVISIBLE);
-                        rebindPreview();
-                        //speechTextView.setVisibility(View.VISIBLE);
-                        sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                        if (connectedToInternet())
-                            Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
-                        else
-                            Toast.makeText(this, "You must be connected to internet to use the Speech Detection Mode!", Toast.LENGTH_LONG).show();
+                    currentMode = Mode.SpeechRecognition;
+                    faceDetected = false; // Reseted and ready to fire the face check anim
+                    speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
+                    objectDetectionImageView.setImageResource(R.drawable.objects_detection);
+                    previewImageView.setVisibility(View.INVISIBLE);
+                    rebindPreview();
+                    //speechTextView.setVisibility(View.VISIBLE);
+                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
+                    if (connectedToInternet())
+                        Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
+                    else
+                        Toast.makeText(this, "You must be connected to internet to use the Speech Detection Mode!", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
             }
@@ -595,24 +595,26 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     protected void checkTtsResources() {
-        Intent checkIntent = new Intent();
-        checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(checkIntent, TTS_DATA_CHECK);
+        Intent intent = new Intent();
+        intent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(intent, TTS_DATA_CHECK);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == TTS_DATA_CHECK) {
             if (resultCode != TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                final Intent tnt = new Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivity(tnt);
+                if (intent != null) {
+                    intent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                    startActivity(intent);
+                }
             }
         }
     }
 
     protected void initializeTTS() {
-        mTTS = new TextToSpeech(getApplicationContext(), status -> {
+        mTTS = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 // We get the output language translated
                 Locale locale = null;
@@ -621,10 +623,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     if (languageAudioWanted.equals(availableLocale.getDisplayLanguage())) { // If the locale voice is installed on the phone then set it
                         locale = new Locale(availableLocale.toString());
                     } else { // If the locale voice not installed then install it
-                        // TODO: find a way to install voices directly
+                        checkTtsResources();
                     }
                 }
-                //String language = FirebaseTranslateLanguage.languageCodeForLanguage(getOutputLanguage());
                 int result = mTTS.setLanguage(locale);
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.d(TAG, "Language not supported");
