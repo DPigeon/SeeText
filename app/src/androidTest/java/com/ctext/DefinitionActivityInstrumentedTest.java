@@ -29,7 +29,7 @@ public class DefinitionActivityInstrumentedTest {
 
     String word = "Test";
     int inputLanguage = FirebaseTranslateLanguage.EN;
-    int outputLanguage = FirebaseTranslateLanguage.IT;
+    int outputLanguage = FirebaseTranslateLanguage.IT; // English <--> Italian
 
     @Rule
     public ActivityTestRule<DefinitionActivity> activityRule =
@@ -47,11 +47,12 @@ public class DefinitionActivityInstrumentedTest {
 
     @Test
     public void testPressingTranslateSwitch() {
-        /* Performs click on save button */
+        /* Performs click on language switch */
         onView(withId(R.id.languageSwitch))
                 .perform(click())
                 .check(matches(isDisplayed()));
 
+        /* Checks if language on switch is the same text */
         onView(withId(R.id.languageSwitch))
                 .check(matches(withText("Italian")));
     }

@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private Camera camera;
     private Preview preview;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
-    private ImageView previewImageView; // Used for object detection
     private GraphicOverlay graphicOverlay;
 
     /* Audio Variables */
@@ -376,9 +375,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     currentMode = Mode.ObjectDetection;
                     speechDetectionImageView.setImageResource(R.drawable.speech_detection);
                     objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
-                    previewImageView.setImageDrawable(null);
                     rebindPreview();
-                    previewImageView.setVisibility(View.VISIBLE);
                     speechTextView.setVisibility(View.INVISIBLE);
                     audioImageView.setVisibility(View.INVISIBLE);
                     sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
@@ -408,9 +405,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     faceDetected = false; // Reseted and ready to fire the face check anim
                     speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
                     objectDetectionImageView.setImageResource(R.drawable.objects_detection);
-                    previewImageView.setVisibility(View.INVISIBLE);
                     rebindPreview();
-                    //speechTextView.setVisibility(View.VISIBLE);
                     sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
                     if (connectedToInternet())
                         Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
@@ -457,7 +452,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         speechTextView = findViewById(R.id.speechTextView);
-        previewImageView = findViewById(R.id.previewImageView);
         faceCheckImageView = findViewById(R.id.faceCheckImageView);
         progressOverlay = findViewById(R.id.progress_overlay);
         if (currentMode == Mode.SpeechRecognition)
