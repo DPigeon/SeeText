@@ -30,6 +30,8 @@ public class TranslateBackObjectAsyncTaskTest {
             protected void onPostExecute(String[] result) {
                 assertNotNull(result);
                 assertTrue(result.length > 0);
+                // For a new cellphone instance on the CI pipeline, the expected will be "Loading..."
+                // TODO: Make it download the right model before test
                 String expectedDefinition = "Un test de l'unité est une méthode d'essai de logiciel par laquelle des unités individuelles du code source sont testées pour déterminer s'ils sont adaptés à l'utilisation.";
                 assertEquals(expectedDefinition, result[1]);
                 String expectedExample = "J'ai écrit quelques tests unitaires hier pour tester des parties de mon logiciel.";
