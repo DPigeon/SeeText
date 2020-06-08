@@ -1,0 +1,61 @@
+name: CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - '!integration'
+      - 'master'
+  push:
+    branches:
+      - '!integration'
+      - 'master'
+
+jobs:     
+  job_1:
+    name: Build APK
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+    - uses: actions/checkout@v2
+      
+    - name: Setup Java JDK
+      uses: actions/setup-java@v1.3.0
+      with:
+        java-version: 1.8
+          
+    - name: Build debug APK
+      run: bash ./gradlew assembleRelease
+      
+    - name: Upload APK
+      uses: actions/upload-artifact@v2
+      with:
+        name: app
+        path: app/build/outputs/apk/release/app.apk # Use secrets here
+        
+  job_2:
+    name: Signing APK
+    runs-on: ubuntu-latest
+    steps:
+    - name: Signing Android Release
+    - uses: r0adkll/sign-android-release@v1
+    - with:
+        releaseDirectory: app/build/outputs/apk/release
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
+   
+  job_3: # $25 to publish app on Google Play Developer https://play.google.com/apps/publish/signup/
+    name: Deployment
+    runs-on: ubuntu-latest
+    steps:
+    - name: TODO: Deploy to Android Play Store
+    # - uses: r0adkll/upload-google-play@v1 # https://github.com/marketplace/actions/upload-android-release-to-play-store
+    # - with:
+        # serviceAccountJson: ${{ SERVICE_ACCOUNT_JSON }} # TODO
+        # packageName: com.ctext
+        # releaseFile: app/build/outputs/apk/release/app.apk
+        # track: alpha
+        # userFraction: 0.33 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
+        # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page
+        # mappingFile: /app/build/outputs/mapping/release/mapping.txt
