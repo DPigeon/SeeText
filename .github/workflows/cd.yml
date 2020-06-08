@@ -1,6 +1,6 @@
 name: CD Pipeline
 
-on:
+on: # Should it also be on push ? Or only PR
   pull_request:
     branches:
       - '!integration'
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-    - uses: actions/checkout@v2
+      uses: actions/checkout@v2
       
     - name: Setup Java JDK
       uses: actions/setup-java@v1.3.0
@@ -33,26 +33,28 @@ jobs:
         path: app/build/outputs/apk/release/app.apk # Use secrets here
         
   job_2:
-    name: Signing APK
+    needs: job_1
+    name: Sign APK
     runs-on: ubuntu-latest
     steps:
     - name: Signing Android Release
-    - uses: r0adkll/sign-android-release@v1
-    - with:
+      uses: r0adkll/sign-android-release@v1
+      with:
         releaseDirectory: app/build/outputs/apk/release
         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
         alias: ${{ secrets.ALIAS }}
         keyStorePassword: ${{ secrets.KEY_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
    
-  job_3: # $25 to publish app on Google Play Developer https://play.google.com/apps/publish/signup/
-    name: Deployment
-    runs-on: ubuntu-latest
-    steps:
-    - name: TODO: Deploy to Android Play Store
-    # - uses: r0adkll/upload-google-play@v1 # https://github.com/marketplace/actions/upload-android-release-to-play-store
-    # - with:
-        # serviceAccountJson: ${{ SERVICE_ACCOUNT_JSON }} # TODO
+  # job_3: # $25 to publish app on Google Play Developer https://play.google.com/apps/publish/signup/
+    # needs: job_2
+    # name: Deployment
+    # runs-on: ubuntu-latest
+    # steps:
+    # - name: TODO: Deploy to Android Play Store
+    #   uses: r0adkll/upload-google-play@v1 # https://github.com/marketplace/actions/upload-android-release-to-play-store
+    #   with:
+        # serviceAccountJson: ${{ SERVICE_ACCOUNT_JSON }} # TODO put service account json here in secrets
         # packageName: com.ctext
         # releaseFile: app/build/outputs/apk/release/app.apk
         # track: alpha
