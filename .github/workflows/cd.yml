@@ -34,6 +34,16 @@ jobs:
         
   job_2:
     needs: job_1
+    name: Artifactory Cleanup
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clean up
+      uses: glassechidna/artifact-cleaner@master
+      with:
+          minimumAge: 86400 # All artifacts at least one day old
+        
+  job_3:
+    needs: job_2
     name: Sign APK
     runs-on: ubuntu-latest
     steps:
