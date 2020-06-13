@@ -57,7 +57,7 @@ jobs:
       with:
         serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
         packageName: com.ctext
-        releaseFile: ${{ steps.sign-app.outputs.signedReleaseFile }}
+        releaseFile: ${{ env.SIGNED_RELEASE_FILE }}
         track: alpha
         userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
         # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page
