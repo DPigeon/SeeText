@@ -1,6 +1,13 @@
 # CText
 <img width="100" src="https://user-images.githubusercontent.com/37888675/80987542-321b1000-8e00-11ea-8d28-9c410e4b01df.png">
-A mobile application that shows you what you say & detects different objects in different languages. 
+A mobile application that shows you what you say & detects different objects in different languages.
+
+## Run Local Build
+To make sure the build passes, run the test script on the root directory
+
+```
+./test.sh
+``` 
 
 ## UI Icons Authors:
 <a href="https://www.flaticon.com/authors/google">Google: Switch Camera Button Free Icon</a>
