@@ -29,23 +29,15 @@ jobs:
         alias: ${{ secrets.ALIAS }}
         keyStorePassword: ${{ secrets.KEY_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
-      
-  job_2:
-    needs: job_1
-    name: Publish
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    
+        
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
         name: app
-        path: app/build/outputs/apk/release/app.apk
+        path: ${{ steps.sign-app.outputs.signedReleaseFile }}
         
-  job_3:
-    needs: job_2
+  job_2:
+    needs: job_1
     name: Artifactory Cleanup
     runs-on: ubuntu-latest
     steps:
@@ -54,8 +46,8 @@ jobs:
       with:
           minimumAge: 86400 # All artifacts at least one day old
         
-  job_4:
-    needs: job_3
+  job_3:
+    needs: job_2
     name: Deployment
     runs-on: ubuntu-latest
     steps:
@@ -64,7 +56,7 @@ jobs:
       with:
         serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
         packageName: com.ctext
-        releaseFile: app/build/outputs/apk/release/app.apk
+        releaseFile: ${{ steps.sign-app.outputs.signedReleaseFile }}
         track: alpha
         userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
         # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page
