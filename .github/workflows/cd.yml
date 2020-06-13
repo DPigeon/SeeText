@@ -1,14 +1,9 @@
 name: CD Pipeline
 
 on: # Should it also be on push ? Or only PR
-  pull_request:
-    branches:
-      - '!integration'
-      - 'master'
   push:
     branches:
-      - '!integration'
-      - 'master'
+      - master
 
 jobs:     
   job_1:
