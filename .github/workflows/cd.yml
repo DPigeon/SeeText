@@ -1,0 +1,72 @@
+name: CD Pipeline
+
+on: # Should it also be on push ? Or only PR
+  push:
+    branches:
+      - master
+
+jobs:     
+  job_1:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Setup Java JDK
+      uses: actions/setup-java@v1.3.0
+      with:
+        java-version: 1.8
+          
+    - name: Build debug APK
+      run: bash ./gradlew assembleRelease
+      
+    - name: Signing Android Release
+      uses: r0adkll/sign-android-release@v1
+      with:
+        releaseDirectory: app/build/outputs/apk/release
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
+        signedReleaseFile: app/build/outputs/apk/release/app.apk # Use secrets here
+      
+  job_2:
+  needs: job_1
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: app
+        path: app/build/outputs/apk/release/app.apk # Use secrets here
+        
+  job_3:
+    needs: job_2
+    name: Artifactory Cleanup
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clean up
+      uses: glassechidna/artifact-cleaner@master
+      with:
+          minimumAge: 86400 # All artifacts at least one day old
+        
+  job_4:
+    needs: job_3
+    name: Deployment
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to Play Store
+      uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
+        packageName: com.ctext
+        releaseFile: app/build/outputs/apk/release/app.apk
+        track: alpha
+        userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
+        # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page
+        # mappingFile: /app/build/outputs/mapping/release/mapping.txt

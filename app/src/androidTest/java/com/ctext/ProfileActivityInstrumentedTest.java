@@ -3,6 +3,7 @@ package com.ctext;
 import android.content.Context;
 import android.content.Intent;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;

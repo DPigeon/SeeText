@@ -1,9 +1,10 @@
 name: CI Pipeline
 
 on:
-  push:
+  pull_request:
     branches:
-      - 'integration'
+      - '*'
+      - integration
 
 jobs:
   job_1:
@@ -16,7 +17,6 @@ jobs:
     - name: Run Lint
       run: bash ./gradlew lint
       
-    
   job_2:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -32,15 +32,23 @@ jobs:
     - name: Run Unit Tests
       run: bash ./gradlew test --stacktrace
       
-  job_3: # Let's configure multiple configurations later
-    name: Instrumented Tests
-    runs-on: macos-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+  # job_3: # Let's configure multiple configurations later
+    # needs: job_2
+    # name: Instrumented Tests
+    # runs-on: macos-latest
+    # strategy:
+      # matrix:
+        # api-level: [21, 23, 29]
+        # target: [default, google_apis]
+    # steps:
+    # - name: Checkout
+      # uses: actions/checkout@v2
 
-    - name: Run Instrumented Tests
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: 29
-        script: ./gradlew connectedCheck
+    # - name: Run Instrumented Tests
+      # uses: reactivecircus/android-emulator-runner@v2 # Does building debug for us
+      # with:
+        # api-level: ${{ matrix.api-level }}
+        # target: ${{ matrix.target }}
+        # arch: x86_64
+        # profile: Nexus 6
+        # script: ./gradlew connectedCheck --stacktrace
