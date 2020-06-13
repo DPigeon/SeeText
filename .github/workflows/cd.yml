@@ -4,6 +4,9 @@ on: # Should it also be on push ? Or only PR
   push:
     branches:
       - master
+  merge:
+    branches:
+      - master
 
 jobs:     
   job_1:
