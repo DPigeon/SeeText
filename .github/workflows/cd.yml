@@ -56,18 +56,18 @@ jobs:
         keyStorePassword: ${{ secrets.KEY_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
    
-  # job_3: # $25 to publish app on Google Play Developer https://play.google.com/apps/publish/signup/
-    # needs: job_2
-    # name: Deployment
-    # runs-on: ubuntu-latest
-    # steps:
-    # - name: TODO: Deploy to Android Play Store
-    #   uses: r0adkll/upload-google-play@v1 # https://github.com/marketplace/actions/upload-android-release-to-play-store
-    #   with:
-        # serviceAccountJson: ${{ SERVICE_ACCOUNT_JSON }} # TODO put service account json here in secrets
-        # packageName: com.ctext
-        # releaseFile: app/build/outputs/apk/release/app.apk
-        # track: alpha
-        # userFraction: 0.33 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
+  job_4:
+    needs: job_3
+    name: Deployment
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to Play Store
+      uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
+        packageName: com.ctext
+        releaseFile: app/build/outputs/apk/release/app.apk
+        track: alpha
+        userFraction: 0.0 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
         # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page
         # mappingFile: /app/build/outputs/mapping/release/mapping.txt
