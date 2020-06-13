@@ -1,14 +1,9 @@
 name: CD Pipeline
 
-on: # Should it also be on push ? Or only PR
+on: 
   push:
     branches:
-      - '!integration'
-      - 'master'
-  merge:
-    branches:
-      - '!integration'
-      - 'master'
+      - master
 
 jobs:     
   job_1:
@@ -37,7 +32,7 @@ jobs:
         signedReleaseFile: app/build/outputs/apk/release/app.apk # Use secrets here
       
   job_2:
-  needs: job_1
+    needs: job_1
     name: Publish
     runs-on: ubuntu-latest
     steps:
