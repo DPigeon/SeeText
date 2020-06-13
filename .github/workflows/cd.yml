@@ -3,7 +3,8 @@ name: CD Pipeline
 on: 
   push:
     branches:
-      - master
+      - '!integration'
+      - 'master'
 
 jobs:     
   job_1:
