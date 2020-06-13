@@ -43,6 +43,7 @@ public class MainActivityInstrumentedTest {
             new IntentsTestRule<>(MainActivity.class);
 
     @Test
+    @Ignore("Needs rework")
     public void testPressingProfileButton() {
         Intents.init();
         onView(withId(R.id.userProfileImageView))

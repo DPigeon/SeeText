@@ -5,6 +5,10 @@ on:
     branches:
       - '!master'
       - 'integration'
+  push:
+    branches:
+      - '!integration'
+      - 'master'
 
 jobs:
   job_1:

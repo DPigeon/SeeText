@@ -9,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -34,6 +35,7 @@ public class TranslateBackObjectAsyncTaskInstrumentedTest {
     }
 
     @Test
+    @Ignore("Needs rework")
     public void testTranslateBackObjectToFrench() throws InterruptedException {
         final CountDownLatch latch = new CountDownLatch(1);
         TranslateBackObjectAsyncTask testTask = new TranslateBackObjectAsyncTask(context, outputLanguage) {

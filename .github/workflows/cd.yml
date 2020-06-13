@@ -5,10 +5,10 @@ on: # Should it also be on push ? Or only PR
     branches:
       - '!integration'
       - 'master'
-  push:
-    branches:
-      - '!integration'
-      - 'master'
+  # push:
+    # branches:
+      # - '!integration'
+      # - 'master'
 
 jobs:     
   job_1:
