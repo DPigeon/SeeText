@@ -32,7 +32,7 @@ jobs:
       
   job_2:
     needs: job_1
-    name: Publish
+    name: Publish Artifact
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
