@@ -22,6 +22,7 @@ jobs:
       run: bash ./gradlew assembleRelease
       
     - name: Signing Android Release
+      id: sign-app
       uses: r0adkll/sign-android-release@v1
       with:
         releaseDirectory: app/build/outputs/apk/release
