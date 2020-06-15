@@ -7,7 +7,7 @@ on:
 
 jobs:     
   job_1:
-    name: Deployment
+    name: Build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -36,19 +36,32 @@ jobs:
       with:
         name: app
         path: ${{ steps.sign-app.outputs.signedReleaseFile }}
-
-    - name: Deploy to Play Store
-      uses: r0adkll/upload-google-play@v1
+        
+  job_2:
+    name: Deployment
+    runs-on: ubuntu-latest
+    needs: job_1
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Download Artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: app # Downloaded to the current directory
+         
+    - name: Upload to Play Store
+      uses: r0adkll/upload-google-play@v1.0.4
       with:
         serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
         packageName: com.ctext
-        releaseFile: ${{ steps.sign-app.outputs.signedReleaseFile }}
+        releaseFile: app-release-unsigned.apk
         track: alpha
         userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
         # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page
         # mappingFile: /app/build/outputs/mapping/release/mapping.txt
         
-  job_2:
+  job_3:
     name: Artifactory Cleanup
     runs-on: ubuntu-latest
     steps:
