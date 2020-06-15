@@ -49,16 +49,13 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: app # Downloaded to the current directory
-      
-    - name: List directories
-      run: ls -R
          
     - name: Upload to Play Store
       uses: r0adkll/upload-google-play@v1.0.4
       with:
         serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
         packageName: com.ctext
-        releaseFile: app-release-unsigned.apk
+        releaseFile: app-release-unsigned-signed.apk
         track: alpha
         userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
         # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page
