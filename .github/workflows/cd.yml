@@ -49,13 +49,19 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: app # Downloaded to the current directory
+      
+    - name: Access Directory
+      run: cd /home/runner/work/CText/CText/app
+      
+    - name: ls
+      run: ls
          
     - name: Upload to Play Store
       uses: r0adkll/upload-google-play@v1.0.4
       with:
         serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
         packageName: com.ctext
-        releaseFile: app/app-release-unsigned.apk
+        releaseFile: app-release-unsigned.apk
         track: alpha
         userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
         # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page
