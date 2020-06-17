@@ -45,9 +45,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       
-    - name: Grant Gradle Rights
-      run: chmod +x ./gradlew
-      
     - name: Download Artifacts
       uses: actions/download-artifact@v2
       with:
