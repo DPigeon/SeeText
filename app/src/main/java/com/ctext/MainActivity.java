@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -43,7 +45,6 @@ import com.ctext.utils.Utils;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -52,6 +53,7 @@ import java.util.concurrent.Executors;
 
 import ai.fritz.core.Fritz;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private static final int TTS_DATA_CHECK = 90;
     private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
     private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
-    private ImageView userProfileImageView, cameraModeImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView;
+    private ImageView userProfileImageView, cameraModeImageView, flashLightImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView;
     private Spinner languageSpinner;
     private TextView languageTextView;
     private boolean faceProcessing = false; // For throttling the calls
@@ -88,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private Preview preview;
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
     private GraphicOverlay graphicOverlay;
+    private boolean flashLightStatus = false;
+    private boolean hasCameraFlash;
 
     /* Audio Variables */
     private Translator translator;
@@ -273,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     public void onEvent(int eventType, Bundle params) {}
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressLint({"ClickableViewAccessibility", "WrongViewCast"})
     protected void setupUI() {
         previewView = findViewById(R.id.previewView);
@@ -318,6 +323,19 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             }
 
             return true;
+        });
+
+        flashLightImageView = findViewById(R.id.flashLightImageView);
+        flashLightImageView.setOnClickListener(view -> {
+            if (hasCameraFlash) {
+                if (flashLightStatus)
+                    flashLight(true, R.drawable.flash_light_enabled);
+                else
+                    flashLight(false, R.drawable.flash_light);
+            } else {
+                Toast.makeText(MainActivity.this, "No flash available on your device",
+                        Toast.LENGTH_SHORT).show();
+            }
         });
 
         languageSpinner = findViewById(R.id.languageSpinner);
@@ -460,6 +478,19 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void flashLight(boolean status, int imageResourceId) {
+        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+
+        try {
+            String cameraId = Objects.requireNonNull(cameraManager).getCameraIdList()[0];
+            cameraManager.setTorchMode(cameraId, status);
+            flashLightStatus = status;
+            flashLightImageView.setImageResource(imageResourceId);
+        } catch (CameraAccessException e) {
+        }
+    }
+
     protected void faceCheckAnimation() {
         if (!faceDetected && currentMode != Mode.ObjectDetection ) {
             faceDetected = true; // Run once when mode chosen
@@ -543,6 +574,9 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) // Videos
             ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS);
+
+        // Flash Camera
+        hasCameraFlash = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
     }
 
     protected void initializeRecognition() {

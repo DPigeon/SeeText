@@ -53,7 +53,16 @@
         android:layout_gravity="right"
         app:srcCompat="@drawable/camera_mode" />
 
-    <ImageView
+	<ImageView
+		android:id="@+id/flashLightImageView"
+		android:layout_width="30dp"
+		android:layout_height="35dp"
+		android:layout_gravity="right"
+		android:layout_marginTop="65dp"
+		android:layout_marginRight="19dp"
+		app:srcCompat="@drawable/flash_light" />
+
+	<ImageView
         android:id="@+id/languagesImageView"
         android:layout_width="56dp"
         android:layout_height="51dp"
