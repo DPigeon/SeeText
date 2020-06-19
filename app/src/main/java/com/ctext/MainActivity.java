@@ -277,7 +277,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     public void onEvent(int eventType, Bundle params) {}
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @SuppressLint({"ClickableViewAccessibility", "WrongViewCast"})
     protected void setupUI() {
         previewView = findViewById(R.id.previewView);
@@ -326,16 +325,25 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         });
 
         flashLightImageView = findViewById(R.id.flashLightImageView);
-        flashLightImageView.setOnClickListener(view -> {
-            if (hasCameraFlash) {
-                if (flashLightStatus)
-                    flashLight(true, R.drawable.flash_light_enabled);
-                else
-                    flashLight(false, R.drawable.flash_light);
-            } else {
-                Toast.makeText(MainActivity.this, "No flash available on your device",
-                        Toast.LENGTH_SHORT).show();
+        flashLightImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.flash_light)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+                view.invalidate();
             }
+            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.flash_light)).clearColorFilter();
+                view.invalidate();
+                if (hasCameraFlash) {
+                    flashLightStatus = !flashLightStatus;
+                    flashLight(flashLightStatus);
+                } else {
+                    Toast.makeText(MainActivity.this, "No flash available on your device!",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            return true;
         });
 
         languageSpinner = findViewById(R.id.languageSpinner);
@@ -478,15 +486,17 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    private void flashLight(boolean status, int imageResourceId) {
+    private void flashLight(boolean status) {
         CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
 
         try {
             String cameraId = Objects.requireNonNull(cameraManager).getCameraIdList()[0];
             cameraManager.setTorchMode(cameraId, status);
             flashLightStatus = status;
-            flashLightImageView.setImageResource(imageResourceId);
+            if (flashLightStatus)
+                flashLightImageView.setImageResource(R.drawable.flash_light_enabled);
+            else
+                flashLightImageView.setImageResource(R.drawable.flash_light);
         } catch (CameraAccessException e) {
         }
     }
