@@ -18,24 +18,29 @@ jobs:
       with:
         java-version: 1.8
           
-    - name: Build APK
-      run: bash ./gradlew assembleRelease
-      
-    - name: Signing Android Release
+    - name: Build & Signing APK
       id: sign-app
-      uses: r0adkll/sign-android-release@v1
-      with:
-        releaseDirectory: app/build/outputs/apk/release
-        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-        alias: ${{ secrets.ALIAS }}
-        keyStorePassword: ${{ secrets.KEY_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
+      run: bash ./gradlew assembleRelease
+           -Pandroid.injected.signing.store.file=${{ secrets.SIGNING_KEY }} 
+           -Pandroid.injected.signing.store.password=${{ secrets.KEY_PASSWORD }} 
+           -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} 
+           -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+      
+    # - name: Signing Android Release
+      # id: sign-app
+      # uses: r0adkll/sign-android-release@v1
+      # with:
+        # releaseDirectory: app/build/outputs/apk/release
+        # signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        # alias: ${{ secrets.ALIAS }}
+        # keyStorePassword: ${{ secrets.KEY_PASSWORD }}
+        # keyPassword: ${{ secrets.KEY_PASSWORD }}
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
         name: app
-        path: ${{ steps.sign-app.outputs.signedReleaseFile }}
+        path: app/build/outputs/apk/release/app-release.apk
         
   job_2:
     name: Deployment
@@ -55,7 +60,7 @@ jobs:
       with:
         serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
         packageName: com.ctext
-        releaseFile: app-release-unsigned-signed.apk
+        releaseFile: app-release.apk
         track: alpha
         userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
         # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page

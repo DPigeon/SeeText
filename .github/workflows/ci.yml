@@ -18,6 +18,17 @@ jobs:
       run: bash ./gradlew lint
       
   job_2:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Build Debug APK
+      run: bash ./gradlew assembleDebug
+    
+  job_3:
+    needs: job_2
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
@@ -32,8 +43,8 @@ jobs:
     - name: Run Unit Tests
       run: bash ./gradlew test --stacktrace
       
-  # job_3: # Let's configure multiple configurations later
-    # needs: job_2
+  # job_4: # Let's configure multiple configurations later
+    # needs: job_3
     # name: Instrumented Tests
     # runs-on: macos-latest
     # strategy:
