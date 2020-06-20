@@ -27,3 +27,5 @@ To make sure the build passes, run the test script on the root directory
 <a href="https://www.freepik.com/flaticon">Freepik: Audio Sound Icon</a>
 
 <a href="https://www.flaticon.com/authors/vectors-market">Vectors Market: Document Icon</a>
+
+<a href="https://www.flaticon.com/authors/freepik">Freepik: CameraFlash</a>
