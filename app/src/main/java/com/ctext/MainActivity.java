@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CaptureRequest;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -56,13 +57,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
+import androidx.camera.core.CameraInfo;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
 
 /* MainActivity.java
 * The MainActivity with CameraX library, Speech Recognition & a Face Detection callback to update the speech text.
@@ -91,7 +95,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private int lensFacing = CameraSelector.LENS_FACING_BACK;
     private GraphicOverlay graphicOverlay;
     private boolean flashLightStatus = false;
-    private boolean hasCameraFlash;
 
     /* Audio Variables */
     private Translator translator;
@@ -334,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 Objects.requireNonNull(view.getContext().getDrawable(R.drawable.flash_light)).clearColorFilter();
                 view.invalidate();
-                if (hasCameraFlash) {
+                if (camera.getCameraInfo().hasFlashUnit()) {
                     flashLightStatus = !flashLightStatus;
                     flashLight(flashLightStatus);
                 } else {
@@ -487,18 +490,12 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     private void flashLight(boolean status) {
-        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-
-        try {
-            String cameraId = Objects.requireNonNull(cameraManager).getCameraIdList()[0];
-            cameraManager.setTorchMode(cameraId, status);
-            flashLightStatus = status;
-            if (flashLightStatus)
-                flashLightImageView.setImageResource(R.drawable.flash_light_enabled);
-            else
-                flashLightImageView.setImageResource(R.drawable.flash_light);
-        } catch (CameraAccessException e) {
-        }
+        camera.getCameraControl().enableTorch(status);
+        flashLightStatus = status;
+        if (status)
+            flashLightImageView.setImageResource(R.drawable.flash_light_enabled);
+        else
+            flashLightImageView.setImageResource(R.drawable.flash_light);
     }
 
     protected void faceCheckAnimation() {
@@ -533,7 +530,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     @SuppressLint("UnsafeExperimentalUsageError")
     protected void bindPreview(@NonNull ProcessCameraProvider cameraProvider, int lensFacing) {
-        preview = new Preview.Builder().build();
+        preview = new Preview.Builder()
+                .build();
         CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(lensFacing).build();
         ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -584,9 +582,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) // Videos
             ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS);
-
-        // Flash Camera
-        hasCameraFlash = getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
     }
 
     protected void initializeRecognition() {

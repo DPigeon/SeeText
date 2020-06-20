@@ -3,7 +3,7 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 29
-    ndkVersion "21.2.6472646" // For CD pipeline
+    ndkVersion "21.3.6528147" // For CD pipeline
     buildToolsVersion "29.0.2"
 
     defaultConfig {
@@ -11,7 +11,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
-        versionName "2.2.1-alpha"
+        versionName "2.3-alpha"
         // To improve image processing performance
         renderscriptTargetApi 21
         renderscriptSupportModeEnabled true
