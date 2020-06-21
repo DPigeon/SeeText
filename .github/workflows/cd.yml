@@ -28,6 +28,9 @@ jobs:
            -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} 
            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
            
+    - name: directory
+      run: cd app/build/outputs/apk/release    
+     
     - name: ls
       run: ls
         
