@@ -27,6 +27,9 @@ jobs:
            -Pandroid.injected.signing.store.password=${{ secrets.KEY_PASSWORD }} 
            -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} 
            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+           
+    - name: ls
+      run: ls
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
