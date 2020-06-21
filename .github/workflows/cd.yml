@@ -17,6 +17,9 @@ jobs:
       uses: actions/setup-java@v1.3.0
       with:
         java-version: 1.8
+        
+    - name: Uninstall NDK
+      run: sdkmanager --uninstall 'ndk-bundle'
           
     - name: Decode Keystore
       run: echo ${{ secrets.SIGNING_KEY }} | base64 --decode > my.keystore
