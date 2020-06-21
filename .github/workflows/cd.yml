@@ -32,7 +32,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: app
-        path: app/build/outputs/apk/release/app-release.apk
+        path: app/build/outputs/apk/release/app-release.aab
         
   job_2:
     name: Deployment
@@ -52,7 +52,7 @@ jobs:
       with:
         serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
         packageName: com.seetext
-        releaseFile: app-release.apk
+        releaseFile: app-release.aab
         track: alpha
         userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
         # whatsNewDirectory: /distribution/whatsnew # release notes for whats new page
