@@ -22,7 +22,6 @@ jobs:
       run: echo ${{ secrets.SIGNING_KEY }} | base64 --decode > my.keystore
       
     - name: Build & Signing APK
-      id: sign-app
       run: bash ./gradlew assembleRelease
            -Pandroid.injected.signing.store.file=$(pwd)/my.keystore 
            -Pandroid.injected.signing.store.password=${{ secrets.KEY_PASSWORD }} 
