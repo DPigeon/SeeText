@@ -29,7 +29,7 @@ jobs:
            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
            
     - name: directory
-      run: cd app/build/outputs/release    
+      run: cd app/build/outputs/bundle/release    
      
     - name: ls
       run: ls
