@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CText</string>
+    <string name="app_name">SeeText</string>
     <string name="edit_profile">Edit</string>
     <string-array name="languages_array">
         <item>Afrikaans</item>

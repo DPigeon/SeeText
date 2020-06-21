@@ -21,9 +21,6 @@ jobs:
     - name: Decode Keystore
       run: echo ${{ secrets.SIGNING_KEY }} | base64 --decode > my.keystore
       
-    - name: Directory
-      run: ls
-      
     - name: Build & Signing APK
       id: sign-app
       run: bash ./gradlew assembleRelease
@@ -31,16 +28,6 @@ jobs:
            -Pandroid.injected.signing.store.password=${{ secrets.KEY_PASSWORD }} 
            -Pandroid.injected.signing.key.alias=${{ secrets.ALIAS }} 
            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
-      
-    # - name: Signing Android Release
-      # id: sign-app
-      # uses: r0adkll/sign-android-release@v1
-      # with:
-        # releaseDirectory: app/build/outputs/apk/release
-        # signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-        # alias: ${{ secrets.ALIAS }}
-        # keyStorePassword: ${{ secrets.KEY_PASSWORD }}
-        # keyPassword: ${{ secrets.KEY_PASSWORD }}
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v2

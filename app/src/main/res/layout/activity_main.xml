@@ -25,7 +25,7 @@
 		android:textStyle="bold"
 		android:visibility="invisible" />
 
-	<com.ctext.utils.GraphicOverlay
+	<com.seetext.utils.GraphicOverlay
 		android:id="@+id/graphicOverlay"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent" />
