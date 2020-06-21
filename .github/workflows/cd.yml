@@ -17,9 +17,6 @@ jobs:
       uses: actions/setup-java@v1.3.0
       with:
         java-version: 1.8
-        
-    - name: Uninstall NDK
-      run: sdkmanager --uninstall 'ndk-bundle'
           
     - name: Decode Keystore
       run: echo ${{ secrets.SIGNING_KEY }} | base64 --decode > my.keystore
@@ -55,7 +52,7 @@ jobs:
       uses: r0adkll/upload-google-play@v1.0.4
       with:
         serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT }}
-        packageName: com.ctext
+        packageName: com.seetext
         releaseFile: app-release.apk
         track: alpha
         userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
