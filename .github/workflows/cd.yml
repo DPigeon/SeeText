@@ -29,16 +29,14 @@ jobs:
            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
            
     - name: directory
-      run: cd app/build/outputs/bundle/release    
-     
-    - name: ls
-      run: ls
+      run: cd app/build/outputs/bundle/release
+           ls
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
         name: app
-        path: app/build/outputs/apk/release/app-release.aab
+        path: app/build/outputs/bundle/release/app-release.aab
         
   job_2:
     name: Deployment
