@@ -279,66 +279,54 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW); // TextureView
         graphicOverlay = findViewById(R.id.graphicOverlay);
 
+        /* Touch button setup */
         userProfileImageView = findViewById(R.id.userProfileImageView);
         userProfileImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.user_profile)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
-                view.invalidate();
-            }
-            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.user_profile)).clearColorFilter();
-                view.invalidate();
-                // Go to the profile activity with a nice slide animation
-                goToProfileActivity("no");
-            }
-
+            touchActions(action, R.drawable.user_profile, view);
             return true;
         });
 
         cameraModeImageView = findViewById(R.id.cameraModeImageView);
         cameraModeImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.camera_mode)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
-                view.invalidate();
-            }
-            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.camera_mode)).clearColorFilter();
-                view.invalidate();
-                if (lensFacing == CameraSelector.LENS_FACING_BACK) {
-                    lensFacing = CameraSelector.LENS_FACING_FRONT;
-                } else {
-                    lensFacing = CameraSelector.LENS_FACING_BACK;
-                }
-                rebindPreview();
-                speechTextView.setVisibility(View.INVISIBLE); // Reset textView
-                sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                audioImageView.setVisibility(View.INVISIBLE);
-            }
-
+            touchActions(action, R.drawable.camera_mode, view);
             return true;
         });
 
         flashLightImageView = findViewById(R.id.flashLightImageView);
         flashLightImageView.setOnTouchListener((view, motionEvent) -> {
             int action = motionEvent.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.flash_light)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
-                view.invalidate();
-            }
-            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.flash_light)).clearColorFilter();
-                view.invalidate();
-                if (camera.getCameraInfo().hasFlashUnit()) {
-                    flashLightStatus = !flashLightStatus;
-                    flashLight(flashLightStatus);
-                } else {
-                    Toast.makeText(MainActivity.this, "No flash available on your device!",
-                            Toast.LENGTH_SHORT).show();
-                }
-            }
+            touchActions(action, R.drawable.flash_light, view);
+            return true;
+        });
 
+        languageTextView = findViewById(R.id.languageTextView);
+        languagesImageView = findViewById(R.id.languagesImageView);
+        languagesImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            touchActions(action, R.drawable.languages, view);
+            return true;
+        });
+
+        objectDetectionImageView = findViewById(R.id.objectDetectionImageView);
+        objectDetectionImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            touchActions(action, R.drawable.objects_detection, view);
+            return true;
+        });
+
+        speechDetectionImageView = findViewById(R.id.speechDetectionImageView);
+        speechDetectionImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            touchActions(action, R.drawable.speech_detection, view);
+            return true;
+        });
+
+        audioImageView = findViewById(R.id.audioImageView);
+        audioImageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            touchActions(action, R.drawable.tts_audio, view);
             return true;
         });
 
@@ -362,103 +350,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-        languageTextView = findViewById(R.id.languageTextView);
-        languagesImageView = findViewById(R.id.languagesImageView);
-        languagesImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.languages)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
-                view.invalidate();
-            }
-            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.languages)).clearColorFilter();
-                view.invalidate();
-                languageSpinner.performClick();
-            }
-
-            return true;
-        });
-
-        objectDetectionImageView = findViewById(R.id.objectDetectionImageView);
-        objectDetectionImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.objects_detection)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
-                view.invalidate();
-            }
-            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.objects_detection)).clearColorFilter();
-                view.invalidate();
-                if (currentMode != Mode.ObjectDetection) {
-                    currentMode = Mode.ObjectDetection;
-                    speechDetectionImageView.setImageResource(R.drawable.speech_detection);
-                    objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
-                    rebindPreview();
-                    speechTextView.setVisibility(View.INVISIBLE);
-                    audioImageView.setVisibility(View.INVISIBLE);
-                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                    if (connectedToInternet())
-                        Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
-                    else
-                        Toast.makeText(this, "You must be connected to internet to use the Object Detector Mode!", Toast.LENGTH_LONG).show();
-                } else
-                    Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
-            }
-
-            return true;
-        });
-
-        speechDetectionImageView = findViewById(R.id.speechDetectionImageView);
-        speechDetectionImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.speech_detection)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
-                view.invalidate();
-            }
-            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.speech_detection)).clearColorFilter();
-                view.invalidate();
-                if (currentMode != Mode.SpeechRecognition) {
-                    currentMode = Mode.SpeechRecognition;
-                    faceDetected = false; // Reseted and ready to fire the face check anim
-                    speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
-                    objectDetectionImageView.setImageResource(R.drawable.objects_detection);
-                    rebindPreview();
-                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                    if (connectedToInternet())
-                        Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
-                    else
-                        Toast.makeText(this, "You must be connected to internet to use the Speech Detection Mode!", Toast.LENGTH_LONG).show();
-                } else
-                    Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
-            }
-
-            return true;
-        });
-
-        audioImageView = findViewById(R.id.audioImageView);
-        audioImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.tts_audio)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
-                view.invalidate();
-            }
-            else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                Objects.requireNonNull(view.getContext().getDrawable(R.drawable.tts_audio)).clearColorFilter();
-                view.invalidate();
-                // Start TTS
-                if (mTTS != null) {
-                    if (!mTTS.isSpeaking())
-                        startTTS(ttsSentence);
-                    Log.d(TAG, ttsSentence);
-                }
-            }
-
-            return true;
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -467,8 +359,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 bindPreview(cameraProvider, lensFacing); // Default facing back
             } catch (ExecutionException | InterruptedException e) {
-                // No errors need to be handled for this Future
-                // This should never be reached
+                // Should never be reached
             }
         }, ContextCompat.getMainExecutor(this));
 
@@ -476,19 +367,94 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         speechTextView = findViewById(R.id.speechTextView);
         faceCheckImageView = findViewById(R.id.faceCheckImageView);
         progressOverlay = findViewById(R.id.progress_overlay);
-        if (currentMode == Mode.SpeechRecognition)
+        if (currentMode == Mode.SpeechRecognition) {
             speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
-        else
+        } else {
             objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
+        }
+    }
+
+    private void touchActions(int action, int drawable, View view) {
+        if (action == MotionEvent.ACTION_DOWN) {
+            Objects.requireNonNull(view.getContext().getDrawable(drawable)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
+            view.invalidate();
+        } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            Objects.requireNonNull(view.getContext().getDrawable(drawable)).clearColorFilter();
+            view.invalidate();
+            if (drawable == R.drawable.user_profile) {
+                goToProfileActivity("no"); // Go to the profile activity with a nice slide animation
+            } else if (drawable == R.drawable.camera_mode) {
+                if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+                    lensFacing = CameraSelector.LENS_FACING_FRONT;
+                } else {
+                    lensFacing = CameraSelector.LENS_FACING_BACK;
+                }
+                rebindPreview();
+                speechTextView.setVisibility(View.INVISIBLE); // Reset textView
+                sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
+                audioImageView.setVisibility(View.INVISIBLE);
+            } else if (drawable == R.drawable.flash_light) {
+                if (camera.getCameraInfo().hasFlashUnit()) {
+                    flashLightStatus = !flashLightStatus;
+                    flashLight(flashLightStatus);
+                } else {
+                    Toast.makeText(MainActivity.this, "No flash available on your device!",
+                            Toast.LENGTH_SHORT).show();
+                }
+            } else if (drawable == R.drawable.languages) {
+                languageSpinner.performClick();
+            } else if (drawable == R.drawable.objects_detection) {
+                if (currentMode != Mode.ObjectDetection) {
+                    currentMode = Mode.ObjectDetection;
+                    speechDetectionImageView.setImageResource(R.drawable.speech_detection);
+                    objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
+                    rebindPreview();
+                    speechTextView.setVisibility(View.INVISIBLE);
+                    audioImageView.setVisibility(View.INVISIBLE);
+                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
+                    if (connectedToInternet()) {
+                        Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, "You must be connected to internet to use the Object Detector Mode!", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
+                }
+            } else if (drawable == R.drawable.speech_detection) {
+                if (currentMode != Mode.SpeechRecognition) {
+                    currentMode = Mode.SpeechRecognition;
+                    faceDetected = false; // Reseted and ready to fire the face check anim
+                    speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
+                    objectDetectionImageView.setImageResource(R.drawable.objects_detection);
+                    rebindPreview();
+                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
+                    if (connectedToInternet()) {
+                        Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, "You must be connected to internet to use the Speech Detection Mode!", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
+                }
+            } else if (drawable == R.drawable.tts_audio) {
+                if (mTTS != null) { // Start TTS
+                    if (!mTTS.isSpeaking()) {
+                        startTTS(ttsSentence);
+                    }
+                    Log.d(TAG, ttsSentence);
+                }
+            }
+        }
     }
 
     private void flashLight(boolean status) {
         camera.getCameraControl().enableTorch(status);
         flashLightStatus = status;
-        if (status)
+        if (status) {
             flashLightImageView.setImageResource(R.drawable.flash_light_enabled);
-        else
+        } else {
             flashLightImageView.setImageResource(R.drawable.flash_light);
+        }
     }
 
     protected void faceCheckAnimation() {
@@ -747,5 +713,4 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         }
         return haveConnectedWifi || haveConnectedMobile;
     }
-
 }
