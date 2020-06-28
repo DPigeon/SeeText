@@ -47,36 +47,6 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends UIMainActivity {
 
-    protected void flashLight(boolean status) {
-        camera.getCameraControl().enableTorch(status);
-        flashLightStatus = status;
-        if (status) {
-            flashLightImageView.setImageResource(R.drawable.flash_light_enabled);
-        } else {
-            flashLightImageView.setImageResource(R.drawable.flash_light);
-        }
-    }
-
-    protected void faceCheckAnimation() {
-        if (!faceDetected && currentMode != Mode.ObjectDetection ) {
-            faceDetected = true; // Run once when mode chosen
-            faceCheckImageView.setVisibility(View.VISIBLE);
-            // Movements to fit all screens
-            double movementBefore = Utils.getScreenHeight() * 0.1; // 10% from bottom
-            double movementAfter = Utils.getScreenHeight() * 0.2; // to 20% from bottom
-            ObjectAnimator animatorY = ObjectAnimator.ofFloat(faceCheckImageView, "y", Utils.getScreenHeight() - (int)movementBefore, Utils.getScreenHeight() - (int)movementAfter);
-            ObjectAnimator fadeInAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 0.0F, 1.0F);
-            ObjectAnimator fadeOutAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 1.0F, 0.0F);
-            animatorY.setDuration(animationDuration);
-            fadeInAnimation.setDuration(animationDuration);
-            fadeOutAnimation.setStartDelay(animationDuration * 4);
-            fadeOutAnimation.setDuration(animationDuration);
-            AnimatorSet animatorSet = new AnimatorSet();
-            animatorSet.playTogether(animatorY, fadeInAnimation, fadeOutAnimation);
-            animatorSet.start();
-        }
-    }
-
     protected void loadLanguageFirstTime() {
         int outputLang = sharedPreferenceHelper.getLanguageOutput();
         if (outputLang != -1) { // First time using the app
@@ -85,6 +55,40 @@ public class MainActivity extends UIMainActivity {
             if (languageTextView != null)
                 languageTextView.setText(stringLang);
         }
+    }
+
+    /* Loads profile if needed */
+    protected void loadProfile() {
+        sharedPreferenceHelper = new SharedPreferenceHelper(this.getSharedPreferences("ProfilePreference", Context.MODE_PRIVATE));
+        Profile profile = sharedPreferenceHelper.getProfile();
+        int lang = profile.getLanguage();
+        int outputLang = profile.getLanguageOutputId();
+        int lens = profile.getLensFacing();
+        int profileMode = profile.getMode();
+
+        if (lens != -1)
+            lensFacing = lens;
+        if (profileMode != -1)
+            currentMode = Mode.values()[profileMode];
+        if (!sharedPreferenceHelper.checkFirstRun()) { // If first run of the app
+            setInputLanguage(lang);
+            if (outputLang != -1)
+                setOutputLanguage(outputLang);
+        } else {
+            goToProfileActivity("yes");
+            Toast.makeText(getApplicationContext(), "Create your profile!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    protected void goToProfileActivity(String firstTime) { // Function that goes from the main activity to profile one
+        if (progressOverlay != null)
+            progressOverlay.setVisibility(View.VISIBLE);
+        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+        intent.putExtra("lensFacing", lensFacing);
+        intent.putExtra("mode", currentMode.ordinal());
+        intent.putExtra("firstTime", firstTime);
+        stopListeningSpeech();
+        startActivity(intent);
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -143,13 +147,15 @@ public class MainActivity extends UIMainActivity {
             ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS);
     }
 
+    /*
+     * SpeechRecognizer
+     */
     protected void initializeRecognition() {
         mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mRecognizer.setRecognitionListener(this);
         initializeTTS();
     }
 
-    /* Starts the speech */
     protected void startRecognition() {
         // Uses our SharedPreferences to perform recognition in different languages
         if (getInputLanguage() >= 0) {
@@ -177,8 +183,8 @@ public class MainActivity extends UIMainActivity {
         }
     }
 
-    /* Makes the app always listen to inputs */
     protected void persistentSpeech() {
+        /* Makes the app always listen to inputs */
         if (mRecognizer != null) {
             stopListeningSpeech();
             initializeRecognition();
@@ -186,6 +192,9 @@ public class MainActivity extends UIMainActivity {
         }
     }
 
+    /*
+     * Text To Speech
+     */
     protected void checkTtsResources() {
         Intent intent = new Intent();
         intent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
@@ -232,38 +241,37 @@ public class MainActivity extends UIMainActivity {
         }
     }
 
-    /* Loads profile if needed */
-    protected void loadProfile() {
-        sharedPreferenceHelper = new SharedPreferenceHelper(this.getSharedPreferences("ProfilePreference", Context.MODE_PRIVATE));
-        Profile profile = sharedPreferenceHelper.getProfile();
-        int lang = profile.getLanguage();
-        int outputLang = profile.getLanguageOutputId();
-        int lens = profile.getLensFacing();
-        int profileMode = profile.getMode();
-
-        if (lens != -1)
-            lensFacing = lens;
-        if (profileMode != -1)
-            currentMode = Mode.values()[profileMode];
-        if (!sharedPreferenceHelper.checkFirstRun()) { // If first run of the app
-            setInputLanguage(lang);
-            if (outputLang != -1)
-                setOutputLanguage(outputLang);
+    /*
+     * Utilities
+     */
+    protected void flashLight(boolean status) {
+        camera.getCameraControl().enableTorch(status);
+        flashLightStatus = status;
+        if (status) {
+            flashLightImageView.setImageResource(R.drawable.flash_light_enabled);
         } else {
-            goToProfileActivity("yes");
-            Toast.makeText(getApplicationContext(), "Create your profile!", Toast.LENGTH_LONG).show();
+            flashLightImageView.setImageResource(R.drawable.flash_light);
         }
     }
 
-    protected void goToProfileActivity(String firstTime) { // Function that goes from the main activity to profile one
-        if (progressOverlay != null)
-            progressOverlay.setVisibility(View.VISIBLE);
-        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-        intent.putExtra("lensFacing", lensFacing);
-        intent.putExtra("mode", currentMode.ordinal());
-        intent.putExtra("firstTime", firstTime);
-        stopListeningSpeech();
-        startActivity(intent);
+    protected void faceCheckAnimation() {
+        if (!faceDetected && currentMode != Mode.ObjectDetection ) {
+            faceDetected = true; // Run once when mode chosen
+            faceCheckImageView.setVisibility(View.VISIBLE);
+            // Movements to fit all screens
+            double movementBefore = Utils.getScreenHeight() * 0.1; // 10% from bottom
+            double movementAfter = Utils.getScreenHeight() * 0.2; // to 20% from bottom
+            ObjectAnimator animatorY = ObjectAnimator.ofFloat(faceCheckImageView, "y", Utils.getScreenHeight() - (int)movementBefore, Utils.getScreenHeight() - (int)movementAfter);
+            ObjectAnimator fadeInAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 0.0F, 1.0F);
+            ObjectAnimator fadeOutAnimation = ObjectAnimator.ofFloat(faceCheckImageView, View.ALPHA, 1.0F, 0.0F);
+            animatorY.setDuration(animationDuration);
+            fadeInAnimation.setDuration(animationDuration);
+            fadeOutAnimation.setStartDelay(animationDuration * 4);
+            fadeOutAnimation.setDuration(animationDuration);
+            AnimatorSet animatorSet = new AnimatorSet();
+            animatorSet.playTogether(animatorY, fadeInAnimation, fadeOutAnimation);
+            animatorSet.start();
+        }
     }
 
     /* Checks if we have a wifi or LTE connection */
@@ -285,7 +293,9 @@ public class MainActivity extends UIMainActivity {
         return haveConnectedWifi || haveConnectedMobile;
     }
 
-    /* Getters & Setters */
+    /*
+     * Getters & Setters
+     */
     protected void setInputLanguage(int number) {
         inputLanguage = number;
     }

@@ -22,6 +22,10 @@ import com.seetext.profile.Profile;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+/* UIMainActivity.java
+ * The abstract base class for MainActivity containing all the UI elements
+ */
+
 public abstract class UIMainActivity extends BaseMainActivity {
 
     protected abstract void bindPreview(ProcessCameraProvider cameraProvider, int lensFacing);
@@ -34,61 +38,31 @@ public abstract class UIMainActivity extends BaseMainActivity {
     @SuppressLint({"ClickableViewAccessibility"})
     public void setupUI() {
         previewView = findViewById(R.id.previewView);
-        previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW); // TextureView
-        graphicOverlay = findViewById(R.id.graphicOverlay);
-
-        /* Touch button setup */
+        previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW);
         userProfileImageView = findViewById(R.id.userProfileImageView);
-        userProfileImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            touchActions(action, R.drawable.user_profile, view);
-            return true;
-        });
-
         cameraModeImageView = findViewById(R.id.cameraModeImageView);
-        cameraModeImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            touchActions(action, R.drawable.camera_mode, view);
-            return true;
-        });
-
         flashLightImageView = findViewById(R.id.flashLightImageView);
-        flashLightImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            touchActions(action, R.drawable.flash_light, view);
-            return true;
-        });
-
         languageTextView = findViewById(R.id.languageTextView);
         languagesImageView = findViewById(R.id.languagesImageView);
-        languagesImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            touchActions(action, R.drawable.languages, view);
-            return true;
-        });
-
-        objectDetectionImageView = findViewById(R.id.objectDetectionImageView);
-        objectDetectionImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            touchActions(action, R.drawable.objects_detection, view);
-            return true;
-        });
-
         speechDetectionImageView = findViewById(R.id.speechDetectionImageView);
-        speechDetectionImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            touchActions(action, R.drawable.speech_detection, view);
-            return true;
-        });
-
+        objectDetectionImageView = findViewById(R.id.objectDetectionImageView);
         audioImageView = findViewById(R.id.audioImageView);
-        audioImageView.setOnTouchListener((view, motionEvent) -> {
-            int action = motionEvent.getAction();
-            touchActions(action, R.drawable.tts_audio, view);
-            return true;
-        });
-
+        speechTextView = findViewById(R.id.speechTextView);
+        faceCheckImageView = findViewById(R.id.faceCheckImageView);
+        graphicOverlay = findViewById(R.id.graphicOverlay);
+        progressOverlay = findViewById(R.id.progress_overlay);
         languageSpinner = findViewById(R.id.languageSpinner);
+        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+
+        /* Touch imageViews setup */
+        setOnTouchListener(cameraModeImageView, R.drawable.camera_mode);
+        setOnTouchListener(userProfileImageView, R.drawable.user_profile);
+        setOnTouchListener(flashLightImageView, R.drawable.flash_light);
+        setOnTouchListener(languagesImageView, R.drawable.languages);
+        setOnTouchListener(speechDetectionImageView, R.drawable.speech_detection);
+        setOnTouchListener(objectDetectionImageView, R.drawable.objects_detection);
+        setOnTouchListener(audioImageView, R.drawable.tts_audio);
+
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.languages_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         languageSpinner.setAdapter(adapter);
@@ -121,15 +95,20 @@ public abstract class UIMainActivity extends BaseMainActivity {
             }
         }, ContextCompat.getMainExecutor(this));
 
-        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        speechTextView = findViewById(R.id.speechTextView);
-        faceCheckImageView = findViewById(R.id.faceCheckImageView);
-        progressOverlay = findViewById(R.id.progress_overlay);
         if (currentMode == Mode.SpeechRecognition) {
             speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
         } else {
             objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
         }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void setOnTouchListener(View imageView, int drawable) {
+        imageView.setOnTouchListener((view, motionEvent) -> {
+            int action = motionEvent.getAction();
+            touchActions(action, drawable, view);
+            return true;
+        });
     }
 
     private void touchActions(int action, int drawable, View view) {
