@@ -273,7 +273,20 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Override
     public void onEvent(int eventType, Bundle params) {}
 
-    @SuppressLint({"ClickableViewAccessibility", "WrongViewCast"})
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == TTS_DATA_CHECK) {
+            if (resultCode != TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                if (intent != null) {
+                    intent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                    startActivity(intent);
+                }
+            }
+        }
+    }
+
+    @SuppressLint({"ClickableViewAccessibility"})
     protected void setupUI() {
         previewView = findViewById(R.id.previewView);
         previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW); // TextureView
@@ -384,66 +397,71 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             if (drawable == R.drawable.user_profile) {
                 goToProfileActivity("no"); // Go to the profile activity with a nice slide animation
             } else if (drawable == R.drawable.camera_mode) {
-                if (lensFacing == CameraSelector.LENS_FACING_BACK) {
-                    lensFacing = CameraSelector.LENS_FACING_FRONT;
-                } else {
-                    lensFacing = CameraSelector.LENS_FACING_BACK;
-                }
-                rebindPreview();
-                speechTextView.setVisibility(View.INVISIBLE); // Reset textView
-                sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                audioImageView.setVisibility(View.INVISIBLE);
+                cameraAction();
             } else if (drawable == R.drawable.flash_light) {
-                if (camera.getCameraInfo().hasFlashUnit()) {
-                    flashLightStatus = !flashLightStatus;
-                    flashLight(flashLightStatus);
-                } else {
-                    Toast.makeText(MainActivity.this, "No flash available on your device!",
-                            Toast.LENGTH_SHORT).show();
-                }
+                flashLightAction();
             } else if (drawable == R.drawable.languages) {
                 languageSpinner.performClick();
-            } else if (drawable == R.drawable.objects_detection) {
-                if (currentMode != Mode.ObjectDetection) {
-                    currentMode = Mode.ObjectDetection;
-                    speechDetectionImageView.setImageResource(R.drawable.speech_detection);
-                    objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
-                    rebindPreview();
-                    speechTextView.setVisibility(View.INVISIBLE);
-                    audioImageView.setVisibility(View.INVISIBLE);
-                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                    if (connectedToInternet()) {
-                        Toast.makeText(this, "Switched to Object Detector Mode!", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(this, "You must be connected to internet to use the Object Detector Mode!", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
-                }
             } else if (drawable == R.drawable.speech_detection) {
-                if (currentMode != Mode.SpeechRecognition) {
-                    currentMode = Mode.SpeechRecognition;
-                    faceDetected = false; // Reseted and ready to fire the face check anim
-                    speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
-                    objectDetectionImageView.setImageResource(R.drawable.objects_detection);
-                    rebindPreview();
-                    sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
-                    if (connectedToInternet()) {
-                        Toast.makeText(this, "Switched to Speech Translator Mode!", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(this, "You must be connected to internet to use the Speech Detection Mode!", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
-                }
+                modeAction(Mode.SpeechRecognition, R.drawable.speech_detection_enabled, R.drawable.objects_detection);
+            } else if (drawable == R.drawable.objects_detection) {
+                modeAction(Mode.ObjectDetection, R.drawable.speech_detection, R.drawable.objects_detection_enabled);
             } else if (drawable == R.drawable.tts_audio) {
-                if (mTTS != null) { // Start TTS
-                    if (!mTTS.isSpeaking()) {
-                        startTTS(ttsSentence);
-                    }
-                    Log.d(TAG, ttsSentence);
-                }
+                ttsAction();
             }
+        }
+    }
+
+    private void cameraAction() {
+        if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+            lensFacing = CameraSelector.LENS_FACING_FRONT;
+        } else {
+            lensFacing = CameraSelector.LENS_FACING_BACK;
+        }
+        rebindPreview();
+        speechTextView.setVisibility(View.INVISIBLE); // Reset textView
+        sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
+        audioImageView.setVisibility(View.INVISIBLE);
+    }
+
+    private void flashLightAction() {
+        if (camera.getCameraInfo().hasFlashUnit()) {
+            flashLightStatus = !flashLightStatus;
+            flashLight(flashLightStatus);
+        } else {
+            Toast.makeText(MainActivity.this, "No flash available on your device!",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /* Actions to do when switching modes with speech and object detection */
+    private void modeAction(Mode mode, int speechDrawable, int objectDetectionDrawable) {
+        if (currentMode != mode) {
+            currentMode = mode;
+            if (mode == Mode.SpeechRecognition) {
+                faceDetected = false; // Reset and ready to fire the face check anim
+            }
+            speechDetectionImageView.setImageResource(speechDrawable);
+            objectDetectionImageView.setImageResource(objectDetectionDrawable);
+            rebindPreview();
+            sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
+            if (connectedToInternet()) {
+                Toast.makeText(this, "Switched to " + mode.toString() + " Mode!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "You must be connected to internet to use the " + mode.toString() + " Mode!",
+                        Toast.LENGTH_LONG).show();
+            }
+        } else {
+            Toast.makeText(this, "You are already in this mode!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void ttsAction() {
+        if (mTTS != null) { // Start TTS
+            if (!mTTS.isSpeaking()) {
+                startTTS(ttsSentence);
+            }
+            Log.d(TAG, ttsSentence);
         }
     }
 
@@ -523,7 +541,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
             image.close();
         });
         camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
-        preview.setSurfaceProvider(previewView.createSurfaceProvider(camera.getCameraInfo()));
+        preview.setSurfaceProvider(previewView.createSurfaceProvider());
     }
 
     /* Rebinds the preview to keep the lenses working in real time */
@@ -592,19 +610,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         startActivityForResult(intent, TTS_DATA_CHECK);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (requestCode == TTS_DATA_CHECK) {
-            if (resultCode != TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                if (intent != null) {
-                    intent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                    startActivity(intent);
-                }
-            }
-        }
-    }
-
     protected void initializeTTS() {
         mTTS = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
@@ -668,23 +673,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         }
     }
 
-    protected void setInputLanguage(int number) {
-        inputLanguage = number;
-    }
-
-    protected int getInputLanguage() {
-        return inputLanguage;
-    }
-
-    protected void setOutputLanguage(int number) {
-        outputLanguage = number;
-    }
-
-    protected int getOutputLanguage() {
-        return outputLanguage;
-    }
-
-    void goToProfileActivity(String firstTime) { // Function that goes from the main activity to profile one
+    private void goToProfileActivity(String firstTime) { // Function that goes from the main activity to profile one
         if (progressOverlay != null)
             progressOverlay.setVisibility(View.VISIBLE);
         Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
@@ -712,5 +701,22 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                     haveConnectedMobile = true;
         }
         return haveConnectedWifi || haveConnectedMobile;
+    }
+
+    /* Getters & Setters */
+    protected void setInputLanguage(int number) {
+        inputLanguage = number;
+    }
+
+    protected int getInputLanguage() {
+        return inputLanguage;
+    }
+
+    protected void setOutputLanguage(int number) {
+        outputLanguage = number;
+    }
+
+    protected int getOutputLanguage() {
+        return outputLanguage;
     }
 }

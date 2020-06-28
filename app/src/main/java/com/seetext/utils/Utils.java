@@ -53,5 +53,4 @@ public class Utils {
     public static int getScreenHeight() {
         return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
-
 }
