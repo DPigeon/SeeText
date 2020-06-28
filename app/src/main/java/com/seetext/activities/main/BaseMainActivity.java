@@ -45,7 +45,11 @@ import androidx.core.content.ContextCompat;
  * The abstract base class for MainActivity containing all the overriding implementation
  */
 
-public abstract class BaseMainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback, ObjectOverlay.Callback {
+public abstract class BaseMainActivity extends AppCompatActivity implements
+        RecognitionListener,
+        FaceDetection.Callback,
+        Translator.Callback,
+        ObjectOverlay.Callback {
 
     protected abstract void setupUI();
     protected abstract void persistentSpeech();
