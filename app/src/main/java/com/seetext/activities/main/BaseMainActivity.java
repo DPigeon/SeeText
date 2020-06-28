@@ -6,13 +6,9 @@ import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.speech.RecognitionListener;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -46,7 +42,6 @@ import androidx.core.content.ContextCompat;
  */
 
 public abstract class BaseMainActivity extends AppCompatActivity implements
-        RecognitionListener,
         FaceDetection.Callback,
         Translator.Callback,
         ObjectOverlay.Callback {
@@ -187,7 +182,6 @@ public abstract class BaseMainActivity extends AppCompatActivity implements
                     intent.putExtra("outputLanguage", getOutputLanguage());
                     startActivity(intent);
                 } else {
-                    // Infinity Loop here BUG
                     goToProfileActivity("yes");
                     Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
                 }
@@ -195,81 +189,6 @@ public abstract class BaseMainActivity extends AppCompatActivity implements
         } else
             Toast.makeText(getApplicationContext(),"You must be connected to internet to see the definitions!", Toast.LENGTH_LONG).show();
     }
-
-    @Override
-    public void onReadyForSpeech(Bundle params) {}
-
-    @Override
-    public void onBeginningOfSpeech() {}
-
-    @Override
-    public void onRmsChanged(float rmsDb) {}
-
-    @Override
-    public void onBufferReceived(byte[] buffer) {}
-
-    @Override
-    public void onEndOfSpeech() {}
-
-    @Override
-    public void onError(int error) {
-        if (error == SpeechRecognizer.ERROR_AUDIO) {
-            Log.d(TAG, "Audio recording error");
-        } else if (error == SpeechRecognizer.ERROR_CLIENT) {
-            Log.d(TAG, "Client side error");
-        } else if (error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
-            Log.d(TAG, "Insufficient permissions");
-        } else if (error == SpeechRecognizer.ERROR_NETWORK) {
-            Log.d(TAG, "Network error");
-        } else if (error == SpeechRecognizer.ERROR_NETWORK_TIMEOUT) {
-            Log.d(TAG, "Network timeout");
-        } else if (error == SpeechRecognizer.ERROR_NO_MATCH) {
-            Log.d(TAG, "No speech match");
-        } else if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) {
-            Log.d(TAG, "Recognizer busy");
-        } else if (error == SpeechRecognizer.ERROR_SERVER) {
-            Log.d(TAG, "Server error");
-        } else if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
-            Log.d(TAG, "No speech input");
-        } else {
-            Log.d(TAG, "Unknown error");
-        }
-
-        persistentSpeech();
-    }
-
-    @Override
-    public void onResults(Bundle results) {
-        String sentence = Objects.requireNonNull(results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)).get(0);
-        /* Sentences may be null sometimes so we avoid that */
-        String sentenceToFitUI = " " + sentence + " ";
-        if (currentMode != Mode.ObjectDetection) { // Current mode must be speech detection
-            if (speechTextView.getVisibility() == View.INVISIBLE)
-                speechTextView.setVisibility(View.VISIBLE);
-                audioImageView.setVisibility(View.VISIBLE);
-            try {
-                if (inputLanguage != outputLanguage) { // Checks if input and output are the same
-                    Translator translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), this);
-                        translator.downloadModelAndTranslate(outputLanguage, sentence);
-                } else
-                    speechTextView.setText(sentenceToFitUI); // We show the text like it is
-            } catch (Exception ignored) {}
-
-            /* Text Animation */
-            speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
-            Animation fadeOutAnim = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-            fadeOutAnim.setStartTime(5000);
-            speechTextView.startAnimation(fadeOutAnim);
-
-            persistentSpeech();
-        }
-    }
-
-    @Override
-    public void onPartialResults(Bundle partialResults) {}
-
-    @Override
-    public void onEvent(int eventType, Bundle params) {}
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {

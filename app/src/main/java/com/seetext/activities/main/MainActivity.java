@@ -45,7 +45,7 @@ import java.util.concurrent.Executors;
  * The speech text should move every time the app recognizes a face near the mouth of the speaker.
  */
 
-public class MainActivity extends UIMainActivity {
+public class MainActivity extends SpeechRecognition {
 
     protected void loadLanguageFirstTime() {
         int outputLang = sharedPreferenceHelper.getLanguageOutput();
@@ -143,52 +143,8 @@ public class MainActivity extends UIMainActivity {
     protected void showPermissions() {
         BaseMainActivity thisActivity = this;
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) // Videos
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) { // Videos
             ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS);
-    }
-
-    /*
-     * SpeechRecognizer
-     */
-    protected void initializeRecognition() {
-        mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-        mRecognizer.setRecognitionListener(this);
-        initializeTTS();
-    }
-
-    protected void startRecognition() {
-        // Uses our SharedPreferences to perform recognition in different languages
-        if (getInputLanguage() >= 0) {
-            String lang = FirebaseTranslateLanguage.languageCodeForLanguage(getInputLanguage());
-            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getApplicationContext().getPackageName());
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
-
-            mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
-            mRecognizer.startListening(intent);
-        } else { // If language not set then send back to profile activity
-            Toast.makeText(getApplicationContext(), "Your language is not set!", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    protected void stopListeningSpeech() {
-        if (mRecognizer != null) {
-            mRecognizer.stopListening();
-            mRecognizer.destroy();
-            mRecognizer = null;
-        }
-        if (mTTS != null) {
-            stopTTS();
-        }
-    }
-
-    protected void persistentSpeech() {
-        /* Makes the app always listen to inputs */
-        if (mRecognizer != null) {
-            stopListeningSpeech();
-            initializeRecognition();
-            startRecognition();
         }
     }
 
@@ -205,16 +161,7 @@ public class MainActivity extends UIMainActivity {
         mTTS = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 // We get the output language translated
-                Locale locale = null;
-                for (Locale availableLocale : mTTS.getAvailableLanguages()) {
-                    String languageAudioWanted = Utils.getLanguageByTag(getOutputLanguage());
-                    if (languageAudioWanted.equals(availableLocale.getDisplayLanguage())) { // If the locale voice is installed on the phone then set it
-                        locale = new Locale(availableLocale.toString());
-                    } else { // If the locale voice not installed then install it
-                        checkTtsResources();
-                    }
-                }
-                int result = mTTS.setLanguage(locale);
+                int result = getLocaleResult();
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                     Log.d(TAG, "Language not supported");
                     audioImageView.setEnabled(false);
@@ -225,6 +172,19 @@ public class MainActivity extends UIMainActivity {
                 Log.d(TAG, "Initialization failed");
             }
         });
+    }
+
+    private int getLocaleResult() {
+        Locale locale = null;
+        for (Locale availableLocale : mTTS.getAvailableLanguages()) {
+            String languageAudioWanted = Utils.getLanguageByTag(getOutputLanguage());
+            if (languageAudioWanted.equals(availableLocale.getDisplayLanguage())) { // If the locale voice is installed on the phone then set it
+                locale = new Locale(availableLocale.toString());
+            } else { // If the locale voice not installed then install it
+                checkTtsResources();
+            }
+        }
+        return mTTS.setLanguage(locale);
     }
 
     protected void startTTS(String sentence) {
