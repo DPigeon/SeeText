@@ -1,6 +1,8 @@
-package com.seetext;
+package com.seetext.activities;
 
 import android.os.Bundle;
+
+import com.seetext.activities.SplashScreenActivity;
 
 import org.junit.*;
 import org.junit.runner.RunWith;

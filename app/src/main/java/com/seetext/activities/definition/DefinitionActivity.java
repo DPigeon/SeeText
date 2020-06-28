@@ -1,4 +1,4 @@
-package com.seetext;
+package com.seetext.activities.definition;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,6 +9,7 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.seetext.R;
 import com.seetext.objectdetection.definition.DefinitionListViewAdapter;
 import com.seetext.objectdetection.definition.ObjectDefinitionAsyncTask;
 import com.seetext.objectdetection.definition.DefinitionRowItem;

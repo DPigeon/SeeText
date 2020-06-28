@@ -11,6 +11,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
+import com.seetext.activities.main.BaseMainActivity;
+
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.matcher.RootMatchers.isSystemAlertWindow;
@@ -21,12 +23,12 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 public class MainActivityInstrumentedTest {
 
     @Rule
-    public ActivityTestRule<MainActivity> activityRule =
-            new ActivityTestRule<>(MainActivity.class);
+    public ActivityTestRule<BaseMainActivity> activityRule =
+            new ActivityTestRule<>(BaseMainActivity.class);
 
     @Rule
-    public IntentsTestRule<MainActivity> intentsTestRule =
-            new IntentsTestRule<>(MainActivity.class);
+    public IntentsTestRule<BaseMainActivity> intentsTestRule =
+            new IntentsTestRule<>(BaseMainActivity.class);
 
     @Test
     @Ignore("Needs rework")

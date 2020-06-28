@@ -1,4 +1,4 @@
-package com.seetext;
+package com.seetext.activities.main;
 
 import android.Manifest;
 import android.animation.AnimatorSet;
@@ -12,9 +12,6 @@ import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
-import android.os.Bundle;
-import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
@@ -22,37 +19,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.seetext.facedetection.FaceDetection;
-import com.seetext.objectdetection.ObjectDetection;
-import com.seetext.objectdetection.ObjectOverlay;
-import com.seetext.profile.Profile;
-import com.seetext.profile.SharedPreferenceHelper;
-import com.seetext.translator.Translator;
-import com.seetext.utils.GraphicOverlay;
-import com.seetext.utils.Utils;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
-
-import java.util.Locale;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
-import ai.fritz.core.Fritz;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.Preview;
@@ -61,233 +32,31 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
+import com.seetext.activities.profile.ProfileActivity;
+import com.seetext.R;
+import com.seetext.facedetection.FaceDetection;
+import com.seetext.objectdetection.ObjectDetection;
+import com.seetext.profile.Profile;
+import com.seetext.profile.SharedPreferenceHelper;
+import com.seetext.utils.Utils;
+
+import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 /* MainActivity.java
-* The MainActivity with CameraX library, Speech Recognition & a Face Detection callback to update the speech text.
-* The speech text should move every time the app recognizes a face near the mouth of the speaker.
+ * The MainActivity with CameraX library, Speech Recognition & a Face Detection callback to update the speech text.
+ * The speech text should move every time the app recognizes a face near the mouth of the speaker.
  */
 
-public class MainActivity extends AppCompatActivity implements RecognitionListener, FaceDetection.Callback, Translator.Callback, ObjectOverlay.Callback {
-    private String TAG = "MainActivity:";
-    private SharedPreferenceHelper sharedPreferenceHelper;
-    private static final int TTS_DATA_CHECK = 90;
-    private static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
-    private int inputLanguage = FirebaseTranslateLanguage.EN, outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
-    private ImageView userProfileImageView, cameraModeImageView, flashLightImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView;
-    private Spinner languageSpinner;
-    private TextView languageTextView;
-    private boolean faceProcessing = false; // For throttling the calls
-    private long animationDuration = 1000; // milliseconds
-    private boolean faceDetected = false; // For face check imageView anim to run once
-    private FrameLayout progressOverlay; // Loading overlay wheel
-
-    /* Video Variables */
-    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
-    private PreviewView previewView;
-    private Camera camera;
-    private Preview preview;
-    private int lensFacing = CameraSelector.LENS_FACING_BACK;
-    private GraphicOverlay graphicOverlay;
-    private boolean flashLightStatus = false;
-
-    /* Audio Variables */
-    private Translator translator;
-    private static SpeechRecognizer mRecognizer = null;
-    private TextView speechTextView;
-    private AudioManager mAudioManager;
-    private TextToSpeech mTTS;
-    private String ttsSentence; // The last translated sentence to send to TTS
-
-    /* Modes of the app */
-    private enum Mode {
-        SpeechRecognition,
-        ObjectDetection
-    }
-    private Mode currentMode = Mode.SpeechRecognition;
+public class MainActivity extends BaseMainActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Fritz.configure(this); // Initialize Fritz
-        setContentView(R.layout.activity_main);
-        Objects.requireNonNull(getSupportActionBar()).hide(); // Hide the main app bar on top
-
-        /* Running UI Thread to get audio & video permission */
-        this.runOnUiThread(() -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                showPermissions();
-            }
-        });
-
-        loadProfile();
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            setupUI();
-        }
-
-        /* Stops any other noise from recognizer when switching activities with microphone */
-        if (mRecognizer != null)
-            stopListeningSpeech();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        loadLanguageFirstTime(); // Check when first time opening the app
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults.length > 0) {
-            if (requestCode == MY_PERMISSIONS) {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    setupUI();
-                } else {
-                    Toast.makeText(this, "You cannot run the app without allowing the camera or microphone!", Toast.LENGTH_LONG).show();
-                    this.finish();
-                }
-            }
-        }
-    }
-
-    @Override
-    public void updateSpeechTextViewPosition(float x, float y, boolean hasFace)  {
-        // This function knows that it has detected a face
-        if (!hasFace) { // Closing speech recognition
-            stopListeningSpeech();
-            speechTextView.setText(""); // Reset text
-        } else { // Opening speech recognition with speech text
-            faceCheckAnimation();
-            if (mRecognizer == null) { // Not initialized
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
-                    initializeRecognition();
-                startRecognition();
-            }
-            speechTextView.setX(x);
-            speechTextView.setY(y);
-        }
-        faceProcessing = false;
-    }
-
-    @Override
-    public void translateTheText(String text) {
-        String sentenceToFitUI = " " + text + " ";
-        speechTextView.setText(sentenceToFitUI);
-        ttsSentence = text;
-    }
-
-    /* Callback for object detection touching words */
-    @Override
-    public void goToObjectDefinition(String word) {
-        if (connectedToInternet()) {
-            if (!word.equals("Loading...")) {
-                if (getInputLanguage() >= 0) {
-                    progressOverlay.setVisibility(View.VISIBLE);
-                    Intent intent = new Intent(MainActivity.this, DefinitionActivity.class);
-                    intent.putExtra("word", word);
-                    intent.putExtra("inputLanguage", getInputLanguage());
-                    intent.putExtra("outputLanguage", getOutputLanguage());
-                    startActivity(intent);
-                } else {
-                    // Infinity Loop here BUG
-                    goToProfileActivity("yes");
-                    Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
-                }
-            }
-        } else
-            Toast.makeText(getApplicationContext(),"You must be connected to internet to see the definitions!", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onReadyForSpeech(Bundle params) {}
-
-    @Override
-    public void onBeginningOfSpeech() {}
-
-    @Override
-    public void onRmsChanged(float rmsDb) {}
-
-    @Override
-    public void onBufferReceived(byte[] buffer) {}
-
-    @Override
-    public void onEndOfSpeech() {}
-
-    @Override
-    public void onError(int error) {
-        if (error == SpeechRecognizer.ERROR_AUDIO) {
-            Log.d(TAG, "Audio recording error");
-        } else if (error == SpeechRecognizer.ERROR_CLIENT) {
-            Log.d(TAG, "Client side error");
-        } else if (error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
-            Log.d(TAG, "Insufficient permissions");
-        } else if (error == SpeechRecognizer.ERROR_NETWORK) {
-            Log.d(TAG, "Network error");
-        } else if (error == SpeechRecognizer.ERROR_NETWORK_TIMEOUT) {
-            Log.d(TAG, "Network timeout");
-        } else if (error == SpeechRecognizer.ERROR_NO_MATCH) {
-            Log.d(TAG, "No speech match");
-        } else if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) {
-            Log.d(TAG, "Recognizer busy");
-        } else if (error == SpeechRecognizer.ERROR_SERVER) {
-            Log.d(TAG, "Server error");
-        } else if (error == SpeechRecognizer.ERROR_SPEECH_TIMEOUT) {
-            Log.d(TAG, "No speech input");
-        } else {
-            Log.d(TAG, "Unknown error");
-        }
-
-        persistentSpeech();
-    }
-
-    @Override
-    public void onResults(Bundle results) {
-        String sentence = Objects.requireNonNull(results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)).get(0);
-        /* Sentences may be null sometimes so we avoid that */
-        String sentenceToFitUI = " " + sentence + " ";
-        if (currentMode != Mode.ObjectDetection) { // Current mode must be speech detection
-            if (speechTextView.getVisibility() == View.INVISIBLE)
-                speechTextView.setVisibility(View.VISIBLE);
-                audioImageView.setVisibility(View.VISIBLE);
-            try {
-                if (inputLanguage != outputLanguage) { // Checks if input and output are the same
-                        translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), this);
-                        translator.downloadModelAndTranslate(outputLanguage, sentence);
-                } else
-                    speechTextView.setText(sentenceToFitUI); // We show the text like it is
-            } catch (Exception ignored) {}
-
-            /* Text Animation */
-            speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
-            Animation fadeOutAnim = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-            fadeOutAnim.setStartTime(5000);
-            speechTextView.startAnimation(fadeOutAnim);
-
-            persistentSpeech();
-        }
-    }
-
-    @Override
-    public void onPartialResults(Bundle partialResults) {}
-
-    @Override
-    public void onEvent(int eventType, Bundle params) {}
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (requestCode == TTS_DATA_CHECK) {
-            if (resultCode != TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                if (intent != null) {
-                    intent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                    startActivity(intent);
-                }
-            }
-        }
-    }
-
     @SuppressLint({"ClickableViewAccessibility"})
-    protected void setupUI() {
+    public void setupUI() {
         previewView = findViewById(R.id.previewView);
         previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.TEXTURE_VIEW); // TextureView
         graphicOverlay = findViewById(R.id.graphicOverlay);
@@ -465,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         }
     }
 
-    private void flashLight(boolean status) {
+    protected void flashLight(boolean status) {
         camera.getCameraControl().enableTorch(status);
         flashLightStatus = status;
         if (status) {
@@ -555,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     /* Used to grant permission from the UI thread */
     protected void showPermissions() {
-        MainActivity thisActivity = this;
+        BaseMainActivity thisActivity = this;
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) // Videos
             ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS);
@@ -673,7 +442,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         }
     }
 
-    private void goToProfileActivity(String firstTime) { // Function that goes from the main activity to profile one
+    protected void goToProfileActivity(String firstTime) { // Function that goes from the main activity to profile one
         if (progressOverlay != null)
             progressOverlay.setVisibility(View.VISIBLE);
         Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
@@ -685,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     /* Checks if we have a wifi or LTE connection */
-    private boolean connectedToInternet() {
+    protected boolean connectedToInternet() {
         boolean haveConnectedWifi = false;
         boolean haveConnectedMobile = false;
 

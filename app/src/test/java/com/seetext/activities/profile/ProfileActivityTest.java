@@ -1,6 +1,8 @@
-package com.seetext;
+package com.seetext.activities.profile;
 
 import android.os.Bundle;
+
+import com.seetext.activities.profile.ProfileActivity;
 
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -29,5 +31,4 @@ public class ProfileActivityTest {
         mockActivity.onStart();
 
     }
-
 }

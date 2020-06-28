@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
+import com.seetext.activities.definition.DefinitionActivity;
 
 import org.junit.Rule;
 import org.junit.Test;

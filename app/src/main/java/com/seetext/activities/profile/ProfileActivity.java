@@ -1,4 +1,4 @@
-package com.seetext;
+package com.seetext.activities.profile;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,6 +14,8 @@ import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import com.seetext.R;
+import com.seetext.activities.main.BaseMainActivity;
 import com.seetext.profile.Profile;
 import com.seetext.profile.SharedPreferenceHelper;
 import com.seetext.translator.Translator;
@@ -157,8 +159,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     void goToActivity() { // Function that goes from the main activity to another one
-        Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
+        Intent intent = new Intent(ProfileActivity.this, BaseMainActivity.class);
         startActivity(intent);
     }
-
 }
