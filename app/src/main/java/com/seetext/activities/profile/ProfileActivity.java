@@ -1,75 +1,24 @@
 package com.seetext.activities.profile;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.seetext.R;
-import com.seetext.activities.main.AbstractMainActivity;
+import com.seetext.activities.main.MainActivity;
 import com.seetext.profile.Profile;
-import com.seetext.profile.SharedPreferenceHelper;
 import com.seetext.translator.Translator;
 import com.seetext.utils.Utils;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateRemoteModel;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 /*
  * The User Profile to change his language (input language)
  */
 
-public class ProfileActivity extends AppCompatActivity {
-    private String TAG = "ProfileActivity";
-    SharedPreferenceHelper sharedPreferenceHelper;
-    ScrollView languagesScrollView;
-    RadioGroup languagesRadioGroup;
-    Button saveButton;
-    int languageChosen = -1; // Language checked on radioButton
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("Profile");
-
-        sharedPreferenceHelper = new SharedPreferenceHelper(this.getSharedPreferences("ProfilePreference", Context.MODE_PRIVATE));
-        setupUI();
-        instantiateRadioGroup();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        setActivityFields();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) { // Creates the three dot action menu
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int menuId = item.getItemId();
-        if (menuId == R.id.profile_settings) { // If we click on the ... button
-            switchMode(true, View.VISIBLE); // Switch to edit mode
-        }
-        return super.onOptionsItemSelected(item);
-    }
+public class ProfileActivity extends AbstractProfileActivity {
 
     protected void setupUI() {
         languagesScrollView = findViewById(R.id.languagesScrollView);
@@ -149,8 +98,9 @@ public class ProfileActivity extends AppCompatActivity {
                 translator.checkAndDownloadModel(model);
             }
             goToActivity();
-        } else
+        } else {
             toastMessage("You must choose a language!");
+        }
     }
 
     protected void toastMessage(String message) { // Shows a toast message
@@ -159,7 +109,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     void goToActivity() { // Function that goes from the main activity to another one
-        Intent intent = new Intent(ProfileActivity.this, AbstractMainActivity.class);
+        Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
         startActivity(intent);
     }
 }
