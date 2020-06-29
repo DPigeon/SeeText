@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
  * The abstract base class for MainActivity containing all the UI elements
  */
 
-public abstract class UIMainActivity extends BaseMainActivity {
+public abstract class AbstractUIMainActivity extends AbstractMainActivity {
 
     protected abstract void bindPreview(ProcessCameraProvider cameraProvider, int lensFacing);
     protected abstract void rebindPreview();
@@ -66,24 +66,7 @@ public abstract class UIMainActivity extends BaseMainActivity {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.languages_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         languageSpinner.setAdapter(adapter);
-        languageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                // An item was selected. You can retrieve the selected item using
-                int langId = adapterView.getPositionForView(view);
-                String item = adapterView.getItemAtPosition(i).toString();
-                if (langId != 0) { // Will have to increase all ids by 1 since 0 is default called at beginning
-                    setOutputLanguage(langId);
-                    // Save the output language in profile
-                    Profile profile = new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal());
-                    sharedPreferenceHelper.saveProfile(profile);
-                    languageTextView.setText(item);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
-        });
+        setOnItemForLanguageSpinner();
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
@@ -108,6 +91,27 @@ public abstract class UIMainActivity extends BaseMainActivity {
             int action = motionEvent.getAction();
             touchActions(action, drawable, view);
             return true;
+        });
+    }
+
+    private void setOnItemForLanguageSpinner() {
+        languageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // An item was selected. You can retrieve the selected item using
+                int langId = adapterView.getPositionForView(view);
+                String item = adapterView.getItemAtPosition(i).toString();
+                if (langId != 0) { // Will have to increase all ids by 1 since 0 is default called at beginning
+                    setOutputLanguage(langId);
+                    // Save the output language in profile
+                    Profile profile = new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal());
+                    sharedPreferenceHelper.saveProfile(profile);
+                    languageTextView.setText(item);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {}
         });
     }
 
@@ -164,6 +168,9 @@ public abstract class UIMainActivity extends BaseMainActivity {
             currentMode = mode;
             if (mode == Mode.SpeechRecognition) {
                 faceDetected = false; // Reset and ready to fire the face check anim
+            } else {
+                speechTextView.setVisibility(View.INVISIBLE);
+                audioImageView.setVisibility(View.INVISIBLE);
             }
             speechDetectionImageView.setImageResource(speechDrawable);
             objectDetectionImageView.setImageResource(objectDetectionDrawable);

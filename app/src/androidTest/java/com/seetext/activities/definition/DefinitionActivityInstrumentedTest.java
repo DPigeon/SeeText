@@ -1,15 +1,17 @@
-package com.seetext;
+package com.seetext.activities.definition;
 
 import android.content.Context;
 import android.content.Intent;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
+import com.seetext.R;
 import com.seetext.activities.definition.DefinitionActivity;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -47,7 +49,7 @@ public class DefinitionActivityInstrumentedTest {
     @Test
     public void testPressingTranslateSwitch() {
         /* Performs click on language switch */
-        onView(withId(R.id.languageSwitch))
+        onView(ViewMatchers.withId(R.id.languageSwitch))
                 .perform(click())
                 .check(matches(isDisplayed()));
 

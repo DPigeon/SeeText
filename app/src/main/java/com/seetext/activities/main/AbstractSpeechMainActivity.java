@@ -17,7 +17,7 @@ import com.seetext.translator.Translator;
 
 import java.util.Objects;
 
-public abstract class SpeechRecognition extends UIMainActivity implements RecognitionListener {
+public abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity implements RecognitionListener {
 
     protected abstract void initializeTTS();
     protected abstract void stopTTS();
@@ -74,7 +74,7 @@ public abstract class SpeechRecognition extends UIMainActivity implements Recogn
             audioImageView.setVisibility(View.VISIBLE);
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
-                    Translator translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), this);
+                    Translator translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), (Translator.Callback) this);
                     translator.downloadModelAndTranslate(outputLanguage, sentence);
                 } else
                     speechTextView.setText(sentenceToFitUI); // We show the text like it is

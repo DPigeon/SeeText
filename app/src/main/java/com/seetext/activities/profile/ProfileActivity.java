@@ -15,7 +15,7 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.seetext.R;
-import com.seetext.activities.main.BaseMainActivity;
+import com.seetext.activities.main.AbstractMainActivity;
 import com.seetext.profile.Profile;
 import com.seetext.profile.SharedPreferenceHelper;
 import com.seetext.translator.Translator;
@@ -159,7 +159,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     void goToActivity() { // Function that goes from the main activity to another one
-        Intent intent = new Intent(ProfileActivity.this, BaseMainActivity.class);
+        Intent intent = new Intent(ProfileActivity.this, AbstractMainActivity.class);
         startActivity(intent);
     }
 }

@@ -8,19 +8,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.seetext.activities.definition.DefinitionActivity;
 import com.seetext.R;
-import com.seetext.facedetection.FaceDetection;
-import com.seetext.objectdetection.ObjectOverlay;
 import com.seetext.profile.SharedPreferenceHelper;
-import com.seetext.translator.Translator;
 import com.seetext.utils.GraphicOverlay;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
@@ -39,12 +34,10 @@ import androidx.core.content.ContextCompat;
 
 /* BaseMainActivity.java
  * The abstract base class for MainActivity containing all the overriding implementation
+ * and parameters.
  */
 
-public abstract class BaseMainActivity extends AppCompatActivity implements
-        FaceDetection.Callback,
-        Translator.Callback,
-        ObjectOverlay.Callback {
+public abstract class AbstractMainActivity extends AppCompatActivity {
 
     protected abstract void setupUI();
     protected abstract void persistentSpeech();
@@ -104,19 +97,11 @@ public abstract class BaseMainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         Objects.requireNonNull(getSupportActionBar()).hide(); // Hide the main app bar on top
 
-        /* Running UI Thread to get audio & video permission */
-        this.runOnUiThread(() -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                showPermissions();
-            }
-        });
-
+        showAudioAndVideoPermissions();
         loadProfile();
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             setupUI();
         }
-
         /* Stops any other noise from recognizer when switching activities with microphone */
         if (mRecognizer != null)
             stopListeningSpeech();
@@ -144,53 +129,6 @@ public abstract class BaseMainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void updateSpeechTextViewPosition(float x, float y, boolean hasFace)  {
-        // This function knows that it has detected a face
-        if (!hasFace) { // Closing speech recognition
-            stopListeningSpeech();
-            speechTextView.setText(""); // Reset text
-        } else { // Opening speech recognition with speech text
-            faceCheckAnimation();
-            if (mRecognizer == null) { // Not initialized
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
-                    initializeRecognition();
-                startRecognition();
-            }
-            speechTextView.setX(x);
-            speechTextView.setY(y);
-        }
-        faceProcessing = false;
-    }
-
-    @Override
-    public void translateTheText(String text) {
-        String sentenceToFitUI = " " + text + " ";
-        speechTextView.setText(sentenceToFitUI);
-        ttsSentence = text;
-    }
-
-    /* Callback for object detection touching words */
-    @Override
-    public void goToObjectDefinition(String word) {
-        if (connectedToInternet()) {
-            if (!word.equals("Loading...")) {
-                if (getInputLanguage() >= 0) {
-                    progressOverlay.setVisibility(View.VISIBLE);
-                    Intent intent = new Intent(BaseMainActivity.this, DefinitionActivity.class);
-                    intent.putExtra("word", word);
-                    intent.putExtra("inputLanguage", getInputLanguage());
-                    intent.putExtra("outputLanguage", getOutputLanguage());
-                    startActivity(intent);
-                } else {
-                    goToProfileActivity("yes");
-                    Toast.makeText(getApplicationContext(), "Set your language!", Toast.LENGTH_LONG).show();
-                }
-            }
-        } else
-            Toast.makeText(getApplicationContext(),"You must be connected to internet to see the definitions!", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == TTS_DATA_CHECK) {
@@ -201,5 +139,14 @@ public abstract class BaseMainActivity extends AppCompatActivity implements
                 }
             }
         }
+    }
+
+    private void showAudioAndVideoPermissions() {
+        /* Running UI Thread to get audio & video permission */
+        this.runOnUiThread(() -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                showPermissions();
+            }
+        });
     }
 }

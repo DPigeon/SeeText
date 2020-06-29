@@ -1,4 +1,4 @@
-package com.seetext;
+package com.seetext.activities.profile;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,11 +7,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
+import com.seetext.R;
 import com.seetext.activities.profile.ProfileActivity;
 
 import static androidx.test.espresso.Espresso.onView;
@@ -42,7 +44,7 @@ public class ProfileActivityInstrumentedTest {
     @Test
     public void testPressingSaveButton() {
         /* Performs click on save button */
-        onView(withId(R.id.saveButton))
+        onView(ViewMatchers.withId(R.id.saveButton))
                 .perform(click())
                 .check(matches(isDisplayed()));
 

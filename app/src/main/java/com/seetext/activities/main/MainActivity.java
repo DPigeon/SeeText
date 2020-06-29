@@ -11,8 +11,6 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.TextureView;
@@ -45,7 +43,7 @@ import java.util.concurrent.Executors;
  * The speech text should move every time the app recognizes a face near the mouth of the speaker.
  */
 
-public class MainActivity extends SpeechRecognition {
+public class MainActivity extends AbstractInterfacesMainActivity {
 
     protected void loadLanguageFirstTime() {
         int outputLang = sharedPreferenceHelper.getLanguageOutput();
@@ -141,7 +139,7 @@ public class MainActivity extends SpeechRecognition {
 
     /* Used to grant permission from the UI thread */
     protected void showPermissions() {
-        BaseMainActivity thisActivity = this;
+        AbstractMainActivity thisActivity = this;
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) { // Videos
             ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO}, MY_PERMISSIONS);

@@ -1,4 +1,4 @@
-package com.seetext;
+package com.seetext.activities.main;
 
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -7,11 +7,13 @@ import org.junit.runner.RunWith;
 
 import androidx.test.espresso.intent.Intents;
 import androidx.test.espresso.intent.rule.IntentsTestRule;
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
-import com.seetext.activities.main.BaseMainActivity;
+import com.seetext.R;
+import com.seetext.activities.main.AbstractMainActivity;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -23,18 +25,18 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 public class MainActivityInstrumentedTest {
 
     @Rule
-    public ActivityTestRule<BaseMainActivity> activityRule =
-            new ActivityTestRule<>(BaseMainActivity.class);
+    public ActivityTestRule<AbstractMainActivity> activityRule =
+            new ActivityTestRule<>(AbstractMainActivity.class);
 
     @Rule
-    public IntentsTestRule<BaseMainActivity> intentsTestRule =
-            new IntentsTestRule<>(BaseMainActivity.class);
+    public IntentsTestRule<AbstractMainActivity> intentsTestRule =
+            new IntentsTestRule<>(AbstractMainActivity.class);
 
     @Test
     @Ignore("Needs rework")
     public void testPressingProfileButton() {
         Intents.init();
-        onView(withId(R.id.userProfileImageView))
+        onView(ViewMatchers.withId(R.id.userProfileImageView))
                 .perform(click());
         Intents.release();
     }
