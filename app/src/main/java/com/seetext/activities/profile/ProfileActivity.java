@@ -20,6 +20,8 @@ import java.util.ArrayList;
 
 public class ProfileActivity extends AbstractProfileActivity {
 
+    protected String TAG = "ProfileActivity:";
+
     protected void setupUI() {
         languagesScrollView = findViewById(R.id.languagesScrollView);
         languagesRadioGroup = findViewById(R.id.languagesRadioGroup);

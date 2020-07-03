@@ -9,21 +9,20 @@ import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.seetext.R;
+import com.seetext.activities.AbstractActivity;
 import com.seetext.profile.SharedPreferenceHelper;
 
 import java.util.Objects;
 
-public abstract class AbstractProfileActivity extends AppCompatActivity {
+public abstract class AbstractProfileActivity extends AbstractActivity {
 
     protected abstract void setupUI();
     protected abstract void instantiateRadioGroup();
     protected abstract void setActivityFields();
     protected abstract void switchMode(boolean b, int visible);
 
-    private String TAG = "ProfileActivity";
+    private String TAG = "AbstractProfileActivity";
     SharedPreferenceHelper sharedPreferenceHelper;
     ScrollView languagesScrollView;
     RadioGroup languagesRadioGroup;
@@ -33,7 +32,6 @@ public abstract class AbstractProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("Profile");
@@ -47,6 +45,11 @@ public abstract class AbstractProfileActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         setActivityFields();
+    }
+
+    @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_profile;
     }
 
     @Override

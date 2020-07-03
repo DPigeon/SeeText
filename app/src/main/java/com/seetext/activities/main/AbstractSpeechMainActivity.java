@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
+import com.seetext.Mode;
 import com.seetext.translator.Translator;
 
 import java.util.Objects;
@@ -21,6 +22,8 @@ public abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity 
 
     protected abstract void initializeTTS();
     protected abstract void stopTTS();
+
+    protected String TAG = "AbstractSpeechMainActivity";
 
     @Override
     public void onReadyForSpeech(Bundle params) {}

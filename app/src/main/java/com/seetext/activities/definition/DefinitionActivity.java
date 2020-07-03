@@ -1,13 +1,7 @@
 package com.seetext.activities.definition;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.Switch;
-import android.widget.TextView;
 
 import com.seetext.R;
 import com.seetext.objectdetection.definition.DefinitionListViewAdapter;
@@ -26,27 +20,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-public class DefinitionActivity extends AppCompatActivity {
-    private String TAG = "DefinitionActivity";
-    private String word = "";
-    private String translatedWord = "";
-    private int inputLanguage;
-    private int outputLanguage;
-    private Boolean hasToTranslate;
-    private TextView pronunciationTextView;
-    private ListView definitionsListView;
-    private List<DefinitionRowItem> definitionRowItems;
-    private List<DefinitionRowItem> transDefinitionRowItems;
-    private DefinitionListViewAdapter adapter;
-    private Switch languageSwitch;
+public class DefinitionActivity extends AbstractDefinitionActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_definition);
-
-        setupUI();
-    }
+    protected String TAG = "DefinitionActivity:";
 
     protected void setupUI() {
         Intent intent = getIntent();
@@ -98,7 +74,7 @@ public class DefinitionActivity extends AppCompatActivity {
 
     /* Used to translate all words back to english to get the response from dictionary API */
     protected void translateWordIfNeeded() {
-        if (outputLanguage == FirebaseTranslateLanguage.EN) // Don't traslate since dictionary API already in english
+        if (outputLanguage == FirebaseTranslateLanguage.EN) // Don't translate since dictionary API already in english
             hasToTranslate = false;
         else {
             hasToTranslate = true;

@@ -18,6 +18,8 @@ public abstract class AbstractInterfacesMainActivity extends AbstractSpeechMainA
         Translator.Callback,
         ObjectOverlay.Callback {
 
+    protected String TAG = "AbstractInterfacesMainActivity:";
+
     @Override
     public void updateSpeechTextViewPosition(float x, float y, boolean hasFace)  {
         // This function knows that it has detected a face

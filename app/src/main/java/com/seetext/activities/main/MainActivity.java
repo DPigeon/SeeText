@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
+import com.seetext.Mode;
 import com.seetext.activities.profile.ProfileActivity;
 import com.seetext.R;
 import com.seetext.facedetection.FaceDetection;
@@ -44,6 +45,8 @@ import java.util.concurrent.Executors;
  */
 
 public class MainActivity extends AbstractInterfacesMainActivity {
+
+    protected String TAG = "MainActivity:";
 
     protected void loadLanguageFirstTime() {
         int outputLang = sharedPreferenceHelper.getLanguageOutput();

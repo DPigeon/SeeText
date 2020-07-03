@@ -14,7 +14,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.seetext.Mode;
 import com.seetext.R;
+import com.seetext.activities.AbstractActivity;
 import com.seetext.profile.SharedPreferenceHelper;
 import com.seetext.utils.GraphicOverlay;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -24,7 +26,6 @@ import java.util.Objects;
 
 import ai.fritz.core.Fritz;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.Preview;
@@ -37,7 +38,7 @@ import androidx.core.content.ContextCompat;
  * and parameters.
  */
 
-public abstract class AbstractMainActivity extends AppCompatActivity {
+public abstract class AbstractMainActivity extends AbstractActivity {
 
     protected abstract void setupUI();
     protected abstract void persistentSpeech();
@@ -54,6 +55,7 @@ public abstract class AbstractMainActivity extends AppCompatActivity {
     protected abstract boolean connectedToInternet();
 
     protected String TAG = "MainActivity:";
+    protected Mode currentMode = Mode.SpeechRecognition;
     protected SharedPreferenceHelper sharedPreferenceHelper;
     protected static final int TTS_DATA_CHECK = 90;
     protected static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
@@ -83,18 +85,10 @@ public abstract class AbstractMainActivity extends AppCompatActivity {
     protected TextToSpeech mTTS;
     protected String ttsSentence; // The last translated sentence to send to TTS
 
-    /* Modes of the app */
-    protected enum Mode {
-        SpeechRecognition,
-        ObjectDetection
-    }
-    protected Mode currentMode = Mode.SpeechRecognition;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fritz.configure(this); // Initialize Fritz
-        setContentView(R.layout.activity_main);
         Objects.requireNonNull(getSupportActionBar()).hide(); // Hide the main app bar on top
 
         showAudioAndVideoPermissions();
@@ -111,6 +105,11 @@ public abstract class AbstractMainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         loadLanguageFirstTime(); // Check when first time opening the app
+    }
+
+    @Override
+    protected int getLayoutResourceId() {
+        return R.layout.activity_main;
     }
 
     @Override

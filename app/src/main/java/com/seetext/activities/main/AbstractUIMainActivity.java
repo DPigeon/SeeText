@@ -16,6 +16,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 
+import com.seetext.Mode;
 import com.seetext.R;
 import com.seetext.profile.Profile;
 
@@ -33,6 +34,8 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
     protected abstract void setOutputLanguage(int languageId);
     protected abstract void flashLight(boolean flashLightStatus);
     protected abstract void startTTS(String ttsSentence);
+
+    protected String TAG = "AbstractUIMainActivity:";
 
     @Override
     @SuppressLint({"ClickableViewAccessibility"})
