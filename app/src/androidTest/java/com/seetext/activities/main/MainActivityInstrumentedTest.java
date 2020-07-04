@@ -1,5 +1,8 @@
 package com.seetext.activities.main;
 
+import android.Manifest;
+
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,6 +14,7 @@ import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
+import androidx.test.rule.GrantPermissionRule;
 
 import com.seetext.R;
 
@@ -22,6 +26,13 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class MainActivityInstrumentedTest {
+
+    @Rule
+    public GrantPermissionRule permissionRule =
+            GrantPermissionRule.grant(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO
+            );
 
     @Rule
     public ActivityTestRule<MainActivity> activityRule =
@@ -41,7 +52,7 @@ public class MainActivityInstrumentedTest {
     }
 
     @Test
-    @Ignore("Needs rework to allow permissions to pass")
+   @Ignore("Needs rework to allow permissions to pass")
     public void testPressingLanguageDropdownButton() {
         onView(withId(R.id.languagesImageView))
                 .perform(click())

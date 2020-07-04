@@ -1,22 +1,21 @@
 package com.seetext.translator;
 
+import android.Manifest;
 import android.content.Context;
 import android.widget.Toast;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
+import androidx.test.rule.GrantPermissionRule;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 import com.seetext.activities.main.MainActivity;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
 public class TranslatorInstrumentedTest {
@@ -26,6 +25,13 @@ public class TranslatorInstrumentedTest {
     Translator.Callback cb;
     String word = "teste";
     String translatedWord = "";
+
+    @Rule
+    public GrantPermissionRule permissionRule =
+            GrantPermissionRule.grant(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO
+            );
 
     @Rule
     public ActivityTestRule<MainActivity> activityRule =
