@@ -32,9 +32,9 @@ public class Translator {
     /* Used for translating in speech recognition using a callback */
     public Translator(Context context, int input, int output, Callback callback) {
         FirebaseTranslatorOptions options = new FirebaseTranslatorOptions.Builder()
-            .setSourceLanguage(input)
-            .setTargetLanguage(output)
-            .build();
+                .setSourceLanguage(input)
+                .setTargetLanguage(output)
+                .build();
         modelManager = FirebaseModelManager.getInstance();
         translator = FirebaseNaturalLanguage.getInstance().getTranslator(options);
         this.context = context;

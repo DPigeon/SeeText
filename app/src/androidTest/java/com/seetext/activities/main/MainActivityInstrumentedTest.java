@@ -24,15 +24,15 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 public class MainActivityInstrumentedTest {
 
     @Rule
-    public ActivityTestRule<AbstractMainActivity> activityRule =
-            new ActivityTestRule<>(AbstractMainActivity.class);
+    public ActivityTestRule<MainActivity> activityRule =
+            new ActivityTestRule<>(MainActivity.class);
 
     @Rule
-    public IntentsTestRule<AbstractMainActivity> intentsTestRule =
-            new IntentsTestRule<>(AbstractMainActivity.class);
+    public IntentsTestRule<MainActivity> intentsTestRule =
+            new IntentsTestRule<>(MainActivity.class);
 
     @Test
-    @Ignore("Needs rework")
+    @Ignore("Needs rework to allow permissions to pass")
     public void testPressingProfileButton() {
         Intents.init();
         onView(ViewMatchers.withId(R.id.userProfileImageView))
@@ -41,7 +41,7 @@ public class MainActivityInstrumentedTest {
     }
 
     @Test
-    @Ignore("Needs rework")
+    @Ignore("Needs rework to allow permissions to pass")
     public void testPressingLanguageDropdownButton() {
         onView(withId(R.id.languagesImageView))
                 .perform(click())

@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class ObjectDetectionTest {
+public class ObjectDetectionInstrumentedTest {
 
     @Rule
     public ActivityTestRule<MainActivity> activityRule =
