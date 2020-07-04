@@ -25,22 +25,24 @@ public class ProfileActivity extends AbstractProfileActivity {
     protected void setupUI() {
         languagesScrollView = findViewById(R.id.languagesScrollView);
         languagesRadioGroup = findViewById(R.id.languagesRadioGroup);
+        checkedButton = findViewById(languagesRadioGroup.getCheckedRadioButtonId());
         saveButton = findViewById(R.id.saveButton);
         saveButton.setOnClickListener(view -> saveProfile());
     }
 
     private void scrollToCheckedButton() {
-        RadioButton checkedButton = findViewById(languagesRadioGroup.getCheckedRadioButtonId());
-        if (checkedButton != null)
+        if (checkedButton != null) {
             languagesScrollView.post(() -> languagesScrollView.smoothScrollTo(0, checkedButton.getTop()));
+        }
     }
 
     protected void instantiateRadioGroup() {
         ArrayList<String> languages = Utils.getLanguageList();
 
         /* Setup the radioGroup list of languages */
-        for (int i = 0; i < languages.size(); i++)
+        for (int i = 0; i < languages.size(); i++) {
             addRadioButtons(languages.get(i), i);
+        }
     }
 
     protected void addRadioButtons(String languages, int i) {
@@ -49,8 +51,9 @@ public class ProfileActivity extends AbstractProfileActivity {
         rButton.setText(languages);
         rButton.setTextSize(20F);
         rButton.setOnCheckedChangeListener((compoundButton, b) -> {
-            if (compoundButton.isChecked())
+            if (compoundButton.isChecked()) {
                 languageChosen = compoundButton.getId(); // Set the current language chosen when touched
+            }
         });
         languagesRadioGroup.addView(rButton);
     }
@@ -61,8 +64,7 @@ public class ProfileActivity extends AbstractProfileActivity {
         assert firstTime != null;
         if (firstTime.equals("yes")) { // If first time launching app
             switchMode(true, View.VISIBLE); // Switch to the edit mode
-        }
-        else {
+        } else {
             switchMode(false, View.INVISIBLE); // Switch to display mode
 
             // Getting the profile and displaying it
@@ -93,15 +95,19 @@ public class ProfileActivity extends AbstractProfileActivity {
             Profile profile = new Profile(languageChosen, outputLanguage, lensFacing, mode);
             sharedPreferenceHelper.saveProfile(profile);
             toastMessage("Your profile has been saved!");
-            /* Here we download the input model to be able to view translated sentences in definitions */
-            if (outputLanguage >= 0) {
-                Translator translator = new Translator(getApplicationContext(), languageChosen, outputLanguage);
-                FirebaseTranslateRemoteModel model = new FirebaseTranslateRemoteModel.Builder(languageChosen).build();
-                translator.checkAndDownloadModel(model);
-            }
+            downloadModel(outputLanguage);
             goToActivity();
         } else {
             toastMessage("You must choose a language!");
+        }
+    }
+
+    private void downloadModel(int outputLanguage) {
+        /* Here we download the input model to be able to view translated sentences in definitions */
+        if (outputLanguage >= 0) {
+            Translator translator = new Translator(getApplicationContext(), languageChosen, outputLanguage);
+            FirebaseTranslateRemoteModel model = new FirebaseTranslateRemoteModel.Builder(languageChosen).build();
+            translator.checkAndDownloadModel(model);
         }
     }
 

@@ -29,6 +29,5 @@ public class ProfileActivityTest {
         Bundle savedInstanceState = new Bundle();
         mockActivity.onCreate(savedInstanceState);
         mockActivity.onStart();
-
     }
 }

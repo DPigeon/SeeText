@@ -13,7 +13,6 @@ import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 
 import com.seetext.R;
-import com.seetext.activities.main.AbstractMainActivity;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;

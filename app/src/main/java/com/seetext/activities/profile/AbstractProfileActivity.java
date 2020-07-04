@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 
@@ -26,6 +27,7 @@ public abstract class AbstractProfileActivity extends AbstractActivity {
     SharedPreferenceHelper sharedPreferenceHelper;
     ScrollView languagesScrollView;
     RadioGroup languagesRadioGroup;
+    RadioButton checkedButton;
     Button saveButton;
     int languageChosen = -1; // Language checked on radioButton
 

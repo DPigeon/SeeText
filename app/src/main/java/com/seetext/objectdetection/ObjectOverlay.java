@@ -20,7 +20,6 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
     private String TAG = "ObjectOverlay";
     private GraphicOverlay graphicOverlay;
     private float x, y;
-    private Size size;
     private String translatedText;
     private FritzVisionObject scaledObject;
     private Paint paint;
@@ -33,7 +32,7 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
         this.graphicOverlay = graphicOverlay;
         borderedText = BorderedText.createDefault(context);
         documentImage = ContextCompat.getDrawable(context, R.drawable.document_word);
-        size = new Size(image.getWidth(), image.getHeight());
+        Size size = new Size(image.getWidth(), image.getHeight());
         scaledObject = object.scaledTo(size);
         x = scaledObject.getBoundingBox().left;
         y = scaledObject.getBoundingBox().top;
@@ -80,5 +79,4 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
             }
         }
     }
-
 }

@@ -50,20 +50,20 @@ public class ObjectDetection {
 
         List<FritzVisionObject> objects = objectResult.getObjects();
         graphicOverlay.clear();
+        drawObject(context, sameAsOutput, objects, outputLanguage, image);
+    }
 
-        if (!sameAsOutput) { // Translator activated
-            for (FritzVisionObject object : objects) {
-                String text = object.getVisionLabel().getText();
+    private void drawObject(Context context, boolean sameAsOutput, List<FritzVisionObject> objects, int outputLanguage, Bitmap image) {
+        for (FritzVisionObject object : objects) {
+            String text = object.getVisionLabel().getText();
+            ObjectOverlay objectOverlay;
+            if (!sameAsOutput) {
                 String translatedText = translator.translateObject(text, outputLanguage);
-                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, translatedText, callback);
-                graphicOverlay.add(objectOverlay);
+                objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, translatedText, callback);
+            } else {
+                objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, text, callback);
             }
-        } else { // No translator needed because same input and output languages (english)
-            for (FritzVisionObject object : objects) {
-                String text = object.getVisionLabel().getText();
-                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, text, callback);
-                graphicOverlay.add(objectOverlay);
-            }
+            graphicOverlay.add(objectOverlay);
         }
     }
 }

@@ -53,12 +53,18 @@ public class DefinitionListViewAdapter extends ArrayAdapter<DefinitionRowItem> {
             holder.definitionTextView = convertView.findViewById(R.id.definitionTextView);
             holder.exampleTextView = convertView.findViewById(R.id.exampleTextView);
             convertView.setTag(holder);
-        } else
+        } else {
             holder = (ViewHolder) convertView.getTag();
+        }
 
         assert definitionRowItem != null;
         holder.iconImageView.setImageResource(definitionRowItem.getIcon());
+        setHolderText(holder, definitionRowItem);
 
+        return convertView;
+    }
+
+    private void setHolderText(ViewHolder holder, DefinitionRowItem definitionRowItem) {
         // If we have any HTML code, we handle it
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             holder.typeTextView.setText(Html.fromHtml(definitionRowItem.getType(), Html.FROM_HTML_MODE_COMPACT));
@@ -69,7 +75,5 @@ public class DefinitionListViewAdapter extends ArrayAdapter<DefinitionRowItem> {
             holder.definitionTextView.setText(Html.fromHtml(definitionRowItem.getDefinition()));
             holder.exampleTextView.setText(Html.fromHtml(definitionRowItem.getExample()));
         }
-
-        return convertView;
     }
 }

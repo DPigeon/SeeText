@@ -13,14 +13,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SplashScreenActivityTest {
+public class AbstractActivityTest {
 
     @Mock
-    SplashScreenActivity mockActivity;
+    AbstractActivity mockActivity;
 
     @Before
     public void setupMock() {
-        mockActivity = mock(SplashScreenActivity.class);
+        mockActivity = mock(AbstractActivity.class);
     }
 
     @Test
