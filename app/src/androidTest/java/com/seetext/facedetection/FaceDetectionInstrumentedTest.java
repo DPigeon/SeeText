@@ -40,7 +40,7 @@ public class FaceDetectionInstrumentedTest {
     Context context;
     FaceDetection faceDetection;
     GraphicOverlay graphicOverlay;
-    FaceDetection.Callback cb;
+    FaceDetectionCallback cb;
     ImageAnalysis imageAnalysis;
 
     @Before

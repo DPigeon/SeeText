@@ -22,9 +22,8 @@ public class TranslatorInstrumentedTest {
 
     Context context;
     Translator translator;
-    Translator.TranslatorCallback cb;
+    TranslatorCallback cb;
     String word = "teste";
-    String translatedWord = "";
 
     @Rule
     public GrantPermissionRule permissionRule =
