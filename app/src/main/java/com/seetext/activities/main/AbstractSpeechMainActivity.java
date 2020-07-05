@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 import com.seetext.Mode;
 import com.seetext.translator.Translator;
+import com.seetext.translator.TranslatorCallback;
 
 import java.util.Objects;
 
@@ -77,7 +78,7 @@ public abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity 
             audioImageView.setVisibility(View.VISIBLE);
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
-                    Translator translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), (Translator.Callback) this);
+                    Translator translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), (TranslatorCallback) this);
                     translator.downloadModelAndTranslate(outputLanguage, sentence);
                 } else
                     speechTextView.setText(sentenceToFitUI); // We show the text like it is

@@ -9,14 +9,14 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 
 import com.seetext.activities.definition.DefinitionActivity;
-import com.seetext.facedetection.FaceDetection;
-import com.seetext.objectdetection.ObjectOverlay;
-import com.seetext.translator.Translator;
+import com.seetext.facedetection.FaceDetectionCallback;
+import com.seetext.objectdetection.TouchObjectCallback;
+import com.seetext.translator.TranslatorCallback;
 
 public abstract class AbstractInterfacesMainActivity extends AbstractSpeechMainActivity implements
-        FaceDetection.Callback,
-        Translator.Callback,
-        ObjectOverlay.Callback {
+        FaceDetectionCallback,
+        TranslatorCallback,
+        TouchObjectCallback {
 
     protected String TAG = "AbstractInterfacesMainActivity:";
 

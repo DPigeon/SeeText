@@ -28,9 +28,9 @@ public class ObjectDetection {
     private Translator translator;
     private FritzVisionObjectPredictor predictor;
     private GraphicOverlay graphicOverlay;
-    private ObjectOverlay.Callback callback;
+    private TouchObjectCallback callback;
 
-    public ObjectDetection(GraphicOverlay graphicOverlay, ObjectOverlay.Callback cb) {
+    public ObjectDetection(GraphicOverlay graphicOverlay, TouchObjectCallback cb) {
         this.graphicOverlay = graphicOverlay;
         ObjectDetectionOnDeviceModel onDeviceModel = FritzVisionModels.getObjectDetectionOnDeviceModel();
         predictor = FritzVision.ObjectDetection.getPredictor(onDeviceModel);

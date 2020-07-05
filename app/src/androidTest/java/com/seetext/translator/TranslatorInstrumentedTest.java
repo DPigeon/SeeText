@@ -22,7 +22,7 @@ public class TranslatorInstrumentedTest {
 
     Context context;
     Translator translator;
-    Translator.Callback cb;
+    Translator.TranslatorCallback cb;
     String word = "teste";
     String translatedWord = "";
 

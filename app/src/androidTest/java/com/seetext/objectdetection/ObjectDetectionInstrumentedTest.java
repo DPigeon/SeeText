@@ -36,7 +36,7 @@ public class ObjectDetectionInstrumentedTest {
     Context context;
     ObjectDetection objectDetection;
     GraphicOverlay graphicOverlay;
-    ObjectOverlay.Callback cb;
+    ObjectOverlay.TouchObjectCallback cb;
 
     @Before
     public void initialize() {

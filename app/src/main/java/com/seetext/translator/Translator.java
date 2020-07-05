@@ -27,10 +27,10 @@ public class Translator {
     final FirebaseTranslator translator;
     FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder().build();
     Context context;
-    Callback callback = null;
+    TranslatorCallback callback = null;
 
     /* Used for translating in speech recognition using a callback */
-    public Translator(Context context, int input, int output, Callback callback) {
+    public Translator(Context context, int input, int output, TranslatorCallback callback) {
         FirebaseTranslatorOptions options = new FirebaseTranslatorOptions.Builder()
                 .setSourceLanguage(input)
                 .setTargetLanguage(output)
@@ -50,11 +50,6 @@ public class Translator {
         modelManager = FirebaseModelManager.getInstance();
         translator = FirebaseNaturalLanguage.getInstance().getTranslator(options);
         this.context = context;
-    }
-
-    /* An interface to give the translated text as a response to Main Activity */
-    public interface Callback {
-        void translateTheText(String text);
     }
 
     /* Translate text from input to output */

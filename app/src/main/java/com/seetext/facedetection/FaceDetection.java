@@ -27,10 +27,10 @@ import androidx.camera.core.ImageProxy;
 public class FaceDetection {
     private String TAG = "FaceDetection";
     private FirebaseVisionFaceDetector detector;
-    private Callback callback = null;
+    private FaceDetectionCallback callback = null;
     private GraphicOverlay graphicOverlay;
 
-    public FaceDetection(GraphicOverlay graphicOverlay, Callback cb) {
+    public FaceDetection(GraphicOverlay graphicOverlay, FaceDetectionCallback cb) {
         this.graphicOverlay = graphicOverlay;
         this.callback = cb;
         // High-accuracy landmark detection
@@ -39,11 +39,6 @@ public class FaceDetection {
                 .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
                 .build();
         detector = FirebaseVision.getInstance().getVisionFaceDetector(highAccuracyOpts);
-    }
-
-    /* An interface to update the position of the speech textView from Main Activity */
-    public interface Callback {
-        void updateSpeechTextViewPosition(float x, float y, boolean hasFace);
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")

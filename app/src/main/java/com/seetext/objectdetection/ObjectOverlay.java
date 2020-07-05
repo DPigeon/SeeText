@@ -25,9 +25,9 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
     private Paint paint;
     private BorderedText borderedText;
     private Drawable documentImage;
-    private Callback callback;
+    private TouchObjectCallback callback;
 
-    public ObjectOverlay(GraphicOverlay graphicOverlay, Context context, FritzVisionObject object, Bitmap image, String translatedText, Callback cb) {
+    public ObjectOverlay(GraphicOverlay graphicOverlay, Context context, FritzVisionObject object, Bitmap image, String translatedText, TouchObjectCallback cb) {
         super(graphicOverlay);
         this.graphicOverlay = graphicOverlay;
         borderedText = BorderedText.createDefault(context);
@@ -40,11 +40,6 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
         this.paint = new Paint();
         this.callback = cb;
         postInvalidate(); // Redraw
-    }
-
-    /* An interface to go to definition activity */
-    public interface Callback {
-        void goToObjectDefinition(String word);
     }
 
     @Override
