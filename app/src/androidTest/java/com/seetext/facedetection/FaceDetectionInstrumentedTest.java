@@ -46,7 +46,9 @@ public class FaceDetectionInstrumentedTest {
     @Before
     public void initialize() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        CameraX.initialize(context, Camera2Config.defaultConfig());
+        if (!CameraX.isInitialized()) {
+            CameraX.initialize(context, Camera2Config.defaultConfig());
+        }
         imageAnalysis = new ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build();

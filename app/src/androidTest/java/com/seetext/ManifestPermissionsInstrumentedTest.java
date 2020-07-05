@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 @Ignore("Bug: No instrumentation registered!")
 public class ManifestPermissionsInstrumentedTest { // https://blog.egorand.me/testing-runtime-permissions-lessons-learned/
 
+    Instrumentation instrumentation;
     UiDevice device;
     String resourceId = "com.android.packageinstaller:id/permission_allow_button";
 
@@ -36,7 +37,7 @@ public class ManifestPermissionsInstrumentedTest { // https://blog.egorand.me/te
 
     @Before
     public void initialize() {
-        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        instrumentation = InstrumentationRegistry.getInstrumentation();
         device = UiDevice.getInstance(instrumentation);
     }
 
