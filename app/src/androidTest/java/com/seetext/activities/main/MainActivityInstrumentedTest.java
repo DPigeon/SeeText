@@ -8,28 +8,27 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import androidx.camera.core.Camera;
-import androidx.camera.core.CameraInfo;
+import androidx.camera.core.CameraSelector;
 import androidx.camera.core.TorchState;
-import androidx.test.espresso.ViewAssertion;
-import androidx.test.espresso.assertion.ViewAssertions;
 import androidx.test.espresso.intent.Intents;
 import androidx.test.espresso.intent.rule.IntentsTestRule;
-import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
 
+import com.seetext.Mode;
 import com.seetext.R;
+import com.seetext.utils.Utils;
 
+import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isSystemAlertWindow;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
-import static androidx.test.espresso.matcher.ViewMatchers.hasBackground;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static org.hamcrest.Matchers.anything;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
@@ -55,7 +54,7 @@ public class MainActivityInstrumentedTest {
 
     @Before
     public void initialize() {
-        mainActivity = activityRule.getActivity();
+        mainActivity = intentsTestRule.getActivity();
     }
 
     @Test
@@ -68,17 +67,58 @@ public class MainActivityInstrumentedTest {
     }
 
     @Test
+    public void testPressingSpeechDetectionButton() {
+        onView(withId(R.id.speechDetectionImageView))
+                .perform(click())
+                .check(matches(isDisplayed()));
+
+        assertEquals(Mode.SpeechRecognition, mainActivity.currentMode);
+    }
+
+    @Test
+    public void testPressingObjectDetectionButton() {
+        onView(withId(R.id.objectDetectionImageView))
+                .perform(click())
+                .check(matches(isDisplayed()));
+
+        assertEquals(Mode.ObjectDetection, mainActivity.currentMode);
+    }
+
+    @Test
+    public void testPressingCameraLens() {
+        onView(withId(R.id.cameraModeImageView))
+                .perform(click())
+                .check(matches(isDisplayed()));
+
+        // Initialized on back first
+        assertEquals(CameraSelector.LENS_FACING_FRONT, mainActivity.lensFacing);
+    }
+
+    @Test
     public void testPressingLanguageDropdownButton() {
+        int czechPosition = 6;
         onView(withId(R.id.languagesImageView))
                 .perform(click())
                 .inRoot(isSystemAlertWindow());
+
+        onData(anything())
+                .atPosition(czechPosition)
+                .perform(click());
+        onView(withId(R.id.languageTextView))
+                .check(matches(withText(Utils.getLanguageByTag(czechPosition))));
     }
 
     @Test
     public void testFlashLight() {
+        int off = mainActivity.camera.getCameraInfo().getTorchState().getValue();
+        assertEquals(TorchState.OFF, off);
+
         onView(withId(R.id.flashLightImageView))
                 .perform(click())
-                .check(ViewAssertions.matches(isDisplayed()));
+                .check(matches(isDisplayed()));
+
+        int on = mainActivity.camera.getCameraInfo().getTorchState().getValue();
+        assertEquals(TorchState.ON, on);
     }
 }
 
