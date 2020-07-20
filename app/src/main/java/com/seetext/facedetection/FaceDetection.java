@@ -25,6 +25,7 @@ import androidx.camera.core.ImageProxy;
  */
 
 public class FaceDetection {
+
     private String TAG = "FaceDetection";
     private FirebaseVisionFaceDetector detector;
     private FaceDetectionCallback callback = null;

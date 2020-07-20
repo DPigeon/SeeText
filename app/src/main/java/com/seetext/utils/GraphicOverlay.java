@@ -46,6 +46,7 @@ import java.util.List;
  * </ol>
  */
 public class GraphicOverlay extends View {
+
     private final String TAG = "GraphicOverlay";
     private final Object lock = new Object();
     private int previewWidth;

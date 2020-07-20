@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SharedPreferenceHelperTest {
+
     private SharedPreferenceHelper sharedPreferenceHelper;
 
     @Mock
@@ -47,5 +48,4 @@ public class SharedPreferenceHelperTest {
         doNothing().when(mockEditor).apply();
         return new SharedPreferenceHelper(mockSharedPreferences);
     }
-
 }

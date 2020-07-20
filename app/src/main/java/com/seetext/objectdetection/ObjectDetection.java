@@ -24,6 +24,7 @@ import ai.fritz.vision.objectdetection.ObjectDetectionOnDeviceModel;
  */
 
 public class ObjectDetection {
+
     private String TAG = "ObjectDetection";
     private Translator translator;
     private FritzVisionObjectPredictor predictor;

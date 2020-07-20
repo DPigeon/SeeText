@@ -14,6 +14,7 @@ import com.seetext.utils.GraphicOverlay;
  */
 
 public class FaceOverlay extends GraphicOverlay.Graphic {
+
     private String TAG = "FaceOverlay";
     private GraphicOverlay graphicOverlay;
     private Rect bounds;
@@ -49,6 +50,5 @@ public class FaceOverlay extends GraphicOverlay.Graphic {
             }
         }
     }
-
 }
 

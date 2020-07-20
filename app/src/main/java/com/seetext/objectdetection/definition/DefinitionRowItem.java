@@ -7,6 +7,7 @@ package com.seetext.objectdetection.definition;
 import org.jetbrains.annotations.NotNull;
 
 public class DefinitionRowItem {
+
     private int icon;
     private String type;
     private String definition;

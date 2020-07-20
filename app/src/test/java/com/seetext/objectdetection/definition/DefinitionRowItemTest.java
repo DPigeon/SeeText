@@ -9,6 +9,7 @@ import static org.junit.Assert.assertNotEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefinitionRowItemTest {
+
     final int iconId = 10000;
     final String type = "noun";
     final String definition = "A unit testing is a software testing method by which individual units of source code are tested to determine whether they are fit for use.";

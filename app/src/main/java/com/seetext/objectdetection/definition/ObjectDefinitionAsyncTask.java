@@ -15,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class ObjectDefinitionAsyncTask extends AsyncTask<String, Void, JSONObject> {
+
     // Request example: curl --header "Authorization: Token 61f80afba945a78ae5d103ad5a3f616ee6c4def5" https://owlbot.info/api/v4/dictionary/owl -s | json_pp
     private String TAG = "ObjectDefinitionAsyncTask";
     private String token = "Token 61f80afba945a78ae5d103ad5a3f616ee6c4def5"; // Using https://owlbot.info/ API
@@ -68,5 +69,4 @@ public class ObjectDefinitionAsyncTask extends AsyncTask<String, Void, JSONObjec
         }
         return sb.toString();
     }
-
 }

@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
  */
 
 public class DefinitionListViewAdapter extends ArrayAdapter<DefinitionRowItem> {
+
     private Context context;
 
     public DefinitionListViewAdapter(Context context, int resourceId, List<DefinitionRowItem> items) {

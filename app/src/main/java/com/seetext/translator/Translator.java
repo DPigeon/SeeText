@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
  */
 
 public class Translator {
+
     private String TAG = "Translator";
     final FirebaseModelManager modelManager;
     final FirebaseTranslator translator;

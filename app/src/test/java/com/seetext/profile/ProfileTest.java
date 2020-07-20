@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProfileTest {
+
     protected int inputLanguage = FirebaseTranslateLanguage.EN;
     protected int outputLanguage = FirebaseTranslateLanguage.FR;
     protected int lensFacing = 0;

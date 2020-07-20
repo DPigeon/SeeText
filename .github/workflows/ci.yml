@@ -43,7 +43,8 @@ jobs:
     - name: Run Unit Tests
       run: bash ./gradlew test --stacktrace
       
-  # job_4: # Let's configure multiple configurations later
+  # Instrumented tests will be done offline due to them taking up too many GitHub Actions Minutes    
+  # job_4:
     # needs: job_3
     # name: Instrumented Tests
     # runs-on: macos-latest

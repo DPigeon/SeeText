@@ -17,6 +17,7 @@ import ai.fritz.vision.objectdetection.BorderedText;
 import androidx.core.content.ContextCompat;
 
 public class ObjectOverlay extends GraphicOverlay.Graphic {
+
     private String TAG = "ObjectOverlay";
     private GraphicOverlay graphicOverlay;
     private float x, y;

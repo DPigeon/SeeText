@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
  */
 
 public class SharedPreferenceHelper {
+
     private SharedPreferences sharedPreferences;
     public final String KEY_LANGUAGE = "ProfileLanguage";
     public final String KEY_LANGUAGE_OUTPUT = "ProfileLanguageOutput";
@@ -52,5 +53,4 @@ public class SharedPreferenceHelper {
         }
         return false;
     }
-
 }
