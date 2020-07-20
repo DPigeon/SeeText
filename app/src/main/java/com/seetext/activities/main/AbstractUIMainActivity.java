@@ -37,6 +37,8 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
 
     protected String TAG = "AbstractUIMainActivity:";
 
+    private FlashLightOverlay flashLightOverlay;
+
     @Override
     @SuppressLint({"ClickableViewAccessibility"})
     public void setupUI() {
@@ -86,6 +88,7 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         } else {
             objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
         }
+        flashLightOverlay = new FlashLightOverlay(graphicOverlay);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -156,12 +159,12 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
     }
 
     private void flashLightAction() {
-        if (camera.getCameraInfo().hasFlashUnit()) {
-            flashLightStatus = !flashLightStatus;
-            flashLight(flashLightStatus);
-        } else {
-            Toast.makeText(getApplicationContext(), "No flash available on your device!",
-                    Toast.LENGTH_SHORT).show();
+        flashLightStatus = !flashLightStatus;
+        flashLight(flashLightStatus);
+        if (camera.getCameraInfo().hasFlashUnit() && lensFacing == CameraSelector.LENS_FACING_BACK) {
+            graphicOverlay.remove(flashLightOverlay);
+        } else if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+            graphicOverlay.add(flashLightOverlay);
         }
     }
 
