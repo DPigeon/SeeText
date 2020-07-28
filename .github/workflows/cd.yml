@@ -48,7 +48,7 @@ jobs:
         name: app # Downloaded to the current directory
     
     - name: directory
-      run: bash ls
+      run: ls
     
     - name: Upload to Play Store
       uses: r0adkll/upload-google-play@v1.0.4
