@@ -47,9 +47,6 @@ jobs:
       with:
         name: app # Downloaded to the current directory
     
-    - name: directory
-      run: ls
-    
     - name: Upload to Play Store
       uses: r0adkll/upload-google-play@v1.0.4
       with:
@@ -58,7 +55,7 @@ jobs:
         releaseFile: app-release.aab
         track: alpha
         userFraction: 0.05 # Portion of users who should get the staged version of the app. Accepts values between 0.0 and 1.0 (exclusive-exclusive)
-        whatsNewDirectory: /whatsnew # Release notes for whats new page
+        whatsNewDirectory: whatsnew # Release notes for whats new page
         
   job_3:
     name: Artifactory Cleanup
