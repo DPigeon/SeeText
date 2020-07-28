@@ -10,8 +10,8 @@ android {
         applicationId "com.seetext"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 2 // Edit when new release
-        versionName "2.3-alpha" // Edit when new release
+        versionCode 3 // Edit when new release
+        versionName "2.4-alpha" // Edit when new release
         // To improve image processing performance
         renderscriptTargetApi 21
         renderscriptSupportModeEnabled true
