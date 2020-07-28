@@ -28,8 +28,9 @@
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <activity
-            android:name="com.seetext.SplashScreenActivity"
-            android:theme="@style/SplashScreenTheme">
+            android:name="com.seetext.activities.SplashScreenActivity"
+            android:theme="@style/SplashScreenTheme"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,23 +38,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.seetext.MainActivity"
+            android:name="com.seetext.activities.main.MainActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.seetext.MainActivity" />
+                android:value="com.seetext.activities.main.MainActivity" />
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
         <activity
-            android:name="com.seetext.ProfileActivity"
-            android:parentActivityName="com.seetext.MainActivity"
+            android:name="com.seetext.activities.profile.ProfileActivity"
+            android:parentActivityName="com.seetext.activities.main.MainActivity"
             android:screenOrientation="portrait">
         </activity>
-        <activity android:name="com.seetext.DefinitionActivity"
-            android:parentActivityName="com.seetext.MainActivity"
+        <activity android:name="com.seetext.activities.definition.DefinitionActivity"
+            android:parentActivityName="com.seetext.activities.main.MainActivity"
             android:screenOrientation="portrait">
 
         </activity>

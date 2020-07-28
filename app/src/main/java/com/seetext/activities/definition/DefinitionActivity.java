@@ -1,14 +1,9 @@
-package com.seetext;
-
-import androidx.appcompat.app.AppCompatActivity;
+package com.seetext.activities.definition;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.view.View;
-import android.widget.ListView;
-import android.widget.Switch;
-import android.widget.TextView;
 
+import com.seetext.R;
 import com.seetext.objectdetection.definition.DefinitionListViewAdapter;
 import com.seetext.objectdetection.definition.ObjectDefinitionAsyncTask;
 import com.seetext.objectdetection.definition.DefinitionRowItem;
@@ -25,27 +20,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-public class DefinitionActivity extends AppCompatActivity {
-    private String TAG = "DefinitionActivity";
-    private String word = "";
-    private String translatedWord = "";
-    private int inputLanguage;
-    private int outputLanguage;
-    private Boolean hasToTranslate;
-    private TextView pronunciationTextView;
-    private ListView definitionsListView;
-    private List<DefinitionRowItem> definitionRowItems;
-    private List<DefinitionRowItem> transDefinitionRowItems;
-    private DefinitionListViewAdapter adapter;
-    private Switch languageSwitch;
+public class DefinitionActivity extends AbstractDefinitionActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_definition);
-
-        setupUI();
-    }
+    protected String TAG = "DefinitionActivity:";
 
     protected void setupUI() {
         Intent intent = getIntent();
@@ -54,14 +31,16 @@ public class DefinitionActivity extends AppCompatActivity {
         outputLanguage = intent.getIntExtra("outputLanguage", -1);
 
         int wordCount = wordCount(word); // We need 1 word
-        if (wordCount > 1)
+        if (wordCount > 1) {
             word = word.substring(word.lastIndexOf(" ") + 1); // Get last word (usually the one we look for)
+        }
 
         String title = word;
         String inputLanguageString = Utils.getLanguageList().get(inputLanguage);
         String outputLanguageString = Utils.getLanguageList().get(outputLanguage);
-        if (outputLanguage != FirebaseTranslateLanguage.EN)
+        if (outputLanguage != FirebaseTranslateLanguage.EN) {
             title = word + " [" + outputLanguageString + "]";
+        }
         Objects.requireNonNull(getSupportActionBar()).setTitle(title);
 
         pronunciationTextView = findViewById(R.id.pronunciationTextView);
@@ -80,8 +59,9 @@ public class DefinitionActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         });
         // Don't show switch option if input same as output
-        if (inputLanguage == outputLanguage)
+        if (inputLanguage == outputLanguage) {
             languageSwitch.setVisibility(View.INVISIBLE);
+        }
 
         definitionRowItems = new ArrayList<>();
         transDefinitionRowItems = new ArrayList<>();
@@ -92,11 +72,28 @@ public class DefinitionActivity extends AppCompatActivity {
         definitionsListView.setAdapter(adapter);
     }
 
+    /* Used to translate all words back to english to get the response from dictionary API */
+    protected void translateWordIfNeeded() {
+        if (outputLanguage == FirebaseTranslateLanguage.EN) // Don't translate since dictionary API already in english
+            hasToTranslate = false;
+        else {
+            hasToTranslate = true;
+            TranslateBackObjectAsyncTask tBackObjAsyncTask = new TranslateBackObjectAsyncTask(getApplicationContext(), outputLanguage);
+            try {
+                translatedWord = tBackObjAsyncTask.execute(word).get()[0];
+            } catch (InterruptedException | ExecutionException error) {
+                error.printStackTrace();
+            }
+        }
+        fetchDefinitions();
+    }
+
     protected void fetchDefinitions() {
         ObjectDefinitionAsyncTask objectDefinitionAsyncTask = new ObjectDefinitionAsyncTask();
         try {
-            if (hasToTranslate)
+            if (hasToTranslate) {
                 word = translatedWord;
+            }
             JSONObject json = objectDefinitionAsyncTask.execute(word).get();
             if (json != null) {
                 String pronunciation = json.getString("pronunciation");
@@ -111,45 +108,12 @@ public class DefinitionActivity extends AppCompatActivity {
                     String def = definition.getString("definition");
                     String example = definition.getString("example");
 
-                    // If no info on some string's item
-                    if (type.equals("null"))
-                        type = i + 1 + ". noun";
-                    if (def.equals("null"))
-                        def = "";
-                    if (example.equals("null"))
-                        example = "";
-                    else
-                        example = '"' + example + '"';
-
-                    // Changing this definition for inappropriate words from API... ex: oven
-                    if (def.contains("a cremation chamber in a Nazi concentration camp")) {
-                        def = "a small furnace or kiln.";
-                    }
-
-                    String[] transInfoInput = new String[3]; // translating to show the definition in input language to toggle if needed to learn
-                    TranslateBackObjectAsyncTask translateInfo1 = new TranslateBackObjectAsyncTask(getApplicationContext(), inputLanguage);
-                    try {
-                        transInfoInput = translateInfo1.execute(type, def, example).get();
-                    } catch (InterruptedException | ExecutionException error) {
-                        error.printStackTrace();
-                    }
-
-                    // English definition list
-                    DefinitionRowItem item = new DefinitionRowItem(R.drawable.objects_detection, i + 1 + ". " + transInfoInput[0], transInfoInput[1], transInfoInput[2]);
-                    definitionRowItems.add(item);
-
-                    // Translate for toggle option
-                    String[] transInfoOutput = new String[3]; // translating to show the definition in output language to learn
-                    TranslateBackObjectAsyncTask translateInfo2 = new TranslateBackObjectAsyncTask(getApplicationContext(), outputLanguage);
-                    try {
-                            transInfoOutput = translateInfo2.execute(type, def, example).get();
-                    } catch (InterruptedException | ExecutionException error) {
-                        error.printStackTrace();
-                    }
-
-                    // Translated definition list
-                    DefinitionRowItem transItem = new DefinitionRowItem(R.drawable.objects_detection, i + 1 + ". " + transInfoOutput[0], transInfoOutput[1], transInfoOutput[2]);
-                    transDefinitionRowItems.add(transItem);
+                    ArrayList<String> correctedWords = correctWords(i, type, def, example);
+                    type = correctedWords.get(0);
+                    def = correctedWords.get(1);
+                    example = correctedWords.get(2);
+                    translateActivity(inputLanguage, type, def, example, i, definitionRowItems);
+                    translateActivity(outputLanguage, type, def, example, i, transDefinitionRowItems);
                 }
             }
         } catch (InterruptedException | ExecutionException | JSONException error) {
@@ -157,20 +121,43 @@ public class DefinitionActivity extends AppCompatActivity {
         }
     }
 
-    /* Used to translate all words back to english to get the response from dictionary API */
-    protected void translateWordIfNeeded() {
-        if (outputLanguage == FirebaseTranslateLanguage.EN) // Don't traslate since dictionary API already in english
-            hasToTranslate = false;
-        else {
-            hasToTranslate = true;
-            TranslateBackObjectAsyncTask tBackObjAsyncTask = new TranslateBackObjectAsyncTask(getApplicationContext(), outputLanguage);
-            try {
-                translatedWord = tBackObjAsyncTask.execute(word).get()[0];
-            } catch (InterruptedException | ExecutionException error) {
-                error.printStackTrace();
-            }
+    private ArrayList<String> correctWords(int i, String type, String def, String example) {
+        if (type.equals("null")) {
+            type = i + 1 + ". noun";
         }
-        fetchDefinitions();
+        if (def.equals("null")) {
+            def = "";
+        }
+        if (example.equals("null")) {
+            example = "";
+        } else {
+            example = '"' + example + '"';
+        }
+
+        // Changing this definition for inappropriate words from API... ex: oven
+        if (def.contains("a cremation chamber in a Nazi concentration camp")) {
+            def = "a small furnace or kiln.";
+        }
+        ArrayList<String> correctedWords = new ArrayList<>();
+        correctedWords.add(type);
+        correctedWords.add(def);
+        correctedWords.add(example);
+
+        return correctedWords;
+    }
+
+    private void translateActivity(int language, String type, String definition, String example, int i, List<DefinitionRowItem> list) {
+        // Translate for toggle option
+        String[] transInfo = new String[3]; // Translating to show the definition in output language to learn
+        TranslateBackObjectAsyncTask translateInfo = new TranslateBackObjectAsyncTask(getApplicationContext(), language);
+        try {
+            transInfo = translateInfo.execute(type, definition, example).get();
+        } catch (InterruptedException | ExecutionException error) {
+            error.printStackTrace();
+        }
+
+        DefinitionRowItem transItem = new DefinitionRowItem(R.drawable.objects_detection, i + 1 + ". " + transInfo[0], transInfo[1], transInfo[2]);
+        list.add(transItem);
     }
 
     /* Get number of words in title from: https://www.javatpoint.com/java-program-to-count-the-number-of-words-in-a-string */
@@ -185,5 +172,4 @@ public class DefinitionActivity extends AppCompatActivity {
         }
         return count;
     }
-
 }

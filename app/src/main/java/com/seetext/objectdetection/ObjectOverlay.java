@@ -17,23 +17,23 @@ import ai.fritz.vision.objectdetection.BorderedText;
 import androidx.core.content.ContextCompat;
 
 public class ObjectOverlay extends GraphicOverlay.Graphic {
+
     private String TAG = "ObjectOverlay";
     private GraphicOverlay graphicOverlay;
     private float x, y;
-    private Size size;
     private String translatedText;
     private FritzVisionObject scaledObject;
     private Paint paint;
     private BorderedText borderedText;
     private Drawable documentImage;
-    private Callback callback;
+    private TouchObjectCallback callback;
 
-    public ObjectOverlay(GraphicOverlay graphicOverlay, Context context, FritzVisionObject object, Bitmap image, String translatedText, Callback cb) {
+    public ObjectOverlay(GraphicOverlay graphicOverlay, Context context, FritzVisionObject object, Bitmap image, String translatedText, TouchObjectCallback cb) {
         super(graphicOverlay);
         this.graphicOverlay = graphicOverlay;
         borderedText = BorderedText.createDefault(context);
         documentImage = ContextCompat.getDrawable(context, R.drawable.document_word);
-        size = new Size(image.getWidth(), image.getHeight());
+        Size size = new Size(image.getWidth(), image.getHeight());
         scaledObject = object.scaledTo(size);
         x = scaledObject.getBoundingBox().left;
         y = scaledObject.getBoundingBox().top;
@@ -41,11 +41,6 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
         this.paint = new Paint();
         this.callback = cb;
         postInvalidate(); // Redraw
-    }
-
-    /* An interface to go to definition activity */
-    public interface Callback {
-        void goToObjectDefinition(String word);
     }
 
     @Override
@@ -80,5 +75,4 @@ public class ObjectOverlay extends GraphicOverlay.Graphic {
             }
         }
     }
-
 }

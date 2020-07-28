@@ -5,6 +5,7 @@ package com.seetext.profile;
  */
 
 public class Profile {
+
     private int languageId;
     private int languageOutputId;
     private int lensFacing;

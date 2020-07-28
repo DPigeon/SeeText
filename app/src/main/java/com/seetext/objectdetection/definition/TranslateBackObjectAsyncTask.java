@@ -12,6 +12,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
  */
 
 public class TranslateBackObjectAsyncTask extends AsyncTask<String, Void, String[]> {
+
     private String TAG = "TranslateBackObjectAsyncTask";
     @SuppressLint("StaticFieldLeak")
     private Context context;
@@ -42,6 +43,5 @@ public class TranslateBackObjectAsyncTask extends AsyncTask<String, Void, String
         }
         return translatedWord;
     }
-
 }
 

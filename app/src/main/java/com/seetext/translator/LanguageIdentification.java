@@ -6,6 +6,7 @@ import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
 import com.google.firebase.ml.naturallanguage.languageid.FirebaseLanguageIdentification;
 
 public class LanguageIdentification {
+
     private String TAG = "LanguageIdentifier";
     FirebaseLanguageIdentification languageIdentifier;
 

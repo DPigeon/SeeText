@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:alpha="0.6"
     android:animateLayoutChanges="true"
-    android:background="@android:color/black"
     android:clickable="true"
     android:focusable="true"
     android:visibility="gone">
@@ -17,6 +16,7 @@
         android:layout_gravity="center"
         android:clickable="true"
         wheel:matProg_barColor="@color/colorPrimary"
-        wheel:matProg_progressIndeterminate="true" />
+        wheel:matProg_progressIndeterminate="true"
+        android:focusable="true" />
 
 </FrameLayout>

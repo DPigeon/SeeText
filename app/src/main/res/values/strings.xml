@@ -1,6 +1,21 @@
 <resources>
     <string name="app_name">SeeText</string>
     <string name="edit_profile">Edit</string>
+    <string name="english">English</string>
+    <string name="front_camera_flash_light">Front Camera Flash Light</string>
+    <string name="user_profile">User Profile</string>
+    <string name="camera_mode">Camera Mode</string>
+    <string name="flash_light">Flash Light</string>
+    <string name="languages">Languages</string>
+    <string name="translate">Translate</string>
+    <string name="audio">Audio</string>
+    <string name="face_detection_check">Face Detection Check</string>
+    <string name="speech_detection">Speech Detection</string>
+    <string name="object_detection">Object Detection</string>
+    <string name="save">Save</string>
+    <string name="used_for_your_microphone_speech">Used for your microphone speech!</string>
+    <string name="choose_your_language">Choose Your Language</string>
+    <string name="profile">Profile</string>
     <string-array name="languages_array">
         <item>Afrikaans</item>
         <item>Arabic</item>
@@ -57,7 +72,7 @@
         <item>Thai</item>
         <item>Tagalog</item>
         <item>Turkish</item>
-        <item>Ukranian</item>
+        <item>Ukrainian</item>
         <item>Urdu</item>
         <item>Vietnamese</item>
         <item>Chinese</item>

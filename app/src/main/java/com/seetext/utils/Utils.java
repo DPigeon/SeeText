@@ -14,6 +14,7 @@ import java.util.Set;
  */
 
 public class Utils {
+
     public static int degreesToFirebaseRotation(int degrees) {
         switch (degrees) {
             case 0:
@@ -53,5 +54,4 @@ public class Utils {
     public static int getScreenHeight() {
         return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
-
 }

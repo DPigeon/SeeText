@@ -24,13 +24,14 @@ import ai.fritz.vision.objectdetection.ObjectDetectionOnDeviceModel;
  */
 
 public class ObjectDetection {
+
     private String TAG = "ObjectDetection";
     private Translator translator;
     private FritzVisionObjectPredictor predictor;
     private GraphicOverlay graphicOverlay;
-    private ObjectOverlay.Callback callback;
+    private TouchObjectCallback callback;
 
-    public ObjectDetection(GraphicOverlay graphicOverlay, ObjectOverlay.Callback cb) {
+    public ObjectDetection(GraphicOverlay graphicOverlay, TouchObjectCallback cb) {
         this.graphicOverlay = graphicOverlay;
         ObjectDetectionOnDeviceModel onDeviceModel = FritzVisionModels.getObjectDetectionOnDeviceModel();
         predictor = FritzVision.ObjectDetection.getPredictor(onDeviceModel);
@@ -50,20 +51,20 @@ public class ObjectDetection {
 
         List<FritzVisionObject> objects = objectResult.getObjects();
         graphicOverlay.clear();
+        drawObject(context, sameAsOutput, objects, outputLanguage, image);
+    }
 
-        if (!sameAsOutput) { // Translator activated
-            for (FritzVisionObject object : objects) {
-                String text = object.getVisionLabel().getText();
+    private void drawObject(Context context, boolean sameAsOutput, List<FritzVisionObject> objects, int outputLanguage, Bitmap image) {
+        for (FritzVisionObject object : objects) {
+            String text = object.getVisionLabel().getText();
+            ObjectOverlay objectOverlay;
+            if (!sameAsOutput) {
                 String translatedText = translator.translateObject(text, outputLanguage);
-                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, translatedText, callback);
-                graphicOverlay.add(objectOverlay);
+                objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, translatedText, callback);
+            } else {
+                objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, text, callback);
             }
-        } else { // No translator needed because same input and output languages (english)
-            for (FritzVisionObject object : objects) {
-                String text = object.getVisionLabel().getText();
-                ObjectOverlay objectOverlay = new ObjectOverlay(graphicOverlay, context, object, image, text, callback);
-                graphicOverlay.add(objectOverlay);
-            }
+            graphicOverlay.add(objectOverlay);
         }
     }
 }
