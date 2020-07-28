@@ -13,7 +13,7 @@
         android:layout_gravity="center|top"
         android:layout_marginTop="45dp"
         app:srcCompat="@drawable/user_profile_dark"
-		android:contentDescription="Profile" />
+		android:contentDescription="@string/profile" />
 
     <TextView
         android:id="@+id/ownLanguageTextView"
@@ -22,7 +22,7 @@
         android:layout_gravity="center|top|left"
         android:paddingLeft="10dp"
         android:paddingTop="140dp"
-        android:text="Choose Your Language"
+        android:text="@string/choose_your_language"
         android:textSize="20sp" />
 
 	<TextView
@@ -32,7 +32,7 @@
 		android:layout_gravity="center|top|left"
 		android:paddingLeft="11dp"
 		android:paddingTop="165dp"
-		android:text="Used for your microphone speech!"
+		android:text="@string/used_for_your_microphone_speech"
 		android:textSize="14sp"
 		android:textStyle="bold" />
 
@@ -41,7 +41,7 @@
         android:layout_width="128dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
-        android:text="Save" />
+        android:text="@string/save" />
 
 	<ScrollView
     android:id="@+id/languagesScrollView"

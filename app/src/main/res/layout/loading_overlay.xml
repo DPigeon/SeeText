@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:alpha="0.6"
     android:animateLayoutChanges="true"
-    android:background="@android:color/black"
     android:clickable="true"
     android:focusable="true"
     android:visibility="gone">
