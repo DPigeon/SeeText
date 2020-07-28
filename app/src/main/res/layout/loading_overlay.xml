@@ -17,6 +17,7 @@
         android:layout_gravity="center"
         android:clickable="true"
         wheel:matProg_barColor="@color/colorPrimary"
-        wheel:matProg_progressIndeterminate="true" />
+        wheel:matProg_progressIndeterminate="true"
+        android:focusable="true" />
 
 </FrameLayout>

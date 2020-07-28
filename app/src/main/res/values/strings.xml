@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">SeeText</string>
     <string name="edit_profile">Edit</string>
+    <string name="english">English</string>
     <string-array name="languages_array">
         <item>Afrikaans</item>
         <item>Arabic</item>
@@ -57,7 +58,7 @@
         <item>Thai</item>
         <item>Tagalog</item>
         <item>Turkish</item>
-        <item>Ukranian</item>
+        <item>Ukrainian</item>
         <item>Urdu</item>
         <item>Vietnamese</item>
         <item>Chinese</item>

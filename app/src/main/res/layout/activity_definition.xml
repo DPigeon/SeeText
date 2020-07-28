@@ -39,7 +39,8 @@
             <ListView
                 android:id="@+id/definitionsListView"
                 android:layout_width="match_parent"
-                android:layout_height="685dp" />
+                android:layout_height="685dp"
+                tools:ignore="NestedScrolling" />
         </LinearLayout>
     </ScrollView>
 
@@ -49,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:text="English"
+        android:text="@string/english"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

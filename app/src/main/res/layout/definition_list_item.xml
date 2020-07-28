@@ -19,7 +19,7 @@
         android:layout_toRightOf="@+id/iconImageView"
         android:paddingBottom="10dp"
         android:textColor="#000000"
-        android:textSize="16dp"
+        android:textSize="16sp"
         android:textStyle="bold|italic" />
 
     <TextView
@@ -32,7 +32,7 @@
         android:width="0dp"
         android:paddingLeft="10dp"
         android:textColor="#000000"
-        android:textSize="16dp" />
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/exampleTextView"
@@ -45,5 +45,5 @@
         android:paddingLeft="10dp"
         android:paddingBottom="5dp"
         android:textColor="#000000"
-        android:textSize="14dp" />
+        android:textSize="14sp" />
 </RelativeLayout>

@@ -108,7 +108,10 @@ public class DefinitionActivity extends AbstractDefinitionActivity {
                     String def = definition.getString("definition");
                     String example = definition.getString("example");
 
-                    correctWords(i, type, def, example);
+                    ArrayList<String> correctedWords = correctWords(i, type, def, example);
+                    type = correctedWords.get(0);
+                    def = correctedWords.get(1);
+                    example = correctedWords.get(2);
                     translateActivity(inputLanguage, type, def, example, i, definitionRowItems);
                     translateActivity(outputLanguage, type, def, example, i, transDefinitionRowItems);
                 }
@@ -118,21 +121,29 @@ public class DefinitionActivity extends AbstractDefinitionActivity {
         }
     }
 
-    private void correctWords(int i, String type, String def, String example) {
-        // If no info on some string's item
-        if (type.equals("null"))
+    private ArrayList<String> correctWords(int i, String type, String def, String example) {
+        if (type.equals("null")) {
             type = i + 1 + ". noun";
-        if (def.equals("null"))
+        }
+        if (def.equals("null")) {
             def = "";
-        if (example.equals("null"))
+        }
+        if (example.equals("null")) {
             example = "";
-        else
+        } else {
             example = '"' + example + '"';
+        }
 
         // Changing this definition for inappropriate words from API... ex: oven
         if (def.contains("a cremation chamber in a Nazi concentration camp")) {
             def = "a small furnace or kiln.";
         }
+        ArrayList<String> correctedWords = new ArrayList<>();
+        correctedWords.add(type);
+        correctedWords.add(def);
+        correctedWords.add(example);
+
+        return correctedWords;
     }
 
     private void translateActivity(int language, String type, String definition, String example, int i, List<DefinitionRowItem> list) {

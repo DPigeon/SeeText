@@ -51,14 +51,16 @@
 		android:id="@+id/userProfileImageView"
 		android:layout_width="66dp"
 		android:layout_height="51dp"
-		app:srcCompat="@drawable/user_profile" />
+		app:srcCompat="@drawable/user_profile"
+		android:contentDescription="User Profile" />
 
 	<ImageView
         android:id="@+id/cameraModeImageView"
         android:layout_width="66dp"
         android:layout_height="51dp"
         android:layout_gravity="right"
-        app:srcCompat="@drawable/camera_mode" />
+        app:srcCompat="@drawable/camera_mode"
+		android:contentDescription="Camera Mode" />
 
 	<ImageView
 		android:id="@+id/flashLightImageView"
@@ -67,14 +69,16 @@
 		android:layout_gravity="right"
 		android:layout_marginTop="65dp"
 		android:layout_marginRight="19dp"
-		app:srcCompat="@drawable/flash_light" />
+		app:srcCompat="@drawable/flash_light"
+		android:contentDescription="Flash Light" />
 
 	<ImageView
         android:id="@+id/languagesImageView"
         android:layout_width="56dp"
         android:layout_height="51dp"
         android:layout_gravity="bottom|right"
-        app:srcCompat="@drawable/languages" />
+        app:srcCompat="@drawable/languages"
+		android:contentDescription="Languages" />
 
 	<TextView
 		android:id="@+id/translateToTextView"
@@ -107,7 +111,8 @@
 		android:layout_marginRight="10dp"
 		android:layout_marginBottom="107dp"
 		android:visibility="invisible"
-		app:srcCompat="@drawable/tts_audio" />
+		app:srcCompat="@drawable/tts_audio"
+		android:contentDescription="Audio" />
 
 	<ImageView
 		android:id="@+id/faceCheckImageView"
@@ -116,14 +121,16 @@
 		android:layout_gravity="bottom"
 		android:layout_marginLeft="5dp"
 		android:visibility="invisible"
-		app:srcCompat="@drawable/face_check" />
+		app:srcCompat="@drawable/face_check"
+		android:contentDescription="Face Detection Check" />
 
 	<ImageView
 		android:id="@+id/speechDetectionImageView"
 		android:layout_width="66dp"
 		android:layout_height="51dp"
 		android:layout_gravity="bottom"
-		app:srcCompat="@drawable/speech_detection" />
+		app:srcCompat="@drawable/speech_detection"
+		android:contentDescription="Speech Detection" />
 
 	<ImageView
 		android:id="@+id/objectDetectionImageView"
@@ -131,7 +138,8 @@
 		android:layout_height="51dp"
 		android:layout_gravity="bottom"
 		android:layout_marginLeft="65dp"
-		app:srcCompat="@drawable/objects_detection" />
+		app:srcCompat="@drawable/objects_detection"
+		android:contentDescription="Object Detection" />
 
 	<include layout="@layout/loading_overlay" />
 
