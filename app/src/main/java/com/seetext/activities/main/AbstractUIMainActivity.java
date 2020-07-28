@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -37,8 +38,6 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
 
     protected String TAG = "AbstractUIMainActivity:";
 
-    private FlashLightOverlay flashLightOverlay;
-
     @Override
     @SuppressLint({"ClickableViewAccessibility"})
     public void setupUI() {
@@ -54,6 +53,7 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         audioImageView = findViewById(R.id.audioImageView);
         speechTextView = findViewById(R.id.speechTextView);
         faceCheckImageView = findViewById(R.id.faceCheckImageView);
+        frontCameraOverlayImageView = findViewById(R.id.frontCameraOverlayImageView);
         graphicOverlay = findViewById(R.id.graphicOverlay);
         progressOverlay = findViewById(R.id.progress_overlay);
         languageSpinner = findViewById(R.id.languageSpinner);
@@ -73,6 +73,8 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         languageSpinner.setAdapter(adapter);
         setOnItemForLanguageSpinner();
 
+        frontCameraOverlayImageView.setVisibility(View.INVISIBLE);
+
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
             try {
@@ -88,7 +90,6 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         } else {
             objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
         }
-        flashLightOverlay = new FlashLightOverlay(graphicOverlay);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -153,19 +154,21 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             lensFacing = CameraSelector.LENS_FACING_BACK;
         }
         rebindPreview();
+        flashLight(false);
+        frontCameraOverlayImageView.setVisibility(View.INVISIBLE);
         speechTextView.setVisibility(View.INVISIBLE); // Reset textView
         sharedPreferenceHelper.saveProfile(new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal()));
         audioImageView.setVisibility(View.INVISIBLE);
     }
 
     private void flashLightAction() {
-        flashLightStatus = !flashLightStatus;
-        flashLight(flashLightStatus);
-        if (camera.getCameraInfo().hasFlashUnit() && lensFacing == CameraSelector.LENS_FACING_BACK) {
-            graphicOverlay.remove(flashLightOverlay);
-        } else if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
-            graphicOverlay.add(flashLightOverlay);
-        }
+            flashLightStatus = !flashLightStatus;
+            flashLight(flashLightStatus);
+            if (lensFacing == CameraSelector.LENS_FACING_FRONT && flashLightStatus) {
+                frontCameraOverlayImageView.setVisibility(View.VISIBLE);
+            } else {
+                frontCameraOverlayImageView.setVisibility(View.INVISIBLE);
+            }
     }
 
     /* Actions to do when switching modes with speech and object detection */

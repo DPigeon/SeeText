@@ -109,7 +109,12 @@ public class MainActivityInstrumentedTest {
     }
 
     @Test
-    public void testFlashLight() {
+    public void testBackFlashLight() {
+        int lens = mainActivity.lensFacing;
+        if (lens != CameraSelector.LENS_FACING_BACK) {
+            onView(withId(R.id.cameraModeImageView))
+                    .perform(click());
+        }
         int off = mainActivity.camera.getCameraInfo().getTorchState().getValue();
         assertEquals(TorchState.OFF, off);
 
@@ -119,6 +124,22 @@ public class MainActivityInstrumentedTest {
 
         int on = mainActivity.camera.getCameraInfo().getTorchState().getValue();
         assertEquals(TorchState.ON, on);
+    }
+
+    @Test
+    public void testFrontFlashLight() {
+        int lens = mainActivity.lensFacing;
+        if (lens == CameraSelector.LENS_FACING_BACK) {
+            onView(withId(R.id.cameraModeImageView))
+                    .perform(click());
+        }
+
+        onView(withId(R.id.flashLightImageView))
+                .perform(click())
+                .check(matches(isDisplayed()));
+
+        onView(withId(R.id.frontCameraOverlayImageView))
+                .check(matches(isDisplayed()));
     }
 }
 

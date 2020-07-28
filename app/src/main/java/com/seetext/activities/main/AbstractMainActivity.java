@@ -61,7 +61,7 @@ public abstract class AbstractMainActivity extends AbstractActivity {
     protected static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
     protected int inputLanguage = FirebaseTranslateLanguage.EN;
     protected int outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
-    protected ImageView userProfileImageView, cameraModeImageView, flashLightImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView;
+    protected ImageView userProfileImageView, cameraModeImageView, flashLightImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView, frontCameraOverlayImageView;
     protected Spinner languageSpinner;
     protected TextView languageTextView;
     protected boolean faceProcessing = false; // For throttling the calls
