@@ -34,7 +34,10 @@ android {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
-
+    lintOptions {
+        disable "UnsafeExperimentalUsageError",
+                "UnsafeExperimentalUsageWarning"
+    }
 }
 
 dependencies {
@@ -56,10 +59,10 @@ dependencies {
     implementation 'com.pnikosis:materialish-progress:1.7'
 
     // CameraX core library using the camera2 implementation
-    def camerax_version = "1.0.0-beta07" // was beta06 before
-    implementation "androidx.camera:camera-camera2:${camerax_version}"
+    def cameraX_version = "1.0.0-beta07" // was beta06 before
+    implementation "androidx.camera:camera-camera2:${cameraX_version}"
     // If you want to additionally use the CameraX Lifecycle library
-    implementation "androidx.camera:camera-lifecycle:${camerax_version}"
+    implementation "androidx.camera:camera-lifecycle:${cameraX_version}"
     // If you want to additionally use the CameraX View class
     implementation "androidx.camera:camera-view:1.0.0-alpha14"
     // If you want to additionally use the CameraX Extensions library

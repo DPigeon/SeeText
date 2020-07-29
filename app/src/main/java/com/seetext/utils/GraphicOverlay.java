@@ -189,7 +189,7 @@ public class GraphicOverlay extends View {
         }
     }
 
-    /* Performs actions when touching an overlayed object */
+    /* Performs actions when touching an overlay object */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
@@ -203,5 +203,4 @@ public class GraphicOverlay extends View {
         invalidate();
         return true;
     }
-
 }

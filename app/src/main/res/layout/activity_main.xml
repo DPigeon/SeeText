@@ -45,7 +45,8 @@
 		android:background="@color/colorPrimary"
 		android:spinnerMode="dialog"
 		android:textColor="#FFFFFF"
-		android:visibility="invisible" />
+		android:visibility="invisible"
+		tools:ignore="RtlHardcoded" />
 
 	<ImageView
 		android:id="@+id/userProfileImageView"
@@ -60,7 +61,8 @@
         android:layout_height="51dp"
         android:layout_gravity="right"
         app:srcCompat="@drawable/camera_mode"
-		android:contentDescription="@string/camera_mode" />
+		android:contentDescription="@string/camera_mode"
+		tools:ignore="RtlHardcoded" />
 
 	<ImageView
 		android:id="@+id/flashLightImageView"
@@ -70,7 +72,8 @@
 		android:layout_marginTop="65dp"
 		android:layout_marginRight="19dp"
 		app:srcCompat="@drawable/flash_light"
-		android:contentDescription="@string/flash_light" />
+		android:contentDescription="@string/flash_light"
+		tools:ignore="RtlHardcoded" />
 
 	<ImageView
         android:id="@+id/languagesImageView"
@@ -78,7 +81,8 @@
         android:layout_height="51dp"
         android:layout_gravity="bottom|right"
         app:srcCompat="@drawable/languages"
-		android:contentDescription="@string/languages" />
+		android:contentDescription="@string/languages"
+		tools:ignore="RtlHardcoded" />
 
 	<TextView
 		android:id="@+id/translateToTextView"
@@ -89,7 +93,8 @@
 		android:layout_marginBottom="80sp"
 		android:background="@android:drawable/editbox_dropdown_light_frame"
 		android:text="@string/translate"
-		android:textSize="12sp" />
+		android:textSize="12sp"
+		tools:ignore="RtlHardcoded" />
 
 	<TextView
 		android:id="@+id/languageTextView"
@@ -101,7 +106,8 @@
 		android:background="@android:drawable/editbox_dropdown_light_frame"
 		android:text="@string/english"
 		android:textColor="#000000"
-		android:textSize="12sp" />
+		android:textSize="12sp"
+		tools:ignore="RtlHardcoded" />
 
 	<ImageView
 		android:id="@+id/audioImageView"
@@ -112,14 +118,15 @@
 		android:layout_marginBottom="107dp"
 		android:visibility="invisible"
 		app:srcCompat="@drawable/tts_audio"
-		android:contentDescription="@string/audio" />
+		android:contentDescription="@string/audio"
+		tools:ignore="RtlHardcoded" />
 
 	<ImageView
 		android:id="@+id/faceCheckImageView"
 		android:layout_width="56dp"
 		android:layout_height="51dp"
 		android:layout_gravity="bottom"
-		android:layout_marginLeft="5dp"
+		android:layout_marginStart="5dp"
 		android:visibility="invisible"
 		app:srcCompat="@drawable/face_check"
 		android:contentDescription="@string/face_detection_check" />
@@ -137,7 +144,7 @@
 		android:layout_width="66dp"
 		android:layout_height="51dp"
 		android:layout_gravity="bottom"
-		android:layout_marginLeft="65dp"
+		android:layout_marginStart="65dp"
 		app:srcCompat="@drawable/objects_detection"
 		android:contentDescription="@string/object_detection" />
 
