@@ -121,6 +121,40 @@
 		android:contentDescription="@string/audio"
 		tools:ignore="RtlHardcoded" />
 
+	<TextView
+		android:id="@+id/inputLanguageTextView"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:layout_marginLeft="178dp"
+		android:layout_marginBottom="40dp"
+		android:background="@android:drawable/editbox_dropdown_light_frame"
+		android:text="@string/english"
+		android:textColor="#000000"
+		android:textSize="12sp"
+		tools:ignore="RtlHardcoded" />
+
+	<ImageView
+		android:id="@+id/swapLanguageImageView"
+		android:layout_width="56dp"
+		android:layout_height="51dp"
+		android:layout_gravity="center"
+		android:layout_marginLeft="180dp"
+		app:srcCompat="@drawable/swap_language" />
+
+	<TextView
+		android:id="@+id/outputLanguageTextView"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:layout_marginLeft="178dp"
+		android:layout_marginTop="45dp"
+		android:background="@android:drawable/editbox_dropdown_light_frame"
+		android:text="@string/english"
+		android:textColor="#000000"
+		android:textSize="12sp"
+		tools:ignore="RtlHardcoded" />
+
 	<ImageView
 		android:id="@+id/faceCheckImageView"
 		android:layout_width="56dp"
