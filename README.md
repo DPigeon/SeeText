@@ -31,3 +31,5 @@ To make sure the build passes, run the test script on the root directory
 <a href="https://www.flaticon.com/authors/freepik">Freepik: CameraFlash</a>
 
 <a href="https://www.flaticon.com/authors/google">Google: Swap Language Icon</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+
+<a href="https://www.flaticon.com/authors/kiranshastry">Kiranshastry: Microphone Icon</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
