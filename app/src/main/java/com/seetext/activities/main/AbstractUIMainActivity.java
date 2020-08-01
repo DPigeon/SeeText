@@ -78,6 +78,7 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         setOnItemForLanguageSpinner();
 
         frontCameraOverlayImageView.setVisibility(View.INVISIBLE);
+
         setSwapLanguageTextViews();
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -94,6 +95,7 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
         } else {
             objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
+            toggleFastSwapLanguages(View.INVISIBLE);
         }
     }
 
@@ -185,9 +187,11 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             currentMode = mode;
             if (mode == Mode.SpeechRecognition) {
                 faceDetected = false; // Reset and ready to fire the face check anim
+                toggleFastSwapLanguages(View.VISIBLE);
             } else {
                 speechTextView.setVisibility(View.INVISIBLE);
                 audioImageView.setVisibility(View.INVISIBLE);
+                toggleFastSwapLanguages(View.INVISIBLE);
             }
             speechDetectionImageView.setImageResource(speechDrawable);
             objectDetectionImageView.setImageResource(objectDetectionDrawable);
@@ -229,5 +233,11 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
 
         Profile profile = new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal());
         sharedPreferenceHelper.saveProfile(profile);
+    }
+
+    private void toggleFastSwapLanguages(int state) {
+        swapInputLanguage.setVisibility(state);
+        swapLanguageImageView.setVisibility(state);
+        swapOutputLanguage.setVisibility(state);
     }
 }
