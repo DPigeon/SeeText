@@ -1,5 +1,6 @@
 package com.seetext.activities.definition;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.Switch;
@@ -7,6 +8,7 @@ import android.widget.TextView;
 
 import com.seetext.R;
 import com.seetext.activities.AbstractActivity;
+import com.seetext.activities.main.MainActivity;
 import com.seetext.objectdetection.definition.DefinitionListViewAdapter;
 import com.seetext.objectdetection.definition.DefinitionRowItem;
 
@@ -38,5 +40,17 @@ public abstract class AbstractDefinitionActivity extends AbstractActivity {
     @Override
     protected int getLayoutResourceId() {
         return R.layout.activity_definition;
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(this, MainActivity.class));
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        return true;
     }
 }

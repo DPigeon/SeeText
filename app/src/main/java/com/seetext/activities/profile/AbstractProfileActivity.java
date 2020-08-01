@@ -1,6 +1,7 @@
 package com.seetext.activities.profile;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,6 +13,7 @@ import android.widget.ScrollView;
 
 import com.seetext.R;
 import com.seetext.activities.AbstractActivity;
+import com.seetext.activities.main.MainActivity;
 import com.seetext.profile.SharedPreferenceHelper;
 
 import java.util.Objects;
@@ -67,5 +69,17 @@ public abstract class AbstractProfileActivity extends AbstractActivity {
             switchMode(true, View.VISIBLE); // Switch to edit mode
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(this, MainActivity.class));
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        return true;
     }
 }

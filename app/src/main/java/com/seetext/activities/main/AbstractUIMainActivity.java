@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
-import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +19,7 @@ import androidx.core.content.ContextCompat;
 import com.seetext.Mode;
 import com.seetext.R;
 import com.seetext.profile.Profile;
+import com.seetext.utils.Utils;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -32,7 +32,6 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
 
     protected abstract void bindPreview(ProcessCameraProvider cameraProvider, int lensFacing);
     protected abstract void rebindPreview();
-    protected abstract void setOutputLanguage(int languageId);
     protected abstract void flashLight(boolean flashLightStatus);
     protected abstract void startTTS(String ttsSentence);
 
@@ -54,6 +53,10 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         speechTextView = findViewById(R.id.speechTextView);
         faceCheckImageView = findViewById(R.id.faceCheckImageView);
         frontCameraOverlayImageView = findViewById(R.id.frontCameraOverlayImageView);
+        swapLanguageImageView = findViewById(R.id.swapLanguageImageView);
+        swapInputLanguage = findViewById(R.id.inputLanguageTextView);
+        swapOutputLanguage = findViewById(R.id.outputLanguageTextView);
+
         graphicOverlay = findViewById(R.id.graphicOverlay);
         progressOverlay = findViewById(R.id.progress_overlay);
         languageSpinner = findViewById(R.id.languageSpinner);
@@ -67,6 +70,7 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         setOnTouchListener(speechDetectionImageView, R.drawable.speech_detection);
         setOnTouchListener(objectDetectionImageView, R.drawable.objects_detection);
         setOnTouchListener(audioImageView, R.drawable.tts_audio);
+        setOnTouchListener(swapLanguageImageView, R.drawable.swap_language);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.languages_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -74,6 +78,8 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         setOnItemForLanguageSpinner();
 
         frontCameraOverlayImageView.setVisibility(View.INVISIBLE);
+
+        setSwapLanguageTextViews();
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
@@ -89,6 +95,7 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             speechDetectionImageView.setImageResource(R.drawable.speech_detection_enabled);
         } else {
             objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
+            toggleFastSwapLanguages(View.INVISIBLE);
         }
     }
 
@@ -114,6 +121,7 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
                     Profile profile = new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal());
                     sharedPreferenceHelper.saveProfile(profile);
                     languageTextView.setText(item);
+                    swapOutputLanguage.setText(item);
                 }
             }
 
@@ -143,6 +151,8 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
                 modeAction(Mode.ObjectDetection, R.drawable.speech_detection, R.drawable.objects_detection_enabled);
             } else if (drawable == R.drawable.tts_audio) {
                 ttsAction();
+            } else if (drawable == R.drawable.swap_language) {
+                swapLanguage();
             }
         }
     }
@@ -177,9 +187,11 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             currentMode = mode;
             if (mode == Mode.SpeechRecognition) {
                 faceDetected = false; // Reset and ready to fire the face check anim
+                toggleFastSwapLanguages(View.VISIBLE);
             } else {
                 speechTextView.setVisibility(View.INVISIBLE);
                 audioImageView.setVisibility(View.INVISIBLE);
+                toggleFastSwapLanguages(View.INVISIBLE);
             }
             speechDetectionImageView.setImageResource(speechDrawable);
             objectDetectionImageView.setImageResource(objectDetectionDrawable);
@@ -203,5 +215,29 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             }
             Log.d(TAG, ttsSentence);
         }
+    }
+
+    private void setSwapLanguageTextViews() {
+        if (getInputLanguage() > -1 || getOutputLanguage() > -1) {
+            swapInputLanguage.setText(Utils.getLanguageByTag(getInputLanguage()));
+            swapOutputLanguage.setText(Utils.getLanguageByTag(getOutputLanguage()));
+        }
+    }
+
+    private void swapLanguage() {
+        int input = getInputLanguage();
+        setInputLanguage(getOutputLanguage());
+        setOutputLanguage(input);
+        setSwapLanguageTextViews(); // Update both swap in and out language
+        languageTextView.setText(Utils.getLanguageByTag(getOutputLanguage())); // Update language output
+
+        Profile profile = new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal());
+        sharedPreferenceHelper.saveProfile(profile);
+    }
+
+    private void toggleFastSwapLanguages(int state) {
+        swapInputLanguage.setVisibility(state);
+        swapLanguageImageView.setVisibility(state);
+        swapOutputLanguage.setVisibility(state);
     }
 }

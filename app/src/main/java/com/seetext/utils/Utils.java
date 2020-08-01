@@ -42,7 +42,10 @@ public class Utils {
     }
 
     public static String getLanguageByTag(int tag) {
-        String language = FirebaseTranslateLanguage.languageCodeForLanguage(tag);
+        String language = "English";
+        if (tag > 0) {
+            language = FirebaseTranslateLanguage.languageCodeForLanguage(tag);
+        }
         return Locale.forLanguageTag(language).getDisplayName();
     }
 

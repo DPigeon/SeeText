@@ -141,6 +141,24 @@ public class MainActivityInstrumentedTest {
         onView(withId(R.id.frontCameraOverlayImageView))
                 .check(matches(isDisplayed()));
     }
+
+    @Test
+    public void testSwapLanguageButton() {
+        int input = 11; // English
+        int output = 16; // Finnish
+        mainActivity.setInputLanguage(input);
+        mainActivity.setOutputLanguage(output);
+
+        onView(withId(R.id.swapLanguageImageView))
+                .perform(click()); // Swap
+
+        onView(withId(R.id.inputLanguageTextView))
+                .check(matches(withText(Utils.getLanguageByTag(output))));
+        onView(withId(R.id.outputLanguageTextView))
+                .check(matches(withText(Utils.getLanguageByTag(input))));
+        onView(withId(R.id.languageTextView))
+                .check(matches(withText(Utils.getLanguageByTag(input))));
+    }
 }
 
 

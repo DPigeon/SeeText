@@ -50,6 +50,8 @@ public abstract class AbstractMainActivity extends AbstractActivity {
     protected abstract void startRecognition();
     protected abstract void stopListeningSpeech();
     protected abstract void goToProfileActivity(String firstTime);
+    protected abstract void setInputLanguage(int number);
+    protected abstract void setOutputLanguage(int number);
     protected abstract int getInputLanguage();
     protected abstract int getOutputLanguage();
     protected abstract boolean connectedToInternet();
@@ -61,9 +63,11 @@ public abstract class AbstractMainActivity extends AbstractActivity {
     protected static final int MY_PERMISSIONS = 100; // Request code response for camera & microphone
     protected int inputLanguage = FirebaseTranslateLanguage.EN;
     protected int outputLanguage = FirebaseTranslateLanguage.EN; // Default is english
-    protected ImageView userProfileImageView, cameraModeImageView, flashLightImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView, frontCameraOverlayImageView;
+    protected ImageView userProfileImageView, cameraModeImageView, flashLightImageView, languagesImageView, speechDetectionImageView, objectDetectionImageView, faceCheckImageView, audioImageView, frontCameraOverlayImageView, swapLanguageImageView;
     protected Spinner languageSpinner;
     protected TextView languageTextView;
+    protected TextView swapInputLanguage;
+    protected TextView swapOutputLanguage;
     protected boolean faceProcessing = false; // For throttling the calls
     protected long animationDuration = 1000; // milliseconds
     protected boolean faceDetected = false; // For face check imageView anim to run once
