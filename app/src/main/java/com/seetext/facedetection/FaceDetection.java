@@ -63,7 +63,7 @@ public class FaceDetection {
         });
     }
 
-    protected void processFace(List<FirebaseVisionFace> faces, int width, int height) {
+    private void processFace(List<FirebaseVisionFace> faces, int width, int height) {
         for (FirebaseVisionFace face : faces) {
             // Check if face has mouth, ears, eyes, etc
             FirebaseVisionFaceLandmark leftEar = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EAR);
@@ -88,7 +88,7 @@ public class FaceDetection {
     }
 
     /* Maps new coordinates from dimensions of imageAnalysis mediaImages to real phone images */
-    protected ArrayList<Integer> mapNewMessageCoordinates(int oldWidth, int oldHeight, int x, int y) {
+    private ArrayList<Integer> mapNewMessageCoordinates(int oldWidth, int oldHeight, int x, int y) {
         ArrayList<Integer> coordinates = new ArrayList<>();
         int widthRatio = Utils.getScreenWidth() / oldWidth;
         int heightRatio = Utils.getScreenHeight() / oldHeight;
@@ -103,5 +103,4 @@ public class FaceDetection {
 
         return coordinates;
     }
-
 }

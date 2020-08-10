@@ -116,7 +116,7 @@ public class ProfileActivity extends AbstractProfileActivity {
         toast.show(); // We display it
     }
 
-    void goToActivity() { // Function that goes from the main activity to another one
+    private void goToActivity() { // Function that goes from the main activity to another one
         Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);

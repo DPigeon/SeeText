@@ -1,0 +1,204 @@
+@startuml
+
+package activities <<Frame>> {
+
+    enum Mode {
+        SpeechRecognition
+        ObjectDetection
+    }
+
+    AbstractMainActivity *-- Mode
+
+    abstract class AbstractActivity extends AppCompatActivity {
+        #String TAG
+        #{abstract} int getLayoutResourceId()
+    }
+
+    class SplashScreenActivity extends AppCompatActivity
+
+    abstract class AbstractDefinitionActivity extends AbstractActivity {
+        ~String TAG
+        ~String word
+        ~String translatedWord
+        ~int inputLanguage
+        ~int outputLanguage
+        ~Boolean hasToTranslate
+        ~TextView pronunciationTextView
+        ~ListView definitionsListView
+        ~List<DefinitionRowItem> definitionRowItems
+        ~List<DefinitionRowItem> transDefinitionRowItems
+        ~DefinitionListViewAdapter adapter
+        ~Switch languageSwitch
+        #{abstract} void setupUI()
+    }
+    class DefinitionActivity extends AbstractDefinitionActivity {
+        ~String TAG
+        #void setupUI()
+        ~void translateWordIfNeeded()
+        ~void fetchDefinitions()
+        ~int wordCount(String word)
+        -ArrayList<String> correctWords(int i, String type, String def, String example)
+        -void translateActivity()
+    }
+
+    abstract class AbstractInterfacesMainActivity extends AbstractSpeechMainActivity implements FaceDetectionCallback, TranslatorCallback, TouchObjectCallback {
+        ~String TAG
+    }
+
+    abstract AbstractMainActivity extends AbstractActivity {
+        #String TAG
+        #Mode currentMode
+        #SharedPreferenceHelper sharedPreferenceHelper
+        #{static} final int TTS_DATA_CHECK
+        #{static} final int MY_PERMISSIONS
+        #int inputLanguage
+        #int outputLanguage
+        #ImageView userProfileImageView
+        #ImageView cameraModeImageView
+        #ImageView flashLightImageView
+        #ImageView languagesImageView
+        #ImageView speechDetectionImageView
+        #ImageView objectDetectionImageView
+        #ImageView faceCheckImageView
+        #ImageView audioImageView
+        #ImageView frontCameraOverlayImageView
+        #ImageView swapLanguageImageView
+        #Spinner languageSpinner
+        #TextView languageTextView
+        #TextView swapInputLanguage
+        #TextView swapOutputLanguage
+        #boolean faceProcessing
+        #long animationDuration
+        #boolean faceDetected
+        #FrameLayout progressOverlay
+        #ListenableFuture<ProcessCameraProvider> cameraProviderFuture
+        #PreviewView previewView
+        #Camera camera
+        #Preview preview
+        #int lensFacing
+        #GraphicOverlay graphicOverlay
+        #boolean flashLightStatus
+        #{static}SpeechRecognizer mRecognizer
+        #TextView speechTextView
+        #AudioManager mAudioManager
+        #TextToSpeech mTTS
+        #String ttsSentence
+
+        #{abstract} void setupUI()
+        #{abstract} void persistentSpeech()
+        #{abstract} void showPermissions()
+        #{abstract} void loadProfile()
+        #{abstract} void loadLanguageFirstTime()
+        #{abstract} void faceCheckAnimation()
+        #{abstract} void initializeRecognition()
+        #{abstract} void startRecognition()
+        #{abstract} void stopListeningSpeech()
+        #{abstract} void goToProfileActivity(String firstTime)
+        #{abstract} void setInputLanguage(int number)
+        #{abstract} void setOutputLanguage(int number)
+        #{abstract} int getInputLanguage()
+        #{abstract} int getOutputLanguage()
+        #{abstract} boolean connectedToInternet()
+
+        -void showAudioAndVideoPermissions()
+    }
+
+    abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity implements RecogitionListener {
+        #String TAG
+
+        #{abstract} void initializeTTS()
+        #{abstract} void stopTTS()
+
+        #void initializeRecognition()
+        #void startRecognition()
+        #void stopListeningSpeech()
+        #void persistentSpeech()
+        -void textAnimation()
+    }
+
+    abstract AbstractUIMainActivity extends AbstractMainActivity {
+        #String TAG
+        #{abstract} void bindPreview(ProcessCameraProvider cameraProvider, int lensFacing)
+        #{abstract} void rebindPreview()
+        #{abstract} void flashLight(boolean flashLightStatus)
+        #{abstract} void startTTS(String ttsSentence)
+
+        -void cameraAction()
+        -void flashLightAction()
+        -void ttsAction()
+        -void setSwapLanguageTextViews()
+        -void toggleFastSwapLanguages(int state)
+        -void swapLanguage()
+        -void touchActions(int action, int drawable, View view)
+        -void setOnItemForLanguageSpinner()
+        -void setOnTouchListener(View imageView, int drawable)
+        -void modeAction(Mode mode, int speechDrawable, int objectDetectionDrawable)
+    }
+
+    class MainActivity extends AbstractInterfacesMainActivity {
+        #String TAG
+
+        #void loadLanguageFirstTime()
+        #void loadProfile()
+        #goToProfileActivity(String firstTime)
+        #void bindPreview(@NonNull ProcessCameraProvider cameraProvider, int lensFacing)
+        #void rebindPreview()
+        #void showPermissions()
+        #void checkTtsResources()
+        #void initializeTTS()
+        #void startTTS(String sentence)
+        #void stopTTS()
+        #void flashLight(boolean status)
+        #void faceCheckAnimation()
+        #boolean connectedToInternet()
+        #void setInputLanguage(int number)
+        #int getInputLanguage()
+        #void setOutputLanguage(int number)
+        #int getOutputLanguage()
+        -int getLocaleResult()
+    }
+
+    abstract AbstractProfileActivity extends AbstractActivity {
+        -String TAG
+
+        ~{abstract} void setupUI()
+        ~{abstract} void instantiateRadioGroup()
+        ~{abstract} void setActivityFields()
+        ~{abstract} void switchMode(boolean b, int visible)
+
+        #SharedPreferenceHelper sharedPreferenceHelper
+        #ScrollView languagesScrollView
+        #RadioGroup languagesRadioGroup
+        #RadioButton checkedButton
+        #Button saveButton
+        #int languageChosen
+    }
+
+    class ProfileActivity extends AbstractProfileActivity {
+        #String TAG
+        #void setupUI()
+        #void instantiateRadioGroup()
+        #void addRadioButtons(String languages, int i)
+        #void setActivityFields()
+        #void switchMode(boolean enabled, int view)
+        #void saveProfile()
+        #void toastMessage(String message)
+        -void downloadModel(int outputLanguage)
+        -void scrollToCheckedButton()
+        -void goToActivity()
+    }
+
+    interface FaceDetectionCallback {
+        ~void updateSpeechTextViewPosition(float x, float y, boolean hasFace)
+    }
+
+    interface TouchObjectCallback {
+        ~void goToObjectDefinition(String word)
+    }
+
+    interface TranslatorCallback {
+        ~void translateTheText(String text)
+    }
+}
+
+@enduml

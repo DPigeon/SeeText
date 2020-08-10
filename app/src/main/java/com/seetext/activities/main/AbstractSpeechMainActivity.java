@@ -88,18 +88,18 @@ public abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity 
         }
     }
 
+    @Override
+    public void onPartialResults(Bundle partialResults) {}
+
+    @Override
+    public void onEvent(int eventType, Bundle params) {}
+
     private void textAnimation() {
         speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
         Animation fadeOutAnim = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
         fadeOutAnim.setStartTime(5000);
         speechTextView.startAnimation(fadeOutAnim);
     }
-
-    @Override
-    public void onPartialResults(Bundle partialResults) {}
-
-    @Override
-    public void onEvent(int eventType, Bundle params) {}
 
     /*
      * SpeechRecognizer
