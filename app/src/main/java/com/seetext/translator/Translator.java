@@ -118,7 +118,7 @@ public class Translator {
         });
     }
 
-    protected void downloadModel(FirebaseTranslateRemoteModel model) {
+    private void downloadModel(FirebaseTranslateRemoteModel model) {
         modelManager.download(model, conditions).addOnSuccessListener(v -> {
             // Model downloaded
             Toast.makeText(context,"Language model has been downloaded!", Toast.LENGTH_LONG).show();

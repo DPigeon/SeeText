@@ -1,0 +1,37 @@
+@startuml
+
+package profile <<Frame>> {
+    class Profile {
+        -int languageId
+        -int languageOutputId
+        -int lensFacing
+        -int mode
+        +Profile(int languageId, int languageOutputId, int lensFacing, int mode)
+        +void setLanguage(int id)
+        +int getLanguage()
+        +void setLanguageOutput(int id)
+        +int getLanguageOutputId()
+        +void setLensFacing(int lens)
+        +int getLensFacing()
+        +void setMode(int mode)
+        +int getMode()
+    }
+
+    class SharedPreferencesHelper {
+        -SharedPreferences sharedPreferences
+        +String KEY_LANGUAGE
+        +String KEY_LANGUAGE_OUTPUT
+        +String KEY_LENS_FACING
+        +String KEY_MODE
+        +String KEY_FIRST_RUN
+        +void saveProfile(Profile profile)
+        +int getLanguageInput()
+        +int getLanguageOutput(
+        +Profile getProfile()
+        +boolean checkFirstRun()
+    }
+
+    SharedPreferencesHelper *-- Profile
+}
+
+@enduml

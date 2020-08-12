@@ -1,0 +1,15 @@
+@startuml
+
+package utils {
+    class GraphicOverlay
+
+    class Utils {
+        +{static}int degreesToFirebaseRotation(int degrees)
+        +{static}ArrayList<String> getLanguageList()
+        +{static}String getLanguageByTag(int tag)
+        +{static}int getScreenWidth()
+        +{static}int getScreenHeight()
+    }
+}
+
+@enduml

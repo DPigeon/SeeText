@@ -21,7 +21,7 @@ package facedetection <<Frame>> {
         -void processFace(List<FirebaseVisionFace> faces, int width, int height)
     }
 
-    class FaceOverlay extends GraphicOverlay {
+    class FaceOverlay extends GraphicOverlay.Graphic {
         -String TAG
         -GraphicOverlay graphicOverlay
         -Rect bounds
