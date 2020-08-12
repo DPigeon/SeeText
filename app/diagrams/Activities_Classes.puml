@@ -12,9 +12,14 @@ package activities <<Frame>> {
     abstract class AbstractActivity extends AppCompatActivity {
         #String TAG
         #{abstract} int getLayoutResourceId()
+        -- @Override --
+        #void onCreate(Bundle savedInstanceState)
     }
 
-    class SplashScreenActivity extends AppCompatActivity
+    class SplashScreenActivity extends AppCompatActivity {
+        -- @Override --
+        #void onCreate(Bundle savedInstanceState)
+    }
 
     abstract class AbstractDefinitionActivity extends AbstractActivity {
         ~String TAG
@@ -30,6 +35,11 @@ package activities <<Frame>> {
         ~DefinitionListViewAdapter adapter
         ~Switch languageSwitch
         #{abstract} void setupUI()
+        -- @Override --
+        #void onCreate(Bundle savedInstanceState)
+        #int getLayoutResourceId()
+        +void onBackPressed()
+        +boolean onSupportNavigateUp()
     }
     class DefinitionActivity extends AbstractDefinitionActivity {
         ~String TAG
@@ -43,6 +53,10 @@ package activities <<Frame>> {
 
     abstract class AbstractInterfacesMainActivity extends AbstractSpeechMainActivity implements FaceDetectionCallback, TranslatorCallback, TouchObjectCallback {
         ~String TAG
+        -- @Override --
+        +void updateSpeechTextViewPosition(float x, float y, boolean hasFace)
+        +void translateTheText(String text)
+        +void goToObjectDefinition(String word)
     }
 
     abstract AbstractMainActivity extends AbstractActivity {
@@ -101,6 +115,11 @@ package activities <<Frame>> {
         #{abstract} boolean connectedToInternet()
 
         -void showAudioAndVideoPermissions()
+        -- @Override --
+        #void onCreate(Bundle savedInstanceState)
+        #void onStart()
+        #int getLayoutResourceId()
+        #void onActivityResult(int requestCode, int resultCode, Intent intent)
     }
 
     abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity implements RecogitionListener {
@@ -114,6 +133,16 @@ package activities <<Frame>> {
         #void stopListeningSpeech()
         #void persistentSpeech()
         -void textAnimation()
+        -- @Override --
+        +void onReadyForSpeech(Bundle params)
+        +void onBeginningOfSpeech()
+        +void onRmsChanged(float rmsDb)
+        +void onBufferReceived(byte[] buffer)
+        +void onEndOfSpeech()
+        +void onError(int error)
+        +void onResults(Bundle results)
+        +void onPartialResults(Bundle partialResults)
+        +void onEvent(int eventType, Bundle params)
     }
 
     abstract AbstractUIMainActivity extends AbstractMainActivity {
@@ -133,6 +162,8 @@ package activities <<Frame>> {
         -void setOnItemForLanguageSpinner()
         -void setOnTouchListener(View imageView, int drawable)
         -void modeAction(Mode mode, int speechDrawable, int objectDetectionDrawable)
+        -- @Override --
+        +void setupUI()
     }
 
     class MainActivity extends AbstractInterfacesMainActivity {
@@ -172,6 +203,11 @@ package activities <<Frame>> {
         #RadioButton checkedButton
         #Button saveButton
         #int languageChosen
+        -- @Override --
+        #void onCreate(Bundle savedInstanceState)
+        #void onStart()
+        #int getLayoutResourceId()
+        
     }
 
     class ProfileActivity extends AbstractProfileActivity {

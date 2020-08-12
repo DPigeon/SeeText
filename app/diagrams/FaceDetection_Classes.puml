@@ -26,8 +26,11 @@ package facedetection <<Frame>> {
         -GraphicOverlay graphicOverlay
         -Rect bounds
         -Paint paint
-
+        --
         +FaceOverlay(GraphicOverlay graphicOverlay, Rect bounds)
+        -- @Override --
+        +void draw(Canvas canvas)
+        +void touchEvent(MotionEvent event)
     }
 }
 
