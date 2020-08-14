@@ -53,10 +53,11 @@ public class FaceDetection {
 
         detector.detectInImage(imageVision).addOnSuccessListener(faces -> {
             // Task completed successfully --> Should start speech recognition HERE
-            if (faces.isEmpty())  // If no face detected
+            if (faces.isEmpty()) {  // If no face detected
                 callback.updateSpeechTextViewPosition(0, 0, false);
-            else  // Face(s) detected
+            } else {  // Face(s) detected
                 processFace(faces, width, height);
+            }
         }).addOnFailureListener(e -> {
             Log.d(TAG, "Error");
             // Task failed with an exception --> No speech
