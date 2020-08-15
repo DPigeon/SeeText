@@ -1,6 +1,8 @@
 @startuml
 
-actor User as U #lightgreen
+!include ./Style.puml
+
+actor User as U #DeepSkyBlue
 
 participant SeeText as ST #gold
 participant FirebaseFaceDetector as FFD #orange
