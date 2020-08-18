@@ -213,7 +213,6 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             if (!mTTS.isSpeaking()) {
                 startTTS(ttsSentence);
             }
-            Log.d(TAG, ttsSentence);
         }
     }
 

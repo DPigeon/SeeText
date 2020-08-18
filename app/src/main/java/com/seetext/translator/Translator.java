@@ -98,9 +98,9 @@ public class Translator {
         FirebaseTranslateRemoteModel model = new FirebaseTranslateRemoteModel.Builder(languageId).build();
 
         modelManager.isModelDownloaded(model).addOnSuccessListener(isDownloaded -> {
-            if (isDownloaded)
+            if (isDownloaded) {
                 translate(text);
-            else {
+            } else {
                 Toast.makeText(context,"Downloading the language model...", Toast.LENGTH_LONG).show();
                 downloadModel(model);
             }

@@ -1,11 +1,14 @@
 package com.seetext.utils;
 
 import android.content.res.Resources;
+import android.util.Log;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -47,6 +50,15 @@ public class Utils {
             language = FirebaseTranslateLanguage.languageCodeForLanguage(tag);
         }
         return Locale.forLanguageTag(language).getDisplayName();
+    }
+
+    public static String filterBadWord(String text) {
+        String asterisk = "*";
+        if (text.contains(asterisk)) {
+            text = text.replace(asterisk, "");
+        }
+
+        return text;
     }
 
     /* Used to get dimension of the current screen */

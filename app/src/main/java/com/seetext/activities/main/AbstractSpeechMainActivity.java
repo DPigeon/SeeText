@@ -16,6 +16,7 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
 import com.seetext.Mode;
 import com.seetext.translator.Translator;
 import com.seetext.translator.TranslatorCallback;
+import com.seetext.utils.Utils;
 
 import java.util.Objects;
 
@@ -70,7 +71,7 @@ public abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity 
     @Override
     public void onResults(Bundle results) {
         String sentence = Objects.requireNonNull(results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)).get(0);
-        String sentenceToFitUI = " " + sentence + " ";
+        String sentenceToFitUI = " " + Utils.filterBadWord(sentence) + " ";
         if (currentMode != Mode.ObjectDetection) { // Current mode must be speech detection
             if (speechTextView.getVisibility() == View.INVISIBLE) {
                 speechTextView.setVisibility(View.VISIBLE);
