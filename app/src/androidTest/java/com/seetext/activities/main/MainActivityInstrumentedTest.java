@@ -154,8 +154,6 @@ public class MainActivityInstrumentedTest {
 
         onView(withId(R.id.inputLanguageTextView))
                 .check(matches(withText(Utils.getLanguageByTag(output))));
-        onView(withId(R.id.outputLanguageTextView))
-                .check(matches(withText(Utils.getLanguageByTag(input))));
         onView(withId(R.id.languageTextView))
                 .check(matches(withText(Utils.getLanguageByTag(input))));
     }

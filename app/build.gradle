@@ -9,7 +9,7 @@ android {
     defaultConfig {
         applicationId "com.seetext"
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion 29 
         versionCode 4 // Edit when new release
         versionName "2.4.1-alpha" // Edit when new release
         // To improve image processing performance

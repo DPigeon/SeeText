@@ -55,7 +55,6 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         frontCameraOverlayImageView = findViewById(R.id.frontCameraOverlayImageView);
         swapLanguageImageView = findViewById(R.id.swapLanguageImageView);
         swapInputLanguage = findViewById(R.id.inputLanguageTextView);
-        swapOutputLanguage = findViewById(R.id.outputLanguageTextView);
 
         graphicOverlay = findViewById(R.id.graphicOverlay);
         progressOverlay = findViewById(R.id.progress_overlay);
@@ -121,7 +120,6 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
                     Profile profile = new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal());
                     sharedPreferenceHelper.saveProfile(profile);
                     languageTextView.setText(item);
-                    swapOutputLanguage.setText(item);
                 }
             }
 
@@ -219,7 +217,6 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
     private void setSwapLanguageTextViews() {
         if (getInputLanguage() > -1 || getOutputLanguage() > -1) {
             swapInputLanguage.setText(Utils.getLanguageByTag(getInputLanguage()));
-            swapOutputLanguage.setText(Utils.getLanguageByTag(getOutputLanguage()));
         }
     }
 
@@ -237,6 +234,6 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
     private void toggleFastSwapLanguages(int state) {
         swapInputLanguage.setVisibility(state);
         swapLanguageImageView.setVisibility(state);
-        swapOutputLanguage.setVisibility(state);
+        languageTextView.setVisibility(state);
     }
 }

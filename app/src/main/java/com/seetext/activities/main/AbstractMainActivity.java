@@ -67,7 +67,6 @@ public abstract class AbstractMainActivity extends AbstractActivity {
     protected Spinner languageSpinner;
     protected TextView languageTextView;
     protected TextView swapInputLanguage;
-    protected TextView swapOutputLanguage;
     protected boolean faceProcessing = false; // For throttling the calls
     protected long animationDuration = 1000; // milliseconds
     protected boolean faceDetected = false; // For face check imageView anim to run once
