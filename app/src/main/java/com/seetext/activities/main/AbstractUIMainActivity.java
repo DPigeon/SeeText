@@ -234,6 +234,5 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
     private void toggleFastSwapLanguages(int state) {
         swapInputLanguage.setVisibility(state);
         swapLanguageImageView.setVisibility(state);
-        languageTextView.setVisibility(state);
     }
 }

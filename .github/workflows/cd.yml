@@ -63,7 +63,7 @@ jobs:
     needs: job_2
     steps:
     - name: Checkout
-    - uses: actions/checkout@master
+      uses: actions/checkout@master
       with:
         # Fetches entire history, so we can analyze commits since last tag
         fetch-depth: 0
