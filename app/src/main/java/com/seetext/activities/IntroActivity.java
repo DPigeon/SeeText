@@ -31,9 +31,7 @@ public class IntroActivity extends AppIntro {
     @Override
     public void onSkipPressed(Fragment currentFragment) {
         super.onSkipPressed(currentFragment);
-        goToNextActivity();
-        Toast.makeText(getApplicationContext(), "Create your profile!", Toast.LENGTH_LONG).show();
-        finish();
+        Toast.makeText(getApplicationContext(), "You have to give permissions first!", Toast.LENGTH_LONG).show();
     }
 
     @Override

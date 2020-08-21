@@ -121,9 +121,10 @@ public class MainActivity extends AbstractInterfacesMainActivity {
                 View surfaceOrTexture = previewView.getChildAt(0);
                 if (surfaceOrTexture instanceof TextureView) {
                     Bitmap bitmap = ((TextureView) surfaceOrTexture).getBitmap();
-                    assert bitmap != null;
-                    Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, Utils.getScreenWidth(), Utils.getScreenHeight(), false);
-                    objectDetection.detectObjects(getApplicationContext(), newBitmap, getOutputLanguage());
+                    if (bitmap != null) {
+                        Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, Utils.getScreenWidth(), Utils.getScreenHeight(), false);
+                        objectDetection.detectObjects(getApplicationContext(), newBitmap, getOutputLanguage());
+                    }
                 }
             }
             image.close();
