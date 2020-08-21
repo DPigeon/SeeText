@@ -80,9 +80,10 @@ public abstract class AbstractProfileActivity extends AbstractActivity {
     public void onBackPressed() {
         Intent intent = getIntent();
         String firstTime = intent.getStringExtra("firstTime");
-        assert firstTime != null;
-        if (firstTime.equals(("no"))) {
-            startActivity(new Intent(this, MainActivity.class));
+        if (firstTime != null) {
+            if (firstTime.equals(("no"))) {
+                startActivity(new Intent(this, MainActivity.class));
+            }
         }
     }
 

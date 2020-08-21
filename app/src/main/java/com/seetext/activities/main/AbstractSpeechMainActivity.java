@@ -20,7 +20,7 @@ import com.seetext.utils.Utils;
 
 import java.util.Objects;
 
-public abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity implements RecognitionListener {
+public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainActivity implements RecognitionListener {
 
     protected abstract void initializeTTS();
     protected abstract void stopTTS();

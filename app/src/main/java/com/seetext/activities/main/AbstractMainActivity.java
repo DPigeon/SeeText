@@ -115,6 +115,20 @@ public abstract class AbstractMainActivity extends AbstractActivity {
         return R.layout.activity_main;
     }
 
+    /**
+     * To avoid pressing back button on intro
+     */
+    @Override
+    public void onBackPressed() {
+        Intent intent = getIntent();
+        String firstTime = intent.getStringExtra("firstTime");
+        if (firstTime != null) {
+            if (firstTime.equals(("no"))) {
+                super.onBackPressed();
+            }
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

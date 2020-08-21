@@ -42,6 +42,20 @@ public class IntroActivity extends AppIntro {
         finish();
     }
 
+    /**
+     * To avoid pressing back button on intro
+     */
+    @Override
+    public void onBackPressed() {
+        Intent intent = getIntent();
+        String firstTime = intent.getStringExtra("firstTime");
+        if (firstTime != null) {
+            if (firstTime.equals(("no"))) {
+                super.onBackPressed();
+            }
+        }
+    }
+
     private void setStyle() {
         setIndicatorColor(
                 getColor(R.color.colorPrimary),
