@@ -24,6 +24,10 @@ import com.seetext.utils.Utils;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+import smartdevelop.ir.eram.showcaseviewlib.GuideView;
+import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
+import smartdevelop.ir.eram.showcaseviewlib.listener.GuideListener;
+
 /* UIMainActivity.java
  * The abstract base class for MainActivity containing all the UI elements
  */
@@ -36,6 +40,8 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
     protected abstract void startTTS(String ttsSentence);
 
     protected String TAG = "AbstractUIMainActivity:";
+    GuideView guideView;
+    GuideView.Builder guideViewBuilder;
 
     @Override
     @SuppressLint({"ClickableViewAccessibility"})
@@ -128,6 +134,7 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         });
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void touchActions(int action, int drawable, View view) {
         if (action == MotionEvent.ACTION_DOWN) {
             Objects.requireNonNull(view.getContext().getDrawable(drawable)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
@@ -234,5 +241,59 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
     private void toggleFastSwapLanguages(int state) {
         swapInputLanguage.setVisibility(state);
         swapLanguageImageView.setVisibility(state);
+    }
+
+    private void guideTour() {
+        guideViewBuilder = new GuideView.Builder(this)
+                .setTitle("Profile Button")
+                .setContentText("Used to you to edit your profile.")
+                .setTargetView(userProfileImageView)
+                .setDismissType(DismissType.targetView)
+                .setGuideListener(view -> {
+                    switch (view.getId()) {
+                        case R.id.userProfileImageView:
+                            guideTourStep(speechDetectionImageView, "Speech Detection Mode", "Used to enter the speech-face \n" +
+                                    "recognition mode.");
+                            break;
+                        case R.id.speechDetectionImageView:
+                            guideTourStep(swapLanguageImageView, "Swap Languages", "Allows you to swap spoken \n" +
+                                    "and translated languages for discussions \n" +
+                                    "between you and someone else.");
+                            break;
+                        case R.id.swapLanguageImageView:
+                            guideTourStep(swapInputLanguage, "Language Spoken", "The language set in your profile.");
+                            break;
+                        case R.id.inputLanguageTextView:
+                            guideTourStep(languageTextView, "Language Translated", "The language you want to translate to.");
+                            break;
+                        case R.id.languageTextView:
+                            guideTourStep(objectDetectionImageView, "Object Detection Mode", "Used to enter the object detection mode. \n" +
+                                    "Tip: touch objects detected to get definitions of them.");
+                            break;
+                        case R.id.objectDetectionImageView:
+                            guideTourStep(languagesImageView, "Translate Languages", "Used to change the translated language.");
+                            break;
+                        case R.id.languagesImageView:
+                            guideTourStep(flashLightImageView, "Flash Light", "Used to see in the dark.");
+                            break;
+                        case R.id.flashLightImageView:
+                            guideTourStep(cameraModeImageView, "Camera Mode", "Used to change the camera lens side.");
+                            break;
+                        case R.id.cameraModeImageView:
+                            Toast.makeText(this, "You have completed the tutorial!", Toast.LENGTH_LONG).show();
+                            return;
+                    }
+                    guideView = guideViewBuilder.build();
+                    guideView.show();
+                });
+        guideView = guideViewBuilder.build();
+        guideView.show();
+    }
+
+    private void guideTourStep(View view, String title, String description) {
+        guideViewBuilder.setTargetView(view)
+                .setTitle(title)
+                .setContentText(description)
+                .build();
     }
 }

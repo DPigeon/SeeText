@@ -57,6 +57,8 @@ dependencies {
 
     // AppIntro slides
     implementation 'com.github.AppIntro:AppIntro:6.0.0'
+    // ShowcaseView Guide Tour
+    implementation 'com.github.mreram:showcaseview:1.1'
 
     // Loading overlay
     implementation 'com.pnikosis:materialish-progress:1.7'
