@@ -1,6 +1,8 @@
 package com.seetext.activities.main;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -14,11 +16,13 @@ import androidx.test.espresso.intent.Intents;
 import androidx.test.espresso.intent.rule.IntentsTestRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
 
 import com.seetext.Mode;
 import com.seetext.R;
+import com.seetext.activities.profile.ProfileActivity;
 import com.seetext.utils.Utils;
 
 import static androidx.test.espresso.Espresso.onData;
@@ -46,7 +50,15 @@ public class MainActivityInstrumentedTest {
 
     @Rule
     public ActivityTestRule<MainActivity> activityRule =
-            new ActivityTestRule<>(MainActivity.class, false, false);
+            new ActivityTestRule<MainActivity>(MainActivity.class, false, false) {
+                @Override
+                protected Intent getActivityIntent() {
+                    Context targetContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+                    Intent result = new Intent(targetContext, ProfileActivity.class);
+                    result.putExtra("firstTime", "no");
+                    return result;
+                }
+            };
 
     @Rule
     public IntentsTestRule<MainActivity> intentsTestRule =
@@ -55,6 +67,7 @@ public class MainActivityInstrumentedTest {
     @Before
     public void initialize() {
         mainActivity = intentsTestRule.getActivity();
+        mainActivity.sharedPreferenceHelper.resetFirstRun(false); // Not completely working
     }
 
     @Test
@@ -149,6 +162,9 @@ public class MainActivityInstrumentedTest {
         mainActivity.setInputLanguage(input);
         mainActivity.setOutputLanguage(output);
 
+        onView(withId(R.id.speechDetectionImageView))
+                .perform(click()); // Enable speech mode
+
         onView(withId(R.id.swapLanguageImageView))
                 .perform(click()); // Swap
 
@@ -158,5 +174,3 @@ public class MainActivityInstrumentedTest {
                 .check(matches(withText(Utils.getLanguageByTag(input))));
     }
 }
-
-

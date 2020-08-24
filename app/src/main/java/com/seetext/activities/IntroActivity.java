@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment;
 import com.github.appintro.AppIntro;
 import com.github.appintro.AppIntroFragment;
 import com.seetext.R;
-import com.seetext.activities.main.MainActivity;
 import com.seetext.activities.profile.ProfileActivity;
 
 import java.util.Objects;
