@@ -17,7 +17,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
@@ -83,6 +82,7 @@ public class IntroGuideTourInstrumentedTest {
                 .inRoot(withDecorView(not(activityRule.getActivity().getWindow().getDecorView())))
                 .check(matches(isDisplayed()));
 
+        // TODO: Having trouble testing the radioGroup
         /*onData(withId(R.id.languagesScrollView))
                 .onChildView(withId(R.id.languagesRadioGroup))
 
