@@ -22,6 +22,7 @@ import androidx.test.rule.GrantPermissionRule;
 
 import com.seetext.Mode;
 import com.seetext.R;
+import com.seetext.activities.ActionActivityFactory;
 import com.seetext.activities.profile.ProfileActivity;
 import com.seetext.utils.Utils;
 
@@ -74,34 +75,27 @@ public class MainActivityInstrumentedTest {
     @Ignore("TODO: init called twice?")
     public void testPressingProfileButton() {
         Intents.init();
-        onView(withId(R.id.userProfileImageView))
-                .perform(click());
+        ActionActivityFactory.performClick(R.id.userProfileImageView);
         Intents.release();
     }
 
     @Test
     public void testPressingSpeechDetectionButton() {
-        onView(withId(R.id.speechDetectionImageView))
-                .perform(click())
-                .check(matches(isDisplayed()));
+        ActionActivityFactory.assertView(R.id.speechDetectionImageView, true, matches(isDisplayed()));
 
         assertEquals(Mode.SpeechRecognition, mainActivity.currentMode);
     }
 
     @Test
     public void testPressingObjectDetectionButton() {
-        onView(withId(R.id.objectDetectionImageView))
-                .perform(click())
-                .check(matches(isDisplayed()));
+        ActionActivityFactory.assertView(R.id.objectDetectionImageView, true, matches(isDisplayed()));
 
         assertEquals(Mode.ObjectDetection, mainActivity.currentMode);
     }
 
     @Test
     public void testPressingCameraLens() {
-        onView(withId(R.id.cameraModeImageView))
-                .perform(click())
-                .check(matches(isDisplayed()));
+        ActionActivityFactory.assertView(R.id.cameraModeImageView, true, matches(isDisplayed()));
 
         // Initialized on back first
         assertEquals(CameraSelector.LENS_FACING_FRONT, mainActivity.lensFacing);

@@ -1,6 +1,5 @@
 package com.seetext.activities;
 
-import androidx.test.espresso.Espresso;
 import androidx.test.espresso.Root;
 import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.ViewInteraction;
@@ -19,27 +18,31 @@ import static org.hamcrest.Matchers.anything;
 
 public class ActionActivityFactory {
 
-    public void performClick(int id, boolean check, ViewAssertion... viewAssertion) {
-        ViewInteraction viewInteraction;
-        if (!check) {
-            onView(withId(id))
-                    .perform(click());
-        } else {
-            onView(withId(id))
-                    .perform(click())
-                    .check(viewAssertion[0]);
-        }
-    }
-
-    public void checkToast(int id, Matcher<Root> root, ViewAssertion viewAssertion) {
+    public static void performClick(int id) {
         onView(withId(id))
-                .inRoot(root)
-                .check(viewAssertion);
+                .perform(click());
     }
 
-    public void performClickOnList(int position) {
+    public static void performClickOnList(int position) {
         onData(anything())
                 .atPosition(position)
                 .perform(click());
+    }
+
+    public static void assertView(int id, boolean click, ViewAssertion viewAssertion) {
+        if (click) {
+            onView(withId(id))
+                    .perform(click())
+                    .check(viewAssertion);
+        } else {
+            onView(withId(id))
+                    .check(viewAssertion);
+        }
+    }
+
+    public static void assertToast(int id, Matcher<Root> root, ViewAssertion viewAssertion) {
+        onView(withId(id))
+                .inRoot(root)
+                .check(viewAssertion);
     }
 }
