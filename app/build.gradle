@@ -40,22 +40,12 @@ android {
     }
 }
 
-def getVersionCode() {
-    def stdOut = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'rev-list', '--all', '--count'
-        standardOutput = stdOut
-    }
-    return stdOut.toString().split("\n").size()
+private Integer getVersionCode() {
+    return Integer.parseInt(['sh','-c','git rev-list --all --count'].execute().text.trim())
 }
 
-def getVersionName() {
-    def stdOut = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'describe', '--abbrev=0'
-        standardOutput = stdOut
-    }
-    return stdOut.toString().trim()
+private String getVersionName() {
+    return ['sh', '-c', 'git describe --abbrev=0'].execute().text.trim()
 }
 
 dependencies {
