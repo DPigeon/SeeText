@@ -5,6 +5,8 @@ import android.util.Log;
 import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
 import com.google.firebase.ml.naturallanguage.languageid.FirebaseLanguageIdentification;
 
+
+// TODO: See if this is a possible feature by testing it story #32
 public class LanguageIdentification {
 
     private String TAG = "LanguageIdentifier";
