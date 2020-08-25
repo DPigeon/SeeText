@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
-apply plugin: 'de.nanogiants.android-versioning'
 
 android {
     compileSdkVersion 29
@@ -11,17 +10,13 @@ android {
         applicationId "com.seetext"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode versioning.getVersionCode()
-        versionName versioning.getVersionName()
+        versionCode getVersionCode()
+        versionName getVersionName()
         // To improve image processing performance
         renderscriptTargetApi 21
         renderscriptSupportModeEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    versioning {
-        keepOriginalBundleFile = true
     }
 
     // Don't compress included TensorFlow Lite models on build.
@@ -43,6 +38,24 @@ android {
         disable "UnsafeExperimentalUsageError",
                 "UnsafeExperimentalUsageWarning"
     }
+}
+
+def getVersionCode() {
+    def stdOut = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-list', '--all', '--count'
+        standardOutput = stdOut
+    }
+    return stdOut.toString().trim()
+}
+
+def getVersionName() {
+    def stdOut = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--abbrev=0'
+        standardOutput = stdOut
+    }
+    return stdOut.toString().trim()
 }
 
 dependencies {
