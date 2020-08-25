@@ -14,14 +14,13 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
 import com.seetext.R;
-import com.seetext.activities.profile.ProfileActivity;
 
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static com.seetext.activities.ActionActivityFactory.*;
 import static org.hamcrest.Matchers.not;
 
 @RunWith(AndroidJUnit4.class)
@@ -43,13 +42,10 @@ public class ProfileActivityInstrumentedTest {
     @Test
     public void testPressingSaveButton() {
         /* Performs click on save button */
-        onView(ViewMatchers.withId(R.id.saveButton))
-                .perform(click())
-                .check(matches(isDisplayed()));
+        assertView(R.id.saveButton, true, isDisplayed());
 
         /* Makes sure toast matches */
-        onView(withText("You must choose a language!"))
-                .inRoot(withDecorView(not(activityRule.getActivity().getWindow().getDecorView())))
-                .check(matches(isDisplayed()));
+        assertToast("You must choose a language!", withDecorView(not(activityRule.getActivity().getWindow().getDecorView())),
+                isDisplayed());
     }
 }

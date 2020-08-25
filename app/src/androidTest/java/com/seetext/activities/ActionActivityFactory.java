@@ -1,15 +1,17 @@
 package com.seetext.activities;
 
+import android.view.View;
+
 import androidx.test.espresso.Root;
-import androidx.test.espresso.ViewAssertion;
-import androidx.test.espresso.ViewInteraction;
 
 import org.hamcrest.Matcher;
 
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.anything;
 
 /**
@@ -29,20 +31,26 @@ public class ActionActivityFactory {
                 .perform(click());
     }
 
-    public static void assertView(int id, boolean click, ViewAssertion viewAssertion) {
+    public static void performClickInRoot(int id, Matcher<Root> matcher) {
+        onView(withId(id))
+                .perform(click())
+                .inRoot(matcher);
+    }
+
+    public static void assertView(int id, boolean click, Matcher<View> matcher) {
         if (click) {
             onView(withId(id))
                     .perform(click())
-                    .check(viewAssertion);
+                    .check(matches(matcher));
         } else {
             onView(withId(id))
-                    .check(viewAssertion);
+                    .check(matches(matcher));
         }
     }
 
-    public static void assertToast(int id, Matcher<Root> root, ViewAssertion viewAssertion) {
-        onView(withId(id))
+    public static void assertToast(String text, Matcher<Root> root, Matcher<View> matcher) {
+        onView(withText(text))
                 .inRoot(root)
-                .check(viewAssertion);
+                .check(matches(matcher));
     }
 }

@@ -17,13 +17,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static com.seetext.activities.ActionActivityFactory.*;
 import static org.hamcrest.Matchers.not;
 
 @RunWith(AndroidJUnit4.class)
@@ -59,28 +55,23 @@ public class IntroGuideTourInstrumentedTest {
 
     @Test
     public void testSkipButton() {
-        onView(withId(R.id.skip))
-                .perform(click());
+        performClick(R.id.skip);
 
-        onView(withText("You have to give permissions first!"))
-                .inRoot(withDecorView(not(activityRule.getActivity().getWindow().getDecorView())))
-                .check(matches(isDisplayed()));
+        assertToast("You have to give permissions first!", withDecorView(not(activityRule.getActivity().getWindow().getDecorView())),
+                isDisplayed());
     }
 
     @Test
     public void testCompleteIntro() {
         int numSteps = 3;
         for (int i = 0; i < numSteps; i++) {
-            onView(withId(R.id.next))
-                    .perform(click());
+            performClick(R.id.next);
         }
 
-        onView(withId(R.id.done))
-                .perform(click());
+        performClick(R.id.done);
 
-        onView(withText("Create your profile!"))
-                .inRoot(withDecorView(not(activityRule.getActivity().getWindow().getDecorView())))
-                .check(matches(isDisplayed()));
+        assertToast("Create your profile!", withDecorView(not(activityRule.getActivity().getWindow().getDecorView())),
+                isDisplayed());
 
         // TODO: Having trouble testing the radioGroup
         /*onData(withId(R.id.languagesScrollView))

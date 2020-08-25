@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'de.nanogiants.android-versioning'
 
 android {
     compileSdkVersion 29
@@ -9,14 +10,18 @@ android {
     defaultConfig {
         applicationId "com.seetext"
         minSdkVersion 23
-        targetSdkVersion 29 
-        versionCode 4 // Edit when new release
-        versionName "2.4.1-alpha" // Edit when new release
+        targetSdkVersion 29
+        versionCode versioning.getVersionCode()
+        versionName versioning.getVersionName()
         // To improve image processing performance
         renderscriptTargetApi 21
         renderscriptSupportModeEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    versioning {
+        keepOriginalBundleFile = true
     }
 
     // Don't compress included TensorFlow Lite models on build.
@@ -64,7 +69,7 @@ dependencies {
     implementation 'com.pnikosis:materialish-progress:1.7'
 
     // CameraX core library using the camera2 implementation
-    def cameraX_version = "1.0.0-beta07" // was beta06 before
+    def cameraX_version = "1.0.0-beta07"
     implementation "androidx.camera:camera-camera2:${cameraX_version}"
     // If you want to additionally use the CameraX Lifecycle library
     implementation "androidx.camera:camera-lifecycle:${cameraX_version}"
