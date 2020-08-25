@@ -76,24 +76,13 @@
 		tools:ignore="RtlHardcoded" />
 
 	<ImageView
-        android:id="@+id/languagesImageView"
-        android:layout_width="56dp"
-        android:layout_height="51dp"
-        android:layout_gravity="bottom|right"
-        app:srcCompat="@drawable/languages"
-		android:contentDescription="@string/languages"
-		tools:ignore="RtlHardcoded" />
-
-	<TextView
-		android:id="@+id/translateToTextView"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
+		android:id="@+id/languagesImageView"
+		android:layout_width="56dp"
+		android:layout_height="51dp"
 		android:layout_gravity="bottom|right"
-		android:layout_marginRight="5dp"
-		android:layout_marginBottom="80sp"
-		android:background="@android:drawable/editbox_dropdown_light_frame"
-		android:text="@string/translate"
-		android:textSize="12sp"
+		android:layout_marginTop="85dp"
+		android:contentDescription="@string/languages"
+		app:srcCompat="@drawable/languages"
 		tools:ignore="RtlHardcoded" />
 
 	<TextView
@@ -101,8 +90,8 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="bottom|right"
-		android:layout_marginRight="10dp"
-		android:layout_marginBottom="52dp"
+		android:layout_marginRight="7dp"
+		android:layout_marginBottom="51dp"
 		android:background="@android:drawable/editbox_dropdown_light_frame"
 		android:text="@string/english"
 		android:textColor="#000000"
@@ -114,20 +103,20 @@
 		android:layout_width="45dp"
 		android:layout_height="35dp"
 		android:layout_gravity="bottom|right"
-		android:layout_marginRight="10dp"
-		android:layout_marginBottom="107dp"
+		android:layout_marginRight="60dp"
+		android:layout_marginBottom="10dp"
+		android:contentDescription="@string/audio"
 		android:visibility="invisible"
 		app:srcCompat="@drawable/tts_audio"
-		android:contentDescription="@string/audio"
 		tools:ignore="RtlHardcoded" />
 
 	<TextView
 		android:id="@+id/inputLanguageTextView"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_gravity="center|right"
+		android:layout_gravity="bottom|right"
 		android:layout_marginRight="7dp"
-		android:layout_marginBottom="40dp"
+		android:layout_marginBottom="136dp"
 		android:background="@android:drawable/editbox_dropdown_light_frame"
 		android:text="@string/english"
 		android:textColor="#000000"
@@ -138,21 +127,9 @@
 		android:id="@+id/swapLanguageImageView"
 		android:layout_width="56dp"
 		android:layout_height="51dp"
-		android:layout_gravity="center|right"
+		android:layout_gravity="bottom|right"
+		android:layout_marginBottom="82dp"
 		app:srcCompat="@drawable/swap_language" />
-
-	<TextView
-		android:id="@+id/outputLanguageTextView"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="center|right"
-		android:layout_marginTop="40dp"
-		android:layout_marginRight="7dp"
-		android:background="@android:drawable/editbox_dropdown_light_frame"
-		android:text="@string/english"
-		android:textColor="#000000"
-		android:textSize="12sp"
-		tools:ignore="RtlHardcoded" />
 
 	<ImageView
 		android:id="@+id/faceCheckImageView"

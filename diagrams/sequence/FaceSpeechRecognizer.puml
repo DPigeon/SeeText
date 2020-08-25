@@ -1,0 +1,33 @@
+@startuml
+
+!include ./Style.puml
+
+actor User as U #DeepSkyBlue
+
+participant SeeText as ST #gold
+participant FirebaseFaceDetector as FFD #orange
+participant SpeechRecognizer as SR #lightgreen
+
+U -> ST : analyzeImage
+activate ST
+
+ST -> FFD : detectInImage
+activate FFD
+
+FFD -> SR : startListening
+activate SR
+
+SR --> ST : updateSpeechTextViewPosition (text)
+
+ST --> U : text
+
+FFD -> SR : stopListening
+
+SR --> ST : updateSpeechTextViewPosition (empty)
+deactivate SR
+
+ST --> U : text
+deactivate FFD
+deactivate ST
+
+@enduml

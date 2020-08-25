@@ -53,4 +53,13 @@ public class SharedPreferenceHelper {
         }
         return false;
     }
+
+    /*
+     * Used to set the first run again if user wants to see tutorial again at some point.
+     */
+    public void resetFirstRun(boolean firstRun) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(KEY_FIRST_RUN, firstRun);
+        editor.apply();
+    }
 }

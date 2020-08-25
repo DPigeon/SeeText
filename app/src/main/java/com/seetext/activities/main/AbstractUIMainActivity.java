@@ -2,6 +2,7 @@ package com.seetext.activities.main;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.util.Log;
@@ -24,6 +25,9 @@ import com.seetext.utils.Utils;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+import smartdevelop.ir.eram.showcaseviewlib.GuideView;
+import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
+
 /* UIMainActivity.java
  * The abstract base class for MainActivity containing all the UI elements
  */
@@ -34,8 +38,11 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
     protected abstract void rebindPreview();
     protected abstract void flashLight(boolean flashLightStatus);
     protected abstract void startTTS(String ttsSentence);
+    protected abstract void guideTour();
 
     protected String TAG = "AbstractUIMainActivity:";
+    GuideView guideView;
+    GuideView.Builder guideViewBuilder;
 
     @Override
     @SuppressLint({"ClickableViewAccessibility"})
@@ -55,7 +62,6 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         frontCameraOverlayImageView = findViewById(R.id.frontCameraOverlayImageView);
         swapLanguageImageView = findViewById(R.id.swapLanguageImageView);
         swapInputLanguage = findViewById(R.id.inputLanguageTextView);
-        swapOutputLanguage = findViewById(R.id.outputLanguageTextView);
 
         graphicOverlay = findViewById(R.id.graphicOverlay);
         progressOverlay = findViewById(R.id.progress_overlay);
@@ -97,6 +103,8 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             objectDetectionImageView.setImageResource(R.drawable.objects_detection_enabled);
             toggleFastSwapLanguages(View.INVISIBLE);
         }
+
+        guideTour();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -113,15 +121,16 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 // An item was selected. You can retrieve the selected item using
-                int langId = adapterView.getPositionForView(view);
-                String item = adapterView.getItemAtPosition(i).toString();
-                if (langId != 0) { // Will have to increase all ids by 1 since 0 is default called at beginning
-                    setOutputLanguage(langId);
-                    // Save the output language in profile
-                    Profile profile = new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal());
-                    sharedPreferenceHelper.saveProfile(profile);
-                    languageTextView.setText(item);
-                    swapOutputLanguage.setText(item);
+                if (adapterView != null) {
+                    int langId = adapterView.getPositionForView(view);
+                    String item = adapterView.getItemAtPosition(i).toString();
+                    if (langId != 0) { // Will have to increase all ids by 1 since 0 is default called at beginning
+                        setOutputLanguage(langId);
+                        // Save the output language in profile
+                        Profile profile = new Profile(getInputLanguage(), getOutputLanguage(), lensFacing, currentMode.ordinal());
+                        sharedPreferenceHelper.saveProfile(profile);
+                        languageTextView.setText(item);
+                    }
                 }
             }
 
@@ -130,6 +139,7 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
         });
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private void touchActions(int action, int drawable, View view) {
         if (action == MotionEvent.ACTION_DOWN) {
             Objects.requireNonNull(view.getContext().getDrawable(drawable)).setColorFilter(0x77000000, PorterDuff.Mode.SRC_ATOP);
@@ -213,14 +223,12 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             if (!mTTS.isSpeaking()) {
                 startTTS(ttsSentence);
             }
-            Log.d(TAG, ttsSentence);
         }
     }
 
     private void setSwapLanguageTextViews() {
         if (getInputLanguage() > -1 || getOutputLanguage() > -1) {
             swapInputLanguage.setText(Utils.getLanguageByTag(getInputLanguage()));
-            swapOutputLanguage.setText(Utils.getLanguageByTag(getOutputLanguage()));
         }
     }
 
@@ -238,6 +246,5 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
     private void toggleFastSwapLanguages(int state) {
         swapInputLanguage.setVisibility(state);
         swapLanguageImageView.setVisibility(state);
-        swapOutputLanguage.setVisibility(state);
     }
 }

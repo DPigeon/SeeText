@@ -1,0 +1,56 @@
+@startuml
+
+!include ./Style.puml
+
+actor User as U #DeepSkyBlue
+
+participant SeeText as ST #gold
+participant FritzAI as FAI #lightblue
+participant FirebaseTranslator as FT #white
+participant OwlBot as OB #silver
+
+== Detecting Objects ==
+
+U -> ST : detectObjects
+activate ST
+
+ST -> FAI : drawContour
+activate FAI
+
+ST -> FT : translate
+activate FT
+
+FAI --> ST : FritzVisionObject
+deactivate FAI
+
+FT --> ST : text
+
+deactivate FT
+
+ST --> U : label + contour
+
+== Touching Objects ==
+
+U -> ST : touch object
+
+ST -> FT : translate word
+activate FT
+
+ST -> OB : Get Definitions
+activate OB
+
+FT --> ST : word
+
+OB --> ST : Definitions
+deactivate OB
+
+ST -> FT : translate definitions
+
+FT --> ST : text definitions
+deactivate FT
+
+ST --> U : DefinitionActivity
+
+deactivate ST
+
+@enduml

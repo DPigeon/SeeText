@@ -1,0 +1,95 @@
+@startuml
+
+package objectdetection <<Frame>> {
+
+    interface TouchObjectCallback {
+        ~void goToObjectDefinition(String word)
+    }
+
+    class ObjectDetection {
+        -String TAG
+        -Translator translator
+        -FritzVisionObjectPredictor predictor
+        -GraphicOverlay graphicOverlay
+        -TouchObjectCallback callback
+        +ObjectDetection(GraphicOverlay graphicOverlay, TouchObjectCallback cb)
+        +void detectObjects(Context context, Bitmap image, int outputLanguage)
+        -void drawObject(Context context, boolean sameAsOutput, List<FritzVisionObject> objects, int outputLanguage, Bitmap image)
+    }
+
+    class ObjectOverlay extends GraphicOverlay.Graphic {
+        -String TAG
+        -GraphicOverlay graphicOverlay
+        -float x, y
+        -String translatedText
+        -FritzVisionObject scaledObject
+        -Paint paint
+        -BorderedText borderedText
+        -Drawable documentImage
+        -TouchObjectCallback callback
+        +ObjectOverlay(GraphicOverlay graphicOverlay, Context context, FritzVisionObject object, Bitmap image, String translatedText, TouchObjectCallback cb)
+        -- @Override --
+        +void draw(Canvas canvas)
+        +void touchEvent(MotionEvent event)
+    }
+
+    ObjectDetection *-- TouchObjectCallback
+    ObjectDetection *-- GraphicOverlay
+    ObjectDetection *-- Translator
+    ObjectOverlay *-- TouchObjectCallback
+    ObjectOverlay *-- GraphicOverlay
+}
+
+package objectdetection.definition <<frame>> {
+
+    class DefinitionListViewAdapter {
+        -Context context
+        -ImageView iconImageView
+        -TextView typeTextView
+        -TextView definitionTextView
+        -TextView exampleTextView
+        +DefinitionListViewAdapter(Context context, int resourceId, List<DefinitionRowItem> items)
+        +View getView(int position, View convertView, @NotNull ViewGroup parent)
+        -void setHolderText(ViewHolder holder, DefinitionRowItem definitionRowItem)
+    }
+
+    class DefinitionRowItem {
+        -int icon;
+        -String type;
+        -String definition;
+        -String example;
+        +DefinitionRowItem(int icon, String type, String definition, String example)
+        +int getIcon()
+        +void setIcon(int icon)
+        +String getType()
+        +void setType(String type)
+        +String getDefinition()
+        +void setDefinition(String definition)
+        +String getExample()
+        +void setExample(String example)
+        -- @Override --
+        +String toString()
+    }
+
+    class ObjectDefinitionAsyncTask extends AsyncTask {
+        -String TAG
+        -String TOKEN
+        -String API_URL
+        -- @Override --
+        #void onPreExecute()
+        #JSONObject doInBackground(String... word)
+        -String convertInputStreamToString(InputStream inputStream)
+    }
+
+    class TranslateBackObjectAsyncTask extends AsyncTask {
+        -String TAG
+        -Context context
+        -int outputLanguage
+        +TranslateBackObjectAsyncTask(Context context, int outputLanguage)
+        -- @Override --
+        #void onPreExecute()
+        #String[] doInBackground(String... word)
+    }
+}
+
+@enduml

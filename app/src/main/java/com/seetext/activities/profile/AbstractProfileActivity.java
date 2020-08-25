@@ -36,8 +36,13 @@ public abstract class AbstractProfileActivity extends AbstractActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        Intent intent = getIntent();
+        String firstTime = intent.getStringExtra("firstTime");
+        if (firstTime.equals("no")) {
+            setBackArrow(true);
+        } else {
+            setBackArrow(false); // If first time on the app, do not show back arrow
+        }
         getSupportActionBar().setTitle("Profile");
 
         sharedPreferenceHelper = new SharedPreferenceHelper(this.getSharedPreferences("ProfilePreference", Context.MODE_PRIVATE));
@@ -73,7 +78,13 @@ public abstract class AbstractProfileActivity extends AbstractActivity {
 
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(this, MainActivity.class));
+        Intent intent = getIntent();
+        String firstTime = intent.getStringExtra("firstTime");
+        if (firstTime != null) {
+            if (firstTime.equals(("no"))) {
+                startActivity(new Intent(this, MainActivity.class));
+            }
+        }
     }
 
     @Override
@@ -81,5 +92,10 @@ public abstract class AbstractProfileActivity extends AbstractActivity {
         onBackPressed();
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
         return true;
+    }
+
+    private void setBackArrow(boolean enabled) {
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(enabled);
+        getSupportActionBar().setDisplayShowHomeEnabled(enabled);
     }
 }

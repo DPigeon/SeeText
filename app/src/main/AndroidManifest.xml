@@ -2,10 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.seetext">
 
-    <uses-permission android:name="android.permission.CAMERA" />
-
     <uses-feature android:name="android.hardware.camera" />
 
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -28,9 +27,9 @@
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <activity
-            android:name="com.seetext.activities.SplashScreenActivity"
-            android:theme="@style/SplashScreenTheme"
-            android:screenOrientation="portrait">
+            android:name=".activities.SplashScreenActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,7 +37,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.seetext.activities.main.MainActivity"
+            android:name=".activities.IntroActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.main.MainActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -49,15 +51,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.seetext.activities.profile.ProfileActivity"
-            android:parentActivityName="com.seetext.activities.main.MainActivity"
-            android:screenOrientation="portrait">
-        </activity>
-        <activity android:name="com.seetext.activities.definition.DefinitionActivity"
-            android:parentActivityName="com.seetext.activities.main.MainActivity"
-            android:screenOrientation="portrait">
-
-        </activity>
+            android:name=".activities.profile.ProfileActivity"
+            android:parentActivityName=".activities.main.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.definition.DefinitionActivity"
+            android:parentActivityName=".activities.main.MainActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

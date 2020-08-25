@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 import com.seetext.Mode;
+import com.seetext.activities.IntroActivity;
 import com.seetext.activities.profile.ProfileActivity;
 import com.seetext.R;
 import com.seetext.facedetection.FaceDetection;
@@ -76,8 +77,8 @@ public class MainActivity extends AbstractInterfacesMainActivity {
             if (outputLang != -1)
                 setOutputLanguage(outputLang);
         } else {
-            goToProfileActivity("yes");
-            Toast.makeText(getApplicationContext(), "Create your profile!", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(MainActivity.this, IntroActivity.class);
+            startActivity(intent);
         }
     }
 
@@ -120,9 +121,10 @@ public class MainActivity extends AbstractInterfacesMainActivity {
                 View surfaceOrTexture = previewView.getChildAt(0);
                 if (surfaceOrTexture instanceof TextureView) {
                     Bitmap bitmap = ((TextureView) surfaceOrTexture).getBitmap();
-                    assert bitmap != null;
-                    Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, Utils.getScreenWidth(), Utils.getScreenHeight(), false);
-                    objectDetection.detectObjects(getApplicationContext(), newBitmap, getOutputLanguage());
+                    if (bitmap != null) {
+                        Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, Utils.getScreenWidth(), Utils.getScreenHeight(), false);
+                        objectDetection.detectObjects(getApplicationContext(), newBitmap, getOutputLanguage());
+                    }
                 }
             }
             image.close();

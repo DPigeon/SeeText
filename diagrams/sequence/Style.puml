@@ -1,0 +1,12 @@
+@startuml
+
+skinparam sequence {
+    ArrowColor DeepSkyBlue
+    ActorBorderColor blue
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+
+    ParticipantBorderColor black
+}
+
+@enduml

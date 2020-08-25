@@ -16,10 +16,11 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguag
 import com.seetext.Mode;
 import com.seetext.translator.Translator;
 import com.seetext.translator.TranslatorCallback;
+import com.seetext.utils.Utils;
 
 import java.util.Objects;
 
-public abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity implements RecognitionListener {
+public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainActivity implements RecognitionListener {
 
     protected abstract void initializeTTS();
     protected abstract void stopTTS();
@@ -70,7 +71,7 @@ public abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity 
     @Override
     public void onResults(Bundle results) {
         String sentence = Objects.requireNonNull(results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)).get(0);
-        String sentenceToFitUI = " " + sentence + " ";
+        String sentenceToFitUI = " " + Utils.filterBadWord(sentence) + " ";
         if (currentMode != Mode.ObjectDetection) { // Current mode must be speech detection
             if (speechTextView.getVisibility() == View.INVISIBLE) {
                 speechTextView.setVisibility(View.VISIBLE);
@@ -88,18 +89,18 @@ public abstract class AbstractSpeechMainActivity extends AbstractUIMainActivity 
         }
     }
 
+    @Override
+    public void onPartialResults(Bundle partialResults) {}
+
+    @Override
+    public void onEvent(int eventType, Bundle params) {}
+
     private void textAnimation() {
         speechTextView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
         Animation fadeOutAnim = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
         fadeOutAnim.setStartTime(5000);
         speechTextView.startAnimation(fadeOutAnim);
     }
-
-    @Override
-    public void onPartialResults(Bundle partialResults) {}
-
-    @Override
-    public void onEvent(int eventType, Bundle params) {}
 
     /*
      * SpeechRecognizer

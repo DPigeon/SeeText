@@ -67,7 +67,6 @@ public abstract class AbstractMainActivity extends AbstractActivity {
     protected Spinner languageSpinner;
     protected TextView languageTextView;
     protected TextView swapInputLanguage;
-    protected TextView swapOutputLanguage;
     protected boolean faceProcessing = false; // For throttling the calls
     protected long animationDuration = 1000; // milliseconds
     protected boolean faceDetected = false; // For face check imageView anim to run once
@@ -114,6 +113,20 @@ public abstract class AbstractMainActivity extends AbstractActivity {
     @Override
     protected int getLayoutResourceId() {
         return R.layout.activity_main;
+    }
+
+    /**
+     * To avoid pressing back button on intro
+     */
+    @Override
+    public void onBackPressed() {
+        Intent intent = getIntent();
+        String firstTime = intent.getStringExtra("firstTime");
+        if (firstTime != null) {
+            if (firstTime.equals(("no"))) {
+                super.onBackPressed();
+            }
+        }
     }
 
     @Override

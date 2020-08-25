@@ -1,0 +1,37 @@
+@startuml
+
+package facedetection <<Frame>> {
+
+    interface FaceDetectionCallback {
+        ~void updateSpeechTextViewPosition(float x, float y, boolean hasFace)
+    }
+
+    FaceDetection *-- FaceDetectionCallback
+    FaceDetection *-- GraphicOverlay
+
+    class FaceDetection {
+        -String TAG
+        -FirebaseVisionFaceDetector detector
+        -FaceDetectionCallback callback
+        -GraphicOverlay graphicOverlay
+
+        +FaceDetection(GraphicOverlay graphicOverlay, FaceDetectionCallback cb)
+        +void analyzeImage(ImageProxy image)
+        #ArrayList<Integer> mapNewMessageCoordinates(int oldWidth, int oldHeight, int x, int y)
+        -void processFace(List<FirebaseVisionFace> faces, int width, int height)
+    }
+
+    class FaceOverlay extends GraphicOverlay.Graphic {
+        -String TAG
+        -GraphicOverlay graphicOverlay
+        -Rect bounds
+        -Paint paint
+        --
+        +FaceOverlay(GraphicOverlay graphicOverlay, Rect bounds)
+        -- @Override --
+        +void draw(Canvas canvas)
+        +void touchEvent(MotionEvent event)
+    }
+}
+
+@enduml

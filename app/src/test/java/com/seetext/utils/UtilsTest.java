@@ -36,4 +36,11 @@ public class UtilsTest {
         assertEquals(expectedSize, list.size());
         assertEquals(expectedLanguage, list.get(FirebaseTranslateLanguage.EN));
     }
+
+    @Test
+    public void testFilterBadWord() {
+        String text = "f*cking hell f*cker f***";
+        String filteredText = Utils.filterBadWord(text);
+        assertEquals("fcking hell fcker f", filteredText);
+    }
 }

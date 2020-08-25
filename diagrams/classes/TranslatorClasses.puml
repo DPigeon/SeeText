@@ -1,0 +1,29 @@
+@startuml
+
+package translator <<Frame>> {
+
+    interface TranslatorCallback {
+        ~void translateTheText(String text)
+    }
+
+    class Translator {
+        -String TAG
+        ~FirebaseModelManager modelManager
+        ~FirebaseTranslator translator
+        ~FirebaseModelDownloadConditions conditions
+        ~Context context
+        ~TranslatorCallback callback
+        +Translator(Context context, int input, int output, TranslatorCallback callback)
+        +Translator(Context context, int input, int output)
+        +void translate(String text)
+        +String translateObject(String text, int languageId)
+        +void downloadModelAndTranslate(int languageId, String text)
+        +void checkAndDownloadModel(FirebaseTranslateRemoteModel model)
+        -void downloadModel(FirebaseTranslateRemoteModel model)
+    }
+
+    Translator *-- TranslatorCallback
+
+}
+
+@enduml

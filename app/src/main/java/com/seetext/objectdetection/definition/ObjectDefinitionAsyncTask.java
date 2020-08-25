@@ -18,8 +18,8 @@ public class ObjectDefinitionAsyncTask extends AsyncTask<String, Void, JSONObjec
 
     // Request example: curl --header "Authorization: Token 61f80afba945a78ae5d103ad5a3f616ee6c4def5" https://owlbot.info/api/v4/dictionary/owl -s | json_pp
     private String TAG = "ObjectDefinitionAsyncTask";
-    private String token = "Token 61f80afba945a78ae5d103ad5a3f616ee6c4def5"; // Using https://owlbot.info/ API
-    private String api = "https://owlbot.info/api/v4/dictionary/";
+    private String TOKEN = "Token 61f80afba945a78ae5d103ad5a3f616ee6c4def5"; // Using https://owlbot.info/ API
+    private String API_URL = "https://owlbot.info/api/v4/dictionary/";
 
     @Override
     protected void onPreExecute() {
@@ -29,9 +29,9 @@ public class ObjectDefinitionAsyncTask extends AsyncTask<String, Void, JSONObjec
     @Override
     protected JSONObject doInBackground(String... word) {
         try {
-            URL url = new URL(api + word[0]);
+            URL url = new URL(API_URL + word[0]);
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestProperty("Authorization", token);
+            httpURLConnection.setRequestProperty("Authorization", TOKEN);
             httpURLConnection.setRequestMethod("GET");
             httpURLConnection.setRequestProperty("Content-Type", "application/json");
             httpURLConnection.connect();
