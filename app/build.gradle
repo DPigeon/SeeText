@@ -46,7 +46,7 @@ def getVersionCode() {
         commandLine 'git', 'rev-list', '--all', '--count'
         standardOutput = stdOut
     }
-    return stdOut.toString().trim()
+    return stdOut.toString().split("\n").size()
 }
 
 def getVersionName() {
