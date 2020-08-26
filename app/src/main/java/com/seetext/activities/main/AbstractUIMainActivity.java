@@ -2,9 +2,12 @@ package com.seetext.activities.main;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
+import android.net.Uri;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -22,6 +26,7 @@ import com.seetext.R;
 import com.seetext.profile.Profile;
 import com.seetext.utils.Utils;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -219,21 +224,73 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
 
     private void ttsAction() {
         if (mTTS != null) { // Start TTS
-            if (!mTTS.isSpeaking()) {
-                startTTS(ttsSentence);
-            }
-            if (!audioImageView.isActivated()) {
-                openTtsSettingsToInstallUnsupportedLanguage(Utils.getLanguageByTag(outputLanguage));
+            int result = getLocaleResult();
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.d(TAG, "Language not supported");
+                String language = Utils.getLanguageByTag(outputLanguage);
+                openDialog("Install " + language + " Voice",
+                        "You are missing the " + language + " voice! Download and install it by " +
+                                "touching the settings button, 'Install' button and choose the voice!",
+                                true
+                        );
+            } else {
+                if (!mTTS.isSpeaking()) {
+                    startTTS(ttsSentence);
+                }
             }
         }
     }
 
-    private void openTtsSettingsToInstallUnsupportedLanguage(String language) {
+    private int getLocaleResult() {
+        Locale locale = Locale.ROOT;
+        int data = 0;
+        if (mTTS.getAvailableLanguages() != null) {
+            for (Locale availableLocale : mTTS.getAvailableLanguages()) {
+                String languageAudioWanted = Utils.getLanguageByTag(getOutputLanguage());
+                if (languageAudioWanted.equals(availableLocale.getDisplayLanguage())) { // If the locale voice is installed on the phone then set it
+                    locale = new Locale(availableLocale.toString());
+                }
+            }
+            data = mTTS.setLanguage(locale);
+        }
+        return data;
+    }
+
+    protected void openDialog(String title, String message, boolean unsupportedLanguage) {
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                    sendToInstallation(unsupportedLanguage);
+                })
+                .setNegativeButton(android.R.string.no, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    private void sendToInstallation(boolean unsupportedLanguage) {
+        if (unsupportedLanguage) {
+            openTtsSettingsToInstallUnsupportedLanguage();
+        } else {
+            installGoogleTTS();
+        }
+    }
+
+    private void openTtsSettingsToInstallUnsupportedLanguage() {
+        // TODO: Find a wait to go to com.android.settings.TTS_SETTINGS.settings.install.voiceId directly
+        String TTS_SETTINGS = "com.android.settings.TTS_SETTINGS";
         Intent intent = new Intent();
-        intent.setAction("com.android.settings.TTS_SETTINGS");
+        intent.setAction(TTS_SETTINGS);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
-        Toast.makeText(this, "You don't have the " + language + " voice. Click on the settings button, then on 'Install' and download the right voice!", Toast.LENGTH_LONG).show();
+    }
+
+    private void installGoogleTTS() {
+        String MARKET_GOOGLE_TTS = "market://details?id=com.google.android.tts";
+        Intent installIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(MARKET_GOOGLE_TTS));
+        installIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
+                | Intent.FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(installIntent);
     }
 
     private void setSwapLanguageTextViews() {

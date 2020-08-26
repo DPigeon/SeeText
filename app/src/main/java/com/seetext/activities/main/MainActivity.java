@@ -158,37 +158,13 @@ public class MainActivity extends AbstractInterfacesMainActivity {
     protected void initializeTTS() {
         mTTS = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
-                // We get the output language translated
-                int result = getLocaleResult();
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.d(TAG, "Language not supported");
-                    audioImageView.setActivated(false);
-                } else {
-                    audioImageView.setActivated(true); // Enable the audio imageView
-                }
+                audioImageView.setEnabled(true);
             } else {
                 Log.d(TAG, "Initialization failed");
-                installGoogleTTS(); // Install the text-to-speech app
+                openDialog("TTS Installation", "You don't have the Text-to-Speech installed. " +
+                        "Sending you to the installation...", false); // Install the text-to-speech app
             }
         });
-    }
-
-    private int getLocaleResult() {
-        Locale locale = null;
-        for (Locale availableLocale : mTTS.getAvailableLanguages()) {
-            String languageAudioWanted = Utils.getLanguageByTag(getOutputLanguage());
-            if (languageAudioWanted.equals(availableLocale.getDisplayLanguage())) { // If the locale voice is installed on the phone then set it
-                locale = new Locale(availableLocale.toString());
-            }
-        }
-        return mTTS.setLanguage(locale);
-    }
-
-    private void installGoogleTTS() {
-        Intent installIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.tts"));
-        installIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET | Intent.FLAG_ACTIVITY_MULTIPLE_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(installIntent);
-        Toast.makeText(this, "Sending you to the Text-to-Speech Installation...", Toast.LENGTH_LONG).show();
     }
 
     protected void startTTS(String sentence) {

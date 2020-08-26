@@ -122,7 +122,7 @@ public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainAc
 
             mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
             mRecognizer.startListening(intent);
-        } else { // If language not set then send back to profile activity
+        } else {
             Toast.makeText(getApplicationContext(), "Your language is not set!", Toast.LENGTH_LONG).show();
         }
     }
