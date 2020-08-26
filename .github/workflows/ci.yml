@@ -24,8 +24,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       
+    - name: Compute Version Code
+      run: echo ::set-env name=VERSION_CODE::$(git rev-list --all --count)
+      
+    - name: Compute Version Name
+      run: echo ::set-env name=VERSION_NAME::$(git dscribe --tags --abbrev=0)
+      
     - name: Build Debug APK
       run: bash ./gradlew assembleDebug
+           -PversCode=${{ env.VERSION_CODE }}
+           -PversName=${{ env.VERSION_NAME }}
     
   job_3:
     needs: job_2

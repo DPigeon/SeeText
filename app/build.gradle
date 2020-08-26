@@ -10,8 +10,9 @@ android {
         applicationId "com.seetext"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode getVersionCode()
-        versionName getVersionName()
+        // VersionCode & VersionName are overwritten from CICD with -PversCode, -PversName args
+        versionCode versCode as Integer
+        versionName versName
         // To improve image processing performance
         renderscriptTargetApi 21
         renderscriptSupportModeEnabled true
@@ -38,14 +39,6 @@ android {
         disable "UnsafeExperimentalUsageError",
                 "UnsafeExperimentalUsageWarning"
     }
-}
-
-private Integer getVersionCode() {
-    return Integer.parseInt(['sh','-c','git rev-list --all --count'].execute().text.trim())
-}
-
-private String getVersionName() {
-    return ['sh', '-c', 'git describe --abbrev=0'].execute().text.trim()
 }
 
 dependencies {
