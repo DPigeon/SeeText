@@ -26,7 +26,6 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import smartdevelop.ir.eram.showcaseviewlib.GuideView;
-import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
 
 /* UIMainActivity.java
  * The abstract base class for MainActivity containing all the UI elements
@@ -223,7 +222,18 @@ public abstract class AbstractUIMainActivity extends AbstractMainActivity {
             if (!mTTS.isSpeaking()) {
                 startTTS(ttsSentence);
             }
+            if (!audioImageView.isActivated()) {
+                openTtsSettingsToInstallUnsupportedLanguage(Utils.getLanguageByTag(outputLanguage));
+            }
         }
+    }
+
+    private void openTtsSettingsToInstallUnsupportedLanguage(String language) {
+        Intent intent = new Intent();
+        intent.setAction("com.android.settings.TTS_SETTINGS");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        Toast.makeText(this, "You don't have the " + language + " voice. Click on the settings button, then on 'Install' and download the right voice!", Toast.LENGTH_LONG).show();
     }
 
     private void setSwapLanguageTextViews() {
