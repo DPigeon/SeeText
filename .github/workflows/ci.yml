@@ -24,6 +24,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2     
       
+    - name: Fetch Tags
+      run: git fetch --prune --unshallow --tags
+
     - name: Compute Version Name
       run: echo "::set-env name=VERSION_NAME::$(git describe --tags --abbrev=0)"
       
