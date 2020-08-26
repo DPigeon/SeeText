@@ -21,6 +21,7 @@ jobs:
       uses: mathieudutour/github-tag-action@v4.5
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        create_annotated_tag: true # To annotate the new tag so that we can describe it with 'git describe'
      
   job_2:
     name: Build
@@ -39,7 +40,7 @@ jobs:
       run: echo ${{ secrets.SIGNING_KEY }} | base64 --decode > my.keystore
       
     - name: Compute Version Name
-      run: echo "::set-env name=VERSION_NAME::$(git describe --tags --always)"
+      run: echo "::set-env name=VERSION_NAME::$(git describe --tags --abbrev=0)"
       
     - name: Build & Signing APK
       run: bash ./gradlew bundleRelease
