@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.ml.common.modeldownload.FirebaseModelDownloadConditions;
@@ -12,6 +14,7 @@ import com.google.firebase.ml.naturallanguage.FirebaseNaturalLanguage;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateRemoteModel;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslator;
 import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOptions;
+import com.seetext.activities.main.MainActivity;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -94,17 +97,29 @@ public class Translator {
     }
 
     /* Downloads a model requested if not downloaded & / or translates */
-    public void downloadModelAndTranslate(int languageId, String text) {
+    public void downloadModelAndTranslate(Context context, int languageId, String text) {
         FirebaseTranslateRemoteModel model = new FirebaseTranslateRemoteModel.Builder(languageId).build();
 
         modelManager.isModelDownloaded(model).addOnSuccessListener(isDownloaded -> {
             if (isDownloaded) {
                 translate(text);
             } else {
-                Toast.makeText(context,"Downloading the language model...", Toast.LENGTH_LONG).show();
-                downloadModel(model);
+                openDownloadDialog(context, "Language Model Download", "To be able to translate, " +
+                        "you must download the language model selected (around 30MB).", model);
             }
         });
+    }
+
+    protected void openDownloadDialog(Context context, String title, String message, FirebaseTranslateRemoteModel model) {
+        new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("Download", (dialog, which) -> {
+                    downloadModel(model);
+                })
+                .setNegativeButton(android.R.string.no, null)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     public void checkAndDownloadModel(FirebaseTranslateRemoteModel model) {

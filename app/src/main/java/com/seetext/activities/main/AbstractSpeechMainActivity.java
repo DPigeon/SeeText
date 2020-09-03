@@ -80,7 +80,7 @@ public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainAc
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
                     Translator translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), (TranslatorCallback) this);
-                    translator.downloadModelAndTranslate(outputLanguage, sentence);
+                    translator.downloadModelAndTranslate(this, outputLanguage, sentence);
                 } else {
                     if (!mTTS.isSpeaking()) {
                         speechTextView.setText(sentenceToFitUI); // We show the text like it is
