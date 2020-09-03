@@ -81,8 +81,11 @@ public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainAc
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
                     Translator translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), (TranslatorCallback) this);
                     translator.downloadModelAndTranslate(outputLanguage, sentence);
-                } else
-                    speechTextView.setText(sentenceToFitUI); // We show the text like it is
+                } else {
+                    if (!mTTS.isSpeaking()) {
+                        speechTextView.setText(sentenceToFitUI); // We show the text like it is
+                    }
+                }
             } catch (Exception ignored) {}
             textAnimation();
             persistentSpeech();
@@ -108,6 +111,7 @@ public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainAc
     protected void initializeRecognition() {
         mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mRecognizer.setRecognitionListener(this);
+        mAudioManager.setParameters("noise_suppression=auto"); // Noise Suppressor
         initializeTTS();
     }
 

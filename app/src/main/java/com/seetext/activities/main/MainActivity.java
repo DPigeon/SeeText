@@ -11,8 +11,9 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
+import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -159,6 +160,7 @@ public class MainActivity extends AbstractInterfacesMainActivity {
         mTTS = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 audioImageView.setEnabled(true);
+                mTTS.setOnUtteranceProgressListener(utteranceProgressListener());
             } else {
                 Log.d(TAG, "Initialization failed");
                 openDialog("TTS Installation", "You don't have the Text-to-Speech installed. " +
@@ -167,10 +169,36 @@ public class MainActivity extends AbstractInterfacesMainActivity {
         });
     }
 
+    private UtteranceProgressListener utteranceProgressListener() {
+        return new UtteranceProgressListener() {
+            @Override
+            public void onStart(String s) {
+                // Speaking started
+                runOnUiThread(() -> {
+                    audioImageView.setEnabled(false);
+                });
+            }
+
+            @Override
+            public void onDone(String s) {
+                // Speaking stopped
+                runOnUiThread(() -> {
+                    audioImageView.setEnabled(true);
+                });
+            }
+
+            @Override
+            public void onError(String s) {
+            }
+        };
+    }
+
     protected void startTTS(String sentence) {
         mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false); // Unmute sound
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        mTTS.speak(sentence, TextToSpeech.QUEUE_FLUSH, null, TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
+        Bundle params = new Bundle();
+        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "");
+        mTTS.speak(sentence, TextToSpeech.QUEUE_FLUSH, params, "4b89afa7-8c1c-4e80-9312-e85e8160814a");
     }
 
     protected void stopTTS() {

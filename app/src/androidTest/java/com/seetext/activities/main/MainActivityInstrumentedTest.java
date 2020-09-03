@@ -1,6 +1,7 @@
 package com.seetext.activities.main;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 
@@ -20,6 +21,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
 
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 import com.seetext.Mode;
 import com.seetext.R;
 import com.seetext.activities.profile.ProfileActivity;
@@ -145,5 +147,18 @@ public class MainActivityInstrumentedTest {
 
         assertView(R.id.inputLanguageTextView, false, withText(Utils.getLanguageByTag(output)));
         assertView(R.id.languageTextView, false, withText(Utils.getLanguageByTag(input)));
+    }
+
+    @Test
+    @Ignore("TODO later")
+    public void testAudioTTSButton() {
+        int input = FirebaseTranslateLanguage.EN;
+        int output = FirebaseTranslateLanguage.GA; // Irish
+        mainActivity.ttsSentence = "duine"; // person in irish
+        mainActivity.setInputLanguage(input);
+        mainActivity.setOutputLanguage(output);
+        mainActivity.audioImageView.setEnabled(true);
+
+        assertView(R.id.audioImageView, true, isDisplayed());
     }
 }
