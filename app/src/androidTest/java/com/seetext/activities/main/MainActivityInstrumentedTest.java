@@ -1,7 +1,6 @@
 package com.seetext.activities.main;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 
@@ -27,7 +26,6 @@ import com.seetext.R;
 import com.seetext.activities.profile.ProfileActivity;
 import com.seetext.utils.Utils;
 
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isSystemAlertWindow;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
 import static com.seetext.activities.ActionActivityFactory.*;

@@ -111,7 +111,7 @@ public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainAc
     protected void initializeRecognition() {
         mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mRecognizer.setRecognitionListener(this);
-        mAudioManager.setParameters("noise_suppression=auto"); // Noise Suppressor
+        mAudioManager.setParameters("noise_suppression=on"); // Noise Suppressor
         initializeTTS();
     }
 
