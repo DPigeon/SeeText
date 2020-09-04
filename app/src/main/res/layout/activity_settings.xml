@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.profile.SettingsActivity">
+
+    <TextView
+        android:id="@+id/rectangleColorTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Object Detection Rectangle Color"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="71dp" />
+
+    <SeekBar
+        android:id="@+id/colorSeekBar"
+        android:layout_width="256dp"
+        android:layout_height="39dp"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="112dp" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="168dp" />
+
+    <TextView
+        android:id="@+id/fastSwapTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fast Swap"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="195dp" />
+
+    <Switch
+        android:id="@+id/fastSwapSwitch"
+        android:layout_width="48dp"
+        android:layout_height="47dp"
+        tools:layout_editor_absoluteX="347dp"
+        tools:layout_editor_absoluteY="177dp" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="233dp" />
+
+    <TextView
+        android:id="@+id/faceCheckAnimationTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Face Check Animation"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="262dp" />
+
+    <Switch
+        android:id="@+id/faceAnimationSwitch"
+        android:layout_width="48dp"
+        android:layout_height="47dp"
+        tools:layout_editor_absoluteX="347dp"
+        tools:layout_editor_absoluteY="243dp" />
+
+    <View
+        android:id="@+id/divider3"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="302dp" />
+
+    <TextView
+        android:id="@+id/audioTTSTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Audio Speech"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="328dp" />
+
+    <Switch
+        android:id="@+id/audioTTSSwitch"
+        android:layout_width="48dp"
+        android:layout_height="47dp"
+        tools:layout_editor_absoluteX="347dp"
+        tools:layout_editor_absoluteY="312dp" />
+
+    <View
+        android:id="@+id/divider4"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="365dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

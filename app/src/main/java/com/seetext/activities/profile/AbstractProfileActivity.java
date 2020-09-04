@@ -38,12 +38,14 @@ public abstract class AbstractProfileActivity extends AbstractActivity {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         String firstTime = intent.getStringExtra("firstTime");
-        if (firstTime.equals("no")) {
-            setBackArrow(true);
-        } else {
-            setBackArrow(false); // If first time on the app, do not show back arrow
+        if (firstTime != null) {
+            if (firstTime.equals("no")) {
+                setBackArrow(true);
+            } else {
+                setBackArrow(false); // If first time on the app, do not show back arrow
+            }
         }
-        getSupportActionBar().setTitle("Profile");
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Profile");
 
         sharedPreferenceHelper = new SharedPreferenceHelper(this.getSharedPreferences("ProfilePreference", Context.MODE_PRIVATE));
         setupUI();
