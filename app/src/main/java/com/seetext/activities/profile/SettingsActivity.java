@@ -7,6 +7,8 @@ import com.seetext.activities.AbstractActivity;
 
 public class SettingsActivity extends AbstractActivity {
 
+    // TODO: Implement the logic
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
