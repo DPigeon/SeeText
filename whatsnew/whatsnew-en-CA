@@ -1,4 +1,2 @@
-- Guide Tour Intro
-- Swap button moved
-- Removed one of the translated text
-- Fix random crashes when processing images
+- Text to Speech Audio Button with Dialog Pop up for Downloading Voices
+- Dialog Pop up for Downloading Language Models
