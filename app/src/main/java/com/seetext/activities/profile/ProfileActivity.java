@@ -120,7 +120,7 @@ public class ProfileActivity extends AbstractProfileActivity {
         Intent intent = getIntent();
         String firstTime = intent.getStringExtra("firstTime");
         Intent mainIntent = new Intent(ProfileActivity.this, MainActivity.class);
-        if (firstTime.equals("yes")) {
+        if (firstTime != null && firstTime.equals("yes")) {
             mainIntent.putExtra("tutorial", "start");
         }
         startActivity(mainIntent);

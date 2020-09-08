@@ -80,9 +80,12 @@ public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainAc
             try {
                 if (inputLanguage != outputLanguage) { // Checks if input and output are the same
                     Translator translator = new Translator(getApplicationContext(), getInputLanguage(), getOutputLanguage(), (TranslatorCallback) this);
-                    translator.downloadModelAndTranslate(outputLanguage, sentence);
-                } else
-                    speechTextView.setText(sentenceToFitUI); // We show the text like it is
+                    translator.downloadModelAndTranslate(this, outputLanguage, sentence);
+                } else {
+                    if (!mTTS.isSpeaking()) {
+                        speechTextView.setText(sentenceToFitUI); // We show the text like it is
+                    }
+                }
             } catch (Exception ignored) {}
             textAnimation();
             persistentSpeech();
@@ -108,6 +111,7 @@ public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainAc
     protected void initializeRecognition() {
         mRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mRecognizer.setRecognitionListener(this);
+        mAudioManager.setParameters("noise_suppression=on"); // Noise Suppressor
         initializeTTS();
     }
 
@@ -122,7 +126,7 @@ public abstract class AbstractSpeechMainActivity extends AbstractGuideTourMainAc
 
             mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true); // Mutes any sound of beep for listening
             mRecognizer.startListening(intent);
-        } else { // If language not set then send back to profile activity
+        } else {
             Toast.makeText(getApplicationContext(), "Your language is not set!", Toast.LENGTH_LONG).show();
         }
     }

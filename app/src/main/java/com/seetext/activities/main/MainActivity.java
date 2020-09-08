@@ -11,7 +11,9 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
@@ -154,46 +156,49 @@ public class MainActivity extends AbstractInterfacesMainActivity {
     /*
      * Text To Speech
      */
-    protected void checkTtsResources() {
-        Intent intent = new Intent();
-        intent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(intent, TTS_DATA_CHECK);
-    }
-
     protected void initializeTTS() {
         mTTS = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
-                // We get the output language translated
-                int result = getLocaleResult();
-                if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.d(TAG, "Language not supported");
-                    audioImageView.setEnabled(false);
-                } else {
-                    audioImageView.setEnabled(true); // Enable the audio imageView
-                }
+                audioImageView.setEnabled(true);
+                mTTS.setOnUtteranceProgressListener(utteranceProgressListener());
             } else {
                 Log.d(TAG, "Initialization failed");
+                openDialog("TTS Installation", "You don't have the Text-to-Speech installed. " +
+                        "Sending you to the installation...", false); // Install the text-to-speech app
             }
         });
     }
 
-    private int getLocaleResult() {
-        Locale locale = null;
-        for (Locale availableLocale : mTTS.getAvailableLanguages()) {
-            String languageAudioWanted = Utils.getLanguageByTag(getOutputLanguage());
-            if (languageAudioWanted.equals(availableLocale.getDisplayLanguage())) { // If the locale voice is installed on the phone then set it
-                locale = new Locale(availableLocale.toString());
-            } else { // If the locale voice not installed then install it
-                checkTtsResources();
+    private UtteranceProgressListener utteranceProgressListener() {
+        return new UtteranceProgressListener() {
+            @Override
+            public void onStart(String s) {
+                // Speaking started
+                runOnUiThread(() -> {
+                    audioImageView.setEnabled(false);
+                });
             }
-        }
-        return mTTS.setLanguage(locale);
+
+            @Override
+            public void onDone(String s) {
+                // Speaking stopped
+                runOnUiThread(() -> {
+                    audioImageView.setEnabled(true);
+                });
+            }
+
+            @Override
+            public void onError(String s) {
+            }
+        };
     }
 
     protected void startTTS(String sentence) {
         mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false); // Unmute sound
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        mTTS.speak(sentence, TextToSpeech.QUEUE_FLUSH, null, TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID);
+        Bundle params = new Bundle();
+        params.putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "");
+        mTTS.speak(sentence, TextToSpeech.QUEUE_FLUSH, params, "4b89afa7-8c1c-4e80-9312-e85e8160814a");
     }
 
     protected void stopTTS() {

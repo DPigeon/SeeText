@@ -20,12 +20,12 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.rule.GrantPermissionRule;
 
+import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslateLanguage;
 import com.seetext.Mode;
 import com.seetext.R;
 import com.seetext.activities.profile.ProfileActivity;
 import com.seetext.utils.Utils;
 
-import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isSystemAlertWindow;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
 import static com.seetext.activities.ActionActivityFactory.*;
@@ -145,5 +145,18 @@ public class MainActivityInstrumentedTest {
 
         assertView(R.id.inputLanguageTextView, false, withText(Utils.getLanguageByTag(output)));
         assertView(R.id.languageTextView, false, withText(Utils.getLanguageByTag(input)));
+    }
+
+    @Test
+    @Ignore("TODO later")
+    public void testAudioTTSButton() {
+        int input = FirebaseTranslateLanguage.EN;
+        int output = FirebaseTranslateLanguage.GA; // Irish
+        mainActivity.ttsSentence = "duine"; // person in irish
+        mainActivity.setInputLanguage(input);
+        mainActivity.setOutputLanguage(output);
+        mainActivity.audioImageView.setEnabled(true);
+
+        assertView(R.id.audioImageView, true, isDisplayed());
     }
 }
